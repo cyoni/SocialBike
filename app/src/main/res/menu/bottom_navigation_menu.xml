@@ -1,0 +1,32 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/home"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="Home"/>
+
+    <item
+        android:id="@+id/friends"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="Friends"/>
+
+    <item
+        android:id="@+id/chat"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="Chat"/>
+
+    <item
+        android:id="@+id/my_profile"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="My Profile"/>
+
+    <item
+        android:id="@+id/my_friends"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="My Friends"/>
+
+</menu>
