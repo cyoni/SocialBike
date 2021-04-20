@@ -40,6 +40,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setFirebase();
+        loadUser();
+
+
+    }
+
+    private void loadUser() {
+
+        if (checkIfUserConnected()){
+
+
+        }
+
     }
 
     private void setFirebase() {

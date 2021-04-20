@@ -1,4 +1,3 @@
-
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -16,15 +15,15 @@ exports.addUserToDB = functions.auth.user().onCreate( (event) => {
 
 
 function verifyUser(userPrivateKey) {
-    const account = (async (resolve, reject) => {
-        const snapshot = await admin.database().ref('users').child(userPrivateKey).once('value');
-        if (snapshot.exists() && snapshot.child('accountActivated').val() === true) {
-            return resolve({
-                publicKey: snapshot.child('user_public_key').val(),
-            });
-        }
-        else
-            return null;
+    const account = ((resolve, reject) => {
+        return admin.database().ref('users').child(userPrivateKey).once('value').then(snapshot => {
+            if (snapshot.exists() && snapshot.child('accountActivated').val() === true) {
+                return resolve({
+                    publicKey: snapshot.child('userPublicKey').val(),
+                })
+            } else
+                return null;
+        })
     })
     return new Promise(account);
 }
@@ -45,11 +44,9 @@ function isNicknameValid(nickname) {
 }
 
 
-async function setNewNickname(publicKey, newNickname) {
-    const a = (admin.database().ref('nicknames').child(newNickname.toLowerCase()).set(publicKey));
-    const b = (admin.database().ref('public').child(publicKey).child('profile').child('nickname').set(newNickname));
-    await a
-    await b
+function setNewNickname(publicKey, newNickname) {
+    const a = await (admin.database().ref('nicknames').child(newNickname.toLowerCase()).set(publicKey));
+    const b = await (admin.database().ref('user_public').child(publicKey).child('profile').child('nickname').set(newNickname));
 }
 
 
@@ -70,10 +67,9 @@ function removeOldNickname(oldNickname) {
 exports.updateNickname = functions.https.onCall(async (data, context) => {
     const privateKey = context.auth.uid;
     var inputNickname = data.nickname.trim();
-    console.log("1");
+
     const account = await verifyUser(privateKey);
 
-    console.log("2");
     if (account === null)
         return "[AUTH_FAILED]";
 
@@ -87,13 +83,10 @@ exports.updateNickname = functions.https.onCall(async (data, context) => {
     if (takenNickname)
         return "[NICKNAME_TAKEN]"
 
-        console.log("3");
     const oldNickname = await getNickname(account.publicKey);
     if (oldNickname !== "")
-        removeOldNickname(oldNickname.toLowerCase());
-        console.log("4");
+        await removeOldNickname(oldNickname.toLowerCase());
 
     await setNewNickname(account.publicKey, inputNickname);
-    console.log("5");
     return inputNickname;
 });

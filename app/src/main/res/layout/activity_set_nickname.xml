@@ -7,32 +7,13 @@
     android:orientation="vertical"
     tools:context=".SetNicknameActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Set Your Profile"
-        android:layout_marginTop="50dp"
-        android:textSize="35dp"
-         />
-
-    <EditText
-        android:id="@+id/editTextTextPersonName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        tools:layout_editor_absoluteX="35dp"
-        tools:layout_editor_absoluteY="201dp" />
-
-    <Button
-        android:id="@+id/done_button"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="73dp"
-        android:text="Done"
-        android:layout_marginTop="100dp" />
-
+        android:layout_height="match_parent"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_signup" />
 
 
 </LinearLayout>
