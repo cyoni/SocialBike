@@ -25,7 +25,6 @@ import java.util.Set;
 
 public class SetNicknameFragment extends Fragment {
 
-
     private View root;
     private Button continueButton;
     private NavController nav;
@@ -36,21 +35,18 @@ public class SetNicknameFragment extends Fragment {
     }
 
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
     }
 
     private void startListening() {
         continueButton.setOnClickListener(view -> {
-            if (User.getNickname().toLowerCase().equals(nickname_txt.getText().toString().toLowerCase())){
-                proceedToTheNextFragment();
+            if (User.getNickname() == null || !User.getNickname().toLowerCase().equals(nickname_txt.getText().toString().toLowerCase())){
+                setNickname();
             }
             else
-                setNickname();
+                proceedToTheNextFragment();
         });
     }
 

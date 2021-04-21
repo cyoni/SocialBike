@@ -67,6 +67,13 @@ function removeOldNickname(oldNickname) {
     return admin.database().ref('nicknames').child(oldNickname).remove();
 }
 
+
+exports.updateProfile = functions.https.onCall(async (data, context) => {
+
+
+...
+})
+
 exports.updateNickname = functions.https.onCall(async (data, context) => {
     const privateKey = context.auth.uid;
     var inputNickname = data.nickname.trim();

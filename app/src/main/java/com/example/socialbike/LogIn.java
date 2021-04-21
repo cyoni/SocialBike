@@ -123,7 +123,7 @@ public class LogIn extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     final HashMap<String, Object> dataMap = (HashMap<String, Object>) dataSnapshot.getValue();
-                    String publicKey = String.valueOf(dataMap.get("userPublicKey"));
+                    String publicKey = String.valueOf(dataMap.get("user_public_key"));
                     String isActiveAccount = String.valueOf(dataMap.get("activeAccount"));
 
                     if (isActiveAccount.equals("false")) {
@@ -162,15 +162,15 @@ public class LogIn extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
 
+        });
     }
 
     private void closeActivity() {
         finish();
     }
+
 
     private void saveNicknameOnDevice(String nickname) {
         MyPreferences.setSharedPreference(LogIn.this, MyPreferences.USER_FOLDER, "nickname", nickname);
@@ -181,6 +181,7 @@ public class LogIn extends AppCompatActivity {
     }
 
     private void savePublicKeyOnDevice(String publicKey) {
+        System.out.println(publicKey + "%%%%%%%%%%%%%%");
         MyPreferences.setSharedPreference(this, MyPreferences.USER_FOLDER, "user_public_key", publicKey);
     }
 

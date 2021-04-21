@@ -41,17 +41,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setFirebase();
         loadUser();
-
-
     }
 
     private void loadUser() {
-
         if (checkIfUserConnected()){
-
-
+            User.setPublicKey(MyPreferences.getUserPublicKey(this));
+            User.setNickname(MyPreferences.getNicknameFromDevice(this));
         }
-
     }
 
     private void setFirebase() {
@@ -82,14 +78,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void login() {
-
-        System.out.println(MyPreferences.getNicknameFromDevice(this)  + " this is my nickname!");
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-
-      //  if (account == null)
-            startActivity(new Intent(this, LogIn.class));
-      //  else {
-     //       System.out.println("Hello " + account.getDisplayName());
-     //   }
+        startActivity(new Intent(this, LogIn.class));
     }
 }
