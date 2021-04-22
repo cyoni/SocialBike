@@ -41,17 +41,23 @@ public class SetNicknameFragment extends Fragment {
     }
 
     private void startListening() {
+
         continueButton.setOnClickListener(view -> {
+
             if (User.getNickname() == null || !User.getNickname().toLowerCase().equals(nickname_txt.getText().toString().toLowerCase())){
                 setNickname();
             }
             else
                 proceedToTheNextFragment();
+
+
         });
+
     }
 
     private void proceedToTheNextFragment() {
-        nav.navigate(R.id.action_setNicknameFragment_to_setProfileFragment);
+
+          nav.navigate(R.id.action_se2tNicknameFragment_to_setProfileFragment);
     }
 
     private void setNickname() {
@@ -87,7 +93,7 @@ public class SetNicknameFragment extends Fragment {
                                 proceedToTheNextFragment();
                                 return null;
                         }
-                        continueButton.setEnabled(true);
+                      //  continueButton.setEnabled(true);
                         return "";
                     }
                 });

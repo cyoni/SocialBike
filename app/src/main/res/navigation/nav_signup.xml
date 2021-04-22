@@ -9,10 +9,12 @@
         android:id="@+id/setNicknameFragment"
         android:name="com.example.socialbike.SetNicknameFragment"
         android:label="fragment_set_nickname"
-        tools:layout="@layout/fragment_set_nickname" >
+        tools:layout="@layout/fragment_set_nickname">
+
         <action
-            android:id="@+id/action_setNicknameFragment_to_setProfileFragment"
+            android:id="@+id/action_se2tNicknameFragment_to_setProfileFragment"
             app:destination="@id/setProfileFragment" />
+
     </fragment>
 
     <fragment

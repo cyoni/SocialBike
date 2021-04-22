@@ -69,9 +69,24 @@ function removeOldNickname(oldNickname) {
 
 
 exports.updateProfile = functions.https.onCall(async (data, context) => {
+    const account = await verifyUser(context.auth.uid);
+    if (account === null)
+        return "[AUTH_FAILED]";
 
+    const publicKey = account.publicKey
 
-...
+    const country = context.params.country;
+    const city = context.params.city;
+    const gender = context.params.gender;
+    const age = context.params.age;
+ 
+    const a = (admin.database().ref('public').child(publicKey).child('profile').child('country').set(country));
+    const b = (admin.database().ref('public').child(publicKey).child('profile').child('city').set(city));
+    const c = (admin.database().ref('public').child(publicKey).child('profile').child('gender').set(gender));
+    const d = (admin.database().ref('public').child(publicKey).child('profile').child('age').set(age));
+
+    await a, b, c, d;
+    return "OK"
 })
 
 exports.updateNickname = functions.https.onCall(async (data, context) => {

@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class SetProfileFragment extends Fragment {
+public class    SetProfileFragment extends Fragment {
 
     private View root;
     private Button doneButton;
@@ -35,19 +35,13 @@ public class SetProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        root = inflater.inflate(R.layout.fragment_set_nickname, container, false);
-
-     //   nav = Navigation.findNavController(container);
-      //  nickname_txt = root.findViewById(R.id.nickname);
+        root = inflater.inflate(R.layout.fragment_set_profile, container, false);
         country = root.findViewById(R.id.country);
         city = root.findViewById(R.id.city);
         gender = root.findViewById(R.id.gender);
         age = root.findViewById(R.id.age);
-
-        
-        doneButton = root.findViewById(R.id.continue_button);
+        doneButton = root.findViewById(R.id.done_button);
         startListening();
-
         return root;
     }
 
@@ -57,15 +51,19 @@ public class SetProfileFragment extends Fragment {
         });
     }
 
+
     private void submitForm() {
 
         doneButton.setEnabled(false);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("nickname", nickname);
+        data.put("country", country.getText().toString());
+        data.put("city", city.getText().toString());
+        data.put("gender", gender.getText().toString());
+        data.put("age", age.getText().toString());
 
         MainActivity.mFunctions
-                .getHttpsCallable("updateNickname")
+                .getHttpsCallable("updateProfile")
                 .call(data)
                 .continueWith(new Continuation<HttpsCallableResult, String>() {
                     @Override
@@ -74,20 +72,15 @@ public class SetProfileFragment extends Fragment {
                         System.out.println("Response from Server: " + answer);
 
                         switch (answer) {
-                            case "[INVALID_NICKNAME]":
-                                MainActivity.toast(getContext(), "This nickname is invalid", 1);
+                            case "OK":
+                                getActivity().finish();
                                 break;
-                            case "[NICKNAME_TAKEN]":
-                                MainActivity.toast(getContext(), "This nickname is already taken.", 1);
+                            case "NOT_OK":
+
                                 break;
                             case "[AUTH_FAILED]":
                                 MainActivity.toast(getContext(), answer, 1);
                                 break;
-                            default:
-                                User.setNickname(answer);
-                                MyPreferences.setSharedPreference(getActivity(), MyPreferences.USER_FOLDER, "nickname", answer);
-
-                                return null;
                         }
                         doneButton.setEnabled(true);
                         return "";
