@@ -15,7 +15,7 @@ exports.addUserToDB = functions.auth.user().onCreate( (event) => {
 });
 
 
-function verifyUser(userPrivateKey) {
+function verifyUser(userPrivateKey) {``
     const account = (async (resolve, reject) => {
         const snapshot = await admin.database().ref('users').child(userPrivateKey).once('value');
         if (snapshot.exists() && snapshot.child('accountActivated').val() === true) {
@@ -68,17 +68,17 @@ function removeOldNickname(oldNickname) {
 }
 
 
-exports.updateProfile = functions.https.onCall(async (data, context) => {
+exports.updateProfile = functions.https.onCall(async (request, context) => {
     const account = await verifyUser(context.auth.uid);
     if (account === null)
         return "[AUTH_FAILED]";
 
     const publicKey = account.publicKey
 
-    const country = context.params.country;
-    const city = context.params.city;
-    const gender = context.params.gender;
-    const age = context.params.age;
+    const country = request.country;
+    const city = request.city;
+    const gender = request.gender;
+    const age = request.age;
  
     const a = (admin.database().ref('public').child(publicKey).child('profile').child('country').set(country));
     const b = (admin.database().ref('public').child(publicKey).child('profile').child('city').set(city));

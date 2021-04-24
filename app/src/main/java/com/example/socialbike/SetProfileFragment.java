@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class    SetProfileFragment extends Fragment {
+public class SetProfileFragment extends Fragment {
 
     private View root;
     private Button doneButton;
@@ -55,7 +55,6 @@ public class    SetProfileFragment extends Fragment {
     private void submitForm() {
 
         doneButton.setEnabled(false);
-
         Map<String, Object> data = new HashMap<>();
         data.put("country", country.getText().toString());
         data.put("city", city.getText().toString());
@@ -71,17 +70,10 @@ public class    SetProfileFragment extends Fragment {
                         String answer = task.getResult().getData().toString();
                         System.out.println("Response from Server: " + answer);
 
-                        switch (answer) {
-                            case "OK":
+                        if (answer.equals("OK"))
                                 getActivity().finish();
-                                break;
-                            case "NOT_OK":
-
-                                break;
-                            case "[AUTH_FAILED]":
-                                MainActivity.toast(getContext(), answer, 1);
-                                break;
-                        }
+                            else
+                                MainActivity.toast(getContext(), "error", 1);
                         doneButton.setEnabled(true);
                         return "";
                     }

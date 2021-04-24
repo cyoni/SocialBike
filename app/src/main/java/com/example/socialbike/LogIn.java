@@ -177,11 +177,10 @@ public class LogIn extends AppCompatActivity {
     }
 
     private void openSetNicknameActivity() {
-        startActivity(new Intent(this, SetNicknameActivity.class));
+        startActivity(new Intent(this, WelcomeActivity.class));
     }
 
     private void savePublicKeyOnDevice(String publicKey) {
-        System.out.println(publicKey + "%%%%%%%%%%%%%%");
         MyPreferences.setSharedPreference(this, MyPreferences.USER_FOLDER, "user_public_key", publicKey);
     }
 
