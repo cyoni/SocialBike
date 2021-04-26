@@ -6,12 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
-
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
@@ -38,8 +35,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-         if (msgItemListener != null)
-            msgItemListener.onBinding(holder, position);
+        msgItemListener.onBinding(holder, position);
     }
 
     // total number of rows
@@ -50,13 +46,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView myTextView, time;
-        public ImageView status;
+        public TextView name, message, time;
+        public ImageView profilePicture;
 
         ViewHolder(View itemView) {
             super(itemView);
-            myTextView = itemView.findViewById(R.id.message);
-          //  status = itemView.findViewById(R.id.status);
+            name = itemView.findViewById(R.id.name);
+            message = itemView.findViewById(R.id.message);
+            //profilePicture = itemView.findViewById(R.id.status);
             time = itemView.findViewById(R.id.time);
         }
 
@@ -73,7 +70,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
   //  }
 
     // allows clicks events to be caught
-    public void setClickListener(Object itemClickListener) {
+    public void setClassReference(Object itemClickListener) {
         this.msgItemListener = (ItemClickListener) itemClickListener;
     }
 

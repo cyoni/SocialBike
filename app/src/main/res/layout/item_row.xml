@@ -26,7 +26,7 @@
             android:layout_marginStart="10dp" />
 
         <TextView
-            android:id="@+id/nickname"
+            android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/profile_image"
@@ -48,7 +48,7 @@
 
 
         <TextView
-            android:id="@+id/date"
+            android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@id/menu_button"
@@ -56,7 +56,7 @@
             android:text="10m" />
 
         <TextView
-            android:id="@+id/content"
+            android:id="@+id/message"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:layout_below="@id/profile_image"
@@ -67,6 +67,7 @@
             android:layout_marginBottom="5sp"
             android:padding="15dp"
             android:textSize="20sp"
+            android:text="....."
             android:layout_alignParentStart="true" />
 
 
@@ -74,7 +75,7 @@
         <include
             android:layout_width="wrap_content"
             android:layout_height="43dp"
-            android:layout_below="@id/content"
+            android:layout_below="@id/message"
             layout="@layout/post_buttons"/>
 
 
