@@ -1,16 +1,22 @@
 package com.example.socialbike;
 
+import com.google.android.gms.tasks.Task;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class MessageManager {
 
+    private final Updater updater;
+
+    public MessageManager(Updater updater){
+        this.updater = updater;
+    }
 
     public void parseMessages(String fresh_msgs){
 
         String tmp_category;
         try {
-
             JSONObject obj = new JSONObject(fresh_msgs);
             JSONArray messages_array = obj.getJSONArray("posts");
 
@@ -24,11 +30,11 @@ public class MessageManager {
                 int likes = 0, comments = 0;
                 boolean doILike = false, isAuthor = false, has_profile_img = false;
 
-                String user_public_key = messages_array.getJSONObject(i).getString("user_public_key");
+                String user_public_key = messages_array.getJSONObject(i).getString("publicKey");
                 String messages = messages_array.getJSONObject(i).getString("message");
-                String nickname = messages_array.getJSONObject(i).getString("nickname");
+                String nickname = messages_array.getJSONObject(i).getString("name");
                 String time = messages_array.getJSONObject(i).getString("timestamp");
-                String messageId = messages_array.getJSONObject(i).getString("postId");
+                //String messageId = messages_array.getJSONObject(i).getString("postId");
 
                 if (messages_array.getJSONObject(i).has("likes_count")) {
                     likes = Integer.parseInt(messages_array.getJSONObject(i).getString("likes_count"));
@@ -45,22 +51,23 @@ public class MessageManager {
                 if (messages_array.getJSONObject(i).has("has_p_img")) {
                     has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
                 }
-                if (messages_array.getJSONObject(i).has("cat")){
-                    tmp_category = messages_array.getJSONObject(i).getString("cat");
-                } else
-                    tmp_category = "category";
 
+                Post post = new Post(user_public_key, nickname, 8888, messages);
+                updater.add(post);
+                updater.update();
+
+                System.out.println("msg " + i + " " + messages);
             }
         }
         catch(Exception e){
-            System.out.println("Error caught in message fetcher: " +e.getMessage());
+            System.out.println("Error caught in message fetcher: " + e.getMessage());
         }
     }
 
 
     public void getPosts(){
         System.out.println("getting posts...");
-        MainActivity.mFunctions
+         MainActivity.mFunctions
                 .getHttpsCallable("getPosts")
                 .call(null)
                 .continueWith(task -> {
@@ -69,12 +76,7 @@ public class MessageManager {
                     System.out.println("response:" + response);
 
                     if (!response.isEmpty()) {
-
-
-
-                    } else {
-                        // notifyUser_error();
-
+                        parseMessages(response);
                     }
                     return "";
                 });

@@ -10,32 +10,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import android.widget.Button;
 
 import java.util.ArrayList;
 
 
-public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener{
+public class EventsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener{
 
-    private static HomeFragment homeFragment = null;
-    private FloatingActionButton floatingButton;
-    private final ArrayList<Post> container;
+    static EventsFragment eventsFragment = null;
     private RecyclerView recyclerView;
+    private final ArrayList<Post> container;
     private RecyclerViewAdapter recyclerViewAdapter;
-    private Updater updater;
 
-    public HomeFragment() {
+    public EventsFragment() {
         container = new ArrayList<>();
-    }
-
-    public static HomeFragment getInstance(){
-        if (homeFragment == null)
-            homeFragment = new HomeFragment();
-        return homeFragment;
     }
 
     private void initAdapter() {
@@ -44,38 +32,38 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         recyclerViewAdapter.setClassReference(this);
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    public static EventsFragment getInstance(){
+        if (eventsFragment == null){
+            eventsFragment = new EventsFragment();
+        }
+        return eventsFragment;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        floatingButton = root.findViewById(R.id.fab);
+        View root = inflater.inflate(R.layout.fragment_events, container, false);
         recyclerView = root.findViewById(R.id.recyclerview);
-        activateFloatingButton();
         initAdapter();
-        updater = new Updater(this.container, recyclerViewAdapter);
 
-        return root;
-    }
+        Updater updater = new Updater(this.container, recyclerViewAdapter);
+        updater.add(new Post("123", "yoni", 1213, "Hi!"));
+        updater.update();
 
-    private void activateFloatingButton() {
-        floatingButton.setOnClickListener(new View.OnClickListener() {
+        Button addEvent = root.findViewById(R.id.add_new_event_button);
+        addEvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //openNewPostActivity();
-                MessageManager messageManager = new MessageManager(updater);
-                messageManager.getPosts();
+                Intent intent = new Intent(getContext(), AddNewEventActivity.class);
+                startActivity(intent);
             }
         });
-    }
 
-    private void openNewPostActivity() {
-        Intent intent = new Intent(getContext(), AddPostActivity.class);
-        startActivity(intent);
+        return root;
     }
 
     @Override
@@ -87,10 +75,5 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     @Override
     public void onItemClick(@NonNull View holder, int position) {
 
-    }
-
-    public void addPost(Post post) {
-        updater.add(post);
-        updater.update();
     }
 }

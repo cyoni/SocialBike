@@ -84,6 +84,7 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
     private void passItemToHome() {
+
         homeFragment.addPost(new Post(User.getPublicKey(), User.getNickname(), 123412, textBox.getText().toString()));
     }
 

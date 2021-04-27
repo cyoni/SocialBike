@@ -138,8 +138,9 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
            
             
             var dataOfUser = {
+                postId: raw_post.key,
                 publicKey: raw_post.child('user_public_key').val(),
-                name: "@@",
+                name: "",
                 message: raw_post.child('message').val(),
                 timestamp: raw_post.child('timestamp').val()
             }
@@ -161,30 +162,46 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 exports.updateNickname = functions.https.onCall(async (data, context) => {
     const privateKey = context.auth.uid;
     var inputNickname = data.nickname.trim();
-    console.log("1");
     const account = await verifyUser(privateKey);
-
-    console.log("2");
     if (account === null)
         return "[AUTH_FAILED]";
-
     const validNickname = isNicknameValid(inputNickname);
-
     if (!validNickname)
         return "[INVALID_NICKNAME]"
-
     const takenNickname = await isNicknameTaken(inputNickname);
-
     if (takenNickname)
         return "[NICKNAME_TAKEN]"
-
-    console.log("3");
     const oldNickname = await getNickname(account.publicKey);
     if (oldNickname !== "")
         removeOldNickname(oldNickname.toLowerCase());
-    console.log("4");
-
     await setNewNickname(account.publicKey, inputNickname);
-    console.log("5");
     return inputNickname;
 });
+
+
+exports.AddNewEvent = functions.https.onCall(async (request, context) => {
+    const privateKey = context.auth.uid;
+    const account = await verifyUser(privateKey);
+    if (account === null)
+        return "[AUTH_FAILED]";
+
+    const eventTime = request.time
+    const eventDate = request.date
+    const eventInfo = request.eventInfo
+    const eventCity = request.city
+    const timestamp = Date.now
+
+    var data = {
+        timestamp,
+        eventTime,
+        eventDate,
+        eventInfo,
+        eventCity,
+    }
+    
+    const newKey = admin.database().ref('events').push().key
+    admin.database().ref('events').child(newKey).set(data)
+
+    return "OK"
+
+})

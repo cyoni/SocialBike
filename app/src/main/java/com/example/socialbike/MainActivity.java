@@ -78,7 +78,8 @@ public class MainActivity extends AppCompatActivity {
                     changeFragment(HomeFragment.getInstance());
                 } else if (item.getItemId() == R.id.friends){
                     changeFragment(FriendsFragment.getInstance());
-                }
+                } else if (item.getItemId() == R.id.events)
+                    changeFragment(EventsFragment.getInstance());
 
                 return true;
             }

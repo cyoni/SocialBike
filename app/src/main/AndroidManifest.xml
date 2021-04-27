@@ -10,9 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SocialBike">
         <activity
+            android:name=".AddNewEventActivity"
+            android:label="@string/title_activity_add_new_event"
+            android:theme="@style/Theme.SocialBike.NoActionBar"></activity>
+        <activity
             android:name=".AddPostActivity"
             android:label="@string/title_activity_adding_post"
-            android:theme="@style/Theme.SocialBike.NoActionBar"></activity>
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
         <activity android:name=".WelcomeActivity" />
         <activity
             android:name=".LogIn"

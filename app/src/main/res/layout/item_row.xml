@@ -44,7 +44,8 @@
             app:srcCompat="@drawable/ic_more_vert_black_24dp"
             android:background="@color/white"
             android:scaleType="centerInside"
-            android:layout_alignRight="@id/content" />
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true" />
 
 
         <TextView
