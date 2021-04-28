@@ -6,10 +6,10 @@
         android:title="Home"/>
 
     <item
-        android:id="@+id/friends"
+        android:id="@+id/events"
         android:enabled="true"
         android:icon="@drawable/ic_android_black_24dp"
-        android:title="Friends"/>
+        android:title="Events"/>
 
     <item
         android:id="@+id/chat"
@@ -17,16 +17,12 @@
         android:icon="@drawable/ic_android_black_24dp"
         android:title="Chat"/>
 
-    <item
-        android:id="@+id/events"
-        android:enabled="true"
-        android:icon="@drawable/ic_android_black_24dp"
-        android:title="Events"/>
+
 
     <item
-        android:id="@+id/my_friends"
+        android:id="@+id/profile"
         android:enabled="true"
         android:icon="@drawable/ic_android_black_24dp"
-        android:title="My Friends"/>
+        android:title="Profile"/>
 
 </menu>

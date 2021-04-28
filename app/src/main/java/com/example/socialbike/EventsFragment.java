@@ -63,6 +63,21 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
             }
         });
 
+        Button sortButton = root.findViewById(R.id.sort_button);
+        sortButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (sortButton.getText().equals("Most relevant")){
+                    sortButton.setText("New Activity");
+                }
+                else{
+                    sortButton.setText("Most relevant");
+                }
+
+            }
+        });
+
         return root;
     }
 

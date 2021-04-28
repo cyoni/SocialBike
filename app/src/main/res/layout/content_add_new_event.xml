@@ -18,7 +18,17 @@
         tools:layout_editor_absoluteY="31dp" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName"
+        android:id="@+id/country"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="country"
+        tools:layout_editor_absoluteX="82dp"
+        tools:layout_editor_absoluteY="87dp" />
+
+    <EditText
+        android:id="@+id/city"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -28,7 +38,7 @@
         tools:layout_editor_absoluteY="87dp" />
 
     <EditText
-        android:id="@+id/editTextTime2"
+        android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -37,7 +47,7 @@
         tools:layout_editor_absoluteY="149dp" />
 
     <EditText
-        android:id="@+id/editTextDate"
+        android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -47,7 +57,7 @@
 
 
     <EditText
-        android:id="@+id/txt_content2"
+        android:id="@+id/content"
         android:layout_width="199dp"
         android:layout_height="178dp"
         android:gravity="start"
@@ -59,8 +69,7 @@
         tools:layout_editor_absoluteY="285dp" />
 
     <Button
-        android:id="@+id/submit2"
-        style="?attr/materialButtonOutlinedStyle"
+        android:id="@+id/submit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/txt_content"

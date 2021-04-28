@@ -27,6 +27,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private Updater updater;
+    private MessageManager messageManager;
 
     public HomeFragment() {
         container = new ArrayList<>();
@@ -50,6 +51,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         super.onCreate(savedInstanceState);
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
@@ -58,9 +60,13 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         activateFloatingButton();
         initAdapter();
         updater = new Updater(this.container, recyclerViewAdapter);
+        messageManager = new MessageManager(updater);
+
+        messageManager.getPosts();
 
         return root;
     }
+
 
     private void activateFloatingButton() {
         floatingButton.setOnClickListener(new View.OnClickListener() {
@@ -84,10 +90,12 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         holder.name.setText(container.get(position).getName());
     }
 
+
     @Override
     public void onItemClick(@NonNull View holder, int position) {
 
     }
+
 
     public void addPost(Post post) {
         updater.add(post);

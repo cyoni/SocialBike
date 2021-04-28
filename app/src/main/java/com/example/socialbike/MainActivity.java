@@ -76,10 +76,12 @@ public class MainActivity extends AppCompatActivity {
 
                 if (item.getItemId() == R.id.home){
                     changeFragment(HomeFragment.getInstance());
-                } else if (item.getItemId() == R.id.friends){
-                    changeFragment(FriendsFragment.getInstance());
-                } else if (item.getItemId() == R.id.events)
+                }  else if (item.getItemId() == R.id.events)
                     changeFragment(EventsFragment.getInstance());
+                else if (item.getItemId() == R.id.chat)
+                    changeFragment(ChatFragment.getInstance());
+                else if (item.getItemId() == R.id.profile)
+                    changeFragment(ProfileFragment.getInstance());
 
                 return true;
             }

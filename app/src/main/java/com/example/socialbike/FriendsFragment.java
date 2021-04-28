@@ -11,13 +11,14 @@ import android.view.ViewGroup;
 
 public class FriendsFragment extends Fragment {
 
-
     private View root;
     private static FriendsFragment friendsFragment = null;
+
 
     public FriendsFragment() {
 
     }
+
 
     public static FriendsFragment getInstance(){
         if (friendsFragment == null){
@@ -27,11 +28,9 @@ public class FriendsFragment extends Fragment {
     }
 
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override

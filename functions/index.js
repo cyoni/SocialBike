@@ -180,28 +180,34 @@ exports.updateNickname = functions.https.onCall(async (data, context) => {
 
 
 exports.AddNewEvent = functions.https.onCall(async (request, context) => {
+    console.log("1")
     const privateKey = context.auth.uid;
     const account = await verifyUser(privateKey);
+
     if (account === null)
         return "[AUTH_FAILED]";
-
+    console.log("2")
     const eventTime = request.time
     const eventDate = request.date
-    const eventInfo = request.eventInfo
+    const eventInfo = request.content
     const eventCity = request.city
-    const timestamp = Date.now
+    const timestamp = Date.now()
+    console.log("3")
 
     var data = {
-        timestamp,
-        eventTime,
-        eventDate,
-        eventInfo,
-        eventCity,
+        userPublicKey: account.publicKey,
+        timestamp: timestamp,
+        eventTime: eventTime,
+        eventDate: eventDate,
+        eventContent: eventInfo,
+        eventCity: eventCity
     }
     
+    console.log("4")
     const newKey = admin.database().ref('events').push().key
-    admin.database().ref('events').child(newKey).set(data)
+
+    await admin.database().ref('events').child(newKey).set(data)
+    console.log("6")
 
     return "OK"
-
 })

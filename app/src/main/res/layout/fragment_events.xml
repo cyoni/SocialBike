@@ -13,26 +13,37 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@id/button2"
-
+        android:layout_toLeftOf="@id/sort_button"
         android:text="Add New Event" />
 
     <Button
-        android:id="@+id/button2"
-        android:layout_width="wrap_content"
+        android:id="@+id/sort_button"
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginRight="10dp"
         style="?attr/materialButtonOutlinedStyle"
-        android:text="Most relevent" />
+        android:text="Most relevant" />
+
+
+    <Button
+        android:id="@+id/gg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/add_new_event_button"
+        android:text="Region: Israel" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/add_new_event_button"
+        android:layout_below="@id/gg"
         android:scrollbars="vertical"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 
-connect add new event to db
+
 </RelativeLayout>
