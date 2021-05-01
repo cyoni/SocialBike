@@ -27,7 +27,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     }
 
     private void initAdapter() {
-        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_row, container);
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_events, container);
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerViewAdapter.setClassReference(this);
     }
@@ -83,8 +83,8 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.message.setText(container.get(position).getMsg());
-        holder.name.setText(container.get(position).getName());
+      //  holder.message.setText(container.get(position).getMsg());
+      //  holder.name.setText(container.get(position).getName());
     }
 
     @Override

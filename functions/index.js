@@ -180,19 +180,17 @@ exports.updateNickname = functions.https.onCall(async (data, context) => {
 
 
 exports.AddNewEvent = functions.https.onCall(async (request, context) => {
-    console.log("1")
     const privateKey = context.auth.uid;
     const account = await verifyUser(privateKey);
 
     if (account === null)
         return "[AUTH_FAILED]";
-    console.log("2")
+
     const eventTime = request.time
     const eventDate = request.date
     const eventInfo = request.content
     const eventCity = request.city
     const timestamp = Date.now()
-    console.log("3")
 
     var data = {
         userPublicKey: account.publicKey,
@@ -202,12 +200,36 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
         eventContent: eventInfo,
         eventCity: eventCity
     }
-    
-    console.log("4")
     const newKey = admin.database().ref('events').push().key
-
     await admin.database().ref('events').child(newKey).set(data)
-    console.log("6")
 
+    return "OK"
+})
+
+exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
+
+    const privateKey = context.auth.uid;
+    const account = await verifyUser(privateKey);
+
+    if (account === null)
+        return "[AUTH_FAILED]";
+
+    const receiverPublicKey = request.receiver;
+    const senderPublicKey = account.publicKey
+    const message = request.message
+    const timestamp = Date.now()
+
+    const sendersName = await getNickname(account.publicKey)
+
+    const data = {
+        receiverPublicKey: receiverPublicKey,
+        senderPublicKey: senderPublicKey,
+        message: message,
+        sendersName: sendersName,
+        timestamp: timestamp,
+    }
+
+    const messageId = await admin.database().ref('private_msgs').child(receiverPublicKey).push().key
+    admin.database().ref('private_msgs').child(receiverPublicKey).child(messageId).child(senderPublicKey).set(data)
     return "OK"
 })

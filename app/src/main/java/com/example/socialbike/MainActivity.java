@@ -12,9 +12,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
+import com.example.socialbike.chat.ChatManager;
+import com.example.socialbike.chat.ContainerForChat;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -29,9 +30,14 @@ public class MainActivity extends AppCompatActivity {
     public static DatabaseReference mDatabase;
     public static FirebaseFunctions mFunctions;
     private BottomNavigationView bottomNavigationView;
+    public static ChatManager chatManager;
 
     public static void toast(Context context, String msg, int isLong) {
         Toast.makeText(context, msg, isLong).show();
+    }
+
+    public MainActivity(){
+        chatManager = new ChatManager();
     }
 
     @Override
@@ -42,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
         loadUser();
         startListeningBottomMenu();
         changeFragment(HomeFragment.getInstance());
+        startChat();
+    }
+
+    private void startChat() {
+        chatManager.listenForNewMessages();
     }
 
     private void loadUser() {
@@ -79,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 }  else if (item.getItemId() == R.id.events)
                     changeFragment(EventsFragment.getInstance());
                 else if (item.getItemId() == R.id.chat)
-                    changeFragment(ChatFragment.getInstance());
+                    changeFragment(ContainerForChat.getInstance());
                 else if (item.getItemId() == R.id.profile)
                     changeFragment(ProfileFragment.getInstance());
 

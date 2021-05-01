@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -46,8 +47,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView name, message, time;
+        public TextView name, message, time, msgStyle;
         public ImageView profilePicture;
+        public Button start_conversation;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -55,6 +57,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             message = itemView.findViewById(R.id.message);
             //profilePicture = itemView.findViewById(R.id.status);
             time = itemView.findViewById(R.id.time);
+            msgStyle = itemView.findViewById(R.id.msgStyle);
+            start_conversation = itemView.findViewById(R.id.start_conversation);
         }
 
         @Override
@@ -69,7 +73,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
      //   return mData.get(id);
   //  }
 
-    // allows clicks events to be caught
+    // allows click events to be caught
     public void setClassReference(Object itemClickListener) {
         this.msgItemListener = (ItemClickListener) itemClickListener;
     }
