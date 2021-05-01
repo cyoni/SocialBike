@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.BreakIterator;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -47,7 +49,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView name, message, time, msgStyle;
+        public TextView name, message, time, msgStyle, message_preview;
         public ImageView profilePicture;
         public Button start_conversation;
 
@@ -59,6 +61,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             time = itemView.findViewById(R.id.time);
             msgStyle = itemView.findViewById(R.id.msgStyle);
             start_conversation = itemView.findViewById(R.id.start_conversation);
+            message_preview = itemView.findViewById(R.id.message_preview);
         }
 
         @Override

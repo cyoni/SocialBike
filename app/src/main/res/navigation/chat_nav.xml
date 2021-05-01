@@ -18,5 +18,9 @@
         android:id="@+id/chatConversationFragment"
         android:name="com.example.socialbike.chat.ChatConversationFragment"
         android:label="fragment_chat_conversation"
-        tools:layout="@layout/fragment_chat_conversation" />
+        tools:layout="@layout/fragment_chat_conversation" >
+        <action
+            android:id="@+id/action_chatConversationFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
 </navigation>

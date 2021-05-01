@@ -38,7 +38,7 @@ public class ChatManager {
                         String messageId = snapshot.getKey();
                         System.out.println("New message: " + postSnapshot.child("message").getValue());
                         System.out.println("Message key: " + postSnapshot.getKey());
-                        passMessageToRelevantClass(messageId, senderPublicKey, sendersName, message);
+                        passMessageToRelevantClass(messageId, senderPublicKey, sendersName, message, true);
                         //removeMessage(message); TODO
                     }
                 }
@@ -61,8 +61,8 @@ public class ChatManager {
 
     }
 
-    private void passMessageToRelevantClass(String messageId, String senderPublicKey, String sendersName, String message) {
-        ChatMessage chatMessage = new ChatMessage(messageId, senderPublicKey, sendersName, message);
+    private void passMessageToRelevantClass(String messageId, String senderPublicKey, String sendersName, String message, boolean isIncomingMessage) {
+        ChatMessage chatMessage = new ChatMessage(messageId, senderPublicKey, sendersName, message, isIncomingMessage);
         //ChatConversationFragment.getInstance().addMessage(chatMessage);
 
         if (chatConversationFragmentDisplayed())
@@ -93,14 +93,13 @@ public class ChatManager {
 
 
     public void sendMessage(String receiver, String message){
-
         Map<String, Object> data = new HashMap<>();
         data.put("receiver", "-MYVCkWexSO_jumnbr0l");
         data.put("publicKey", User.getPublicKey());
         data.put("message", message);
 
         System.out.println("sending private msg to "+ receiver +"...");
-        passMessageToRelevantClass("123456", User.getPublicKey(), User.getNickname(), message);
+        passMessageToRelevantClass("123456", User.getPublicKey(), User.getNickname(), message, false);
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")
@@ -111,6 +110,5 @@ public class ChatManager {
                     return "";
                 });
     }
-
 
 }

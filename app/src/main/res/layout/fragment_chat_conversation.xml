@@ -6,11 +6,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".chat.ChatConversationFragment">
 
+    <Button
+        android:id="@+id/back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back" />
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
+        android:layout_below="@id/back"
         android:layout_marginTop="2dp"
         android:scrollbars="vertical"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />

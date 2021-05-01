@@ -1,13 +1,16 @@
 package com.example.socialbike.chat;
 
 public class ChatMessage {
-    private final String messageId, senderPublicKey, sendersName, message;
 
-    public ChatMessage(String messageId, String senderPublicKey, String sendersName, String message) {
+    private final String messageId, senderPublicKey, sendersName, message;
+    private final boolean isIncomingMessage;
+
+    public ChatMessage(String messageId, String senderPublicKey, String sendersName, String message, boolean isIncomingMessage) {
         this.messageId = messageId;
         this.senderPublicKey = senderPublicKey;
         this.sendersName = sendersName;
         this.message = message;
+        this.isIncomingMessage = isIncomingMessage;
     }
 
     public String getMessageId() {
@@ -24,6 +27,10 @@ public class ChatMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    public boolean isIncomingMessage() {
+        return isIncomingMessage;
     }
 
 }
