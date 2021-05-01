@@ -1,5 +1,6 @@
 package com.example.socialbike.chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,5 +30,6 @@ public class ContainerForChat extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.chat, container, false);
     }
+
 
 }
