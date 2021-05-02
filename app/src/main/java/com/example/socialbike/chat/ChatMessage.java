@@ -2,7 +2,7 @@ package com.example.socialbike.chat;
 
 public class ChatMessage {
 
-    private final String messageId, senderPublicKey, sendersName, message;
+    protected final String messageId, senderPublicKey, sendersName, message;
     private final boolean isIncomingMessage;
 
     public ChatMessage(String messageId, String senderPublicKey, String sendersName, String message, boolean isIncomingMessage) {

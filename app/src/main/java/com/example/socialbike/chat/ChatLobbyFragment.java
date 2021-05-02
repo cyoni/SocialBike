@@ -19,7 +19,7 @@ public class ChatLobbyFragment extends Fragment implements RecyclerViewAdapter.I
 
     static ChatLobbyFragment chatFragment = null;
     private RecyclerView recyclerView;
-    private final ArrayList<ChatUser> container;
+    private final ArrayList<ChatMsgPreview> container;
     private RecyclerViewAdapter recyclerViewAdapter;
     //private EditText messageBox;
     private NavController nav;
@@ -52,7 +52,7 @@ public class ChatLobbyFragment extends Fragment implements RecyclerViewAdapter.I
         recyclerView = root.findViewById(R.id.recyclerview);
         initAdapter();
 
-        this.container.add(new ChatUser("22", "Yoni", "Have a nice day!"));
+        this.container.add(new ChatMsgPreview("22", "Yoni", "Have a nice day!"));
         // Button send = root.findViewById(R.id.send);
         //messageBox = root.findViewById(R.id.messageBox);
 

@@ -9,17 +9,20 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ChatManager {
 
     public ChatConversationFragment chatConversationFragment;
     public ChatLobbyFragment chatLobbyFragment;
+    HashMap<String, List<ChatMsgPreview>> incomingMessages;
     boolean isChatEnabled = true;
 
     public ChatManager(){
-
+        incomingMessages = new HashMap<>();
     }
 
     public void listenForNewMessages(){
@@ -69,17 +72,16 @@ public class ChatManager {
             chatConversationFragment.addMessage(chatMessage);
         else if (chatLobbyFragmentDisplayed()){
             chatLobbyFragment.updateLobbyList(chatMessage);
-        }else{
-               /*     HashMap<String, List<String>> incomingMessages = new HashMap<>();
+        } else {
 
-        if (incomingMessages.get("yoni") == null) {
-            incomingMessages.put("yoni", new ArrayList<>());
-        }
-        incomingMessages.get("yoni").add("ddd");
-*/
+            if (incomingMessages.get(senderPublicKey) == null) {
+                incomingMessages.put(senderPublicKey, new ArrayList<>());
+            }
+            incomingMessages.get(senderPublicKey).add(new ChatMsgPreview(messageId, senderPublicKey, sendersName, message);
+            //chatLobbyFragment.updateLobbyList(chatMessage);
+
             System.out.println("A new message was added to the data structure in Chat Lobby.");
         }
-
 
     }
 
