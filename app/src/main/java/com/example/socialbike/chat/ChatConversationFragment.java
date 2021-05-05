@@ -54,6 +54,7 @@ public class ChatConversationFragment extends Fragment implements RecyclerViewAd
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MainActivity.chatManager.chatConversationFragment = this;
     }
 
     @Override
@@ -66,8 +67,8 @@ public class ChatConversationFragment extends Fragment implements RecyclerViewAd
         recyclerView = root.findViewById(R.id.recyclerview);
         initAdapter();
 
-        MainActivity.chatManager.chatConversationFragment = this;
-        MainActivity.chatManager.chatLobbyFragment = null;
+
+        ///MainActivity.chatManager.chatLobbyFragment = null;
 
 
         backButton.setOnClickListener(view -> {

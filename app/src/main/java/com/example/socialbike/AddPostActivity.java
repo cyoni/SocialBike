@@ -85,7 +85,7 @@ public class AddPostActivity extends AppCompatActivity {
 
     private void passItemToHome() {
 
-        homeFragment.addPost(new Post(User.getPublicKey(), User.getNickname(), 123412, textBox.getText().toString()));
+        homeFragment.addPost(new Post("77777", User.getPublicKey(), User.getNickname(), 123412, textBox.getText().toString()));
     }
 
     private boolean isMessageValid() {

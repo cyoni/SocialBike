@@ -52,7 +52,7 @@ public class MessageManager {
                     has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
                 }
 
-                Post post = new Post(user_public_key, nickname, 8888, messages);
+                Post post = new Post("7777", user_public_key, nickname, 8888, messages);
                 updater.add(post);
                 updater.update();
 

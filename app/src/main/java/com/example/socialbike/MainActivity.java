@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.socialbike.chat.ChatLobbyFragment;
 import com.example.socialbike.chat.ChatManager;
 import com.example.socialbike.chat.ContainerForChat;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -87,14 +88,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-                if (item.getItemId() == R.id.home){
+                switch (item.getItemId()){
+                    case R.id.home:
+                        changeFragment(HomeFragment.getInstance());
+                        break;
+                    case R.id.events:
+                        changeFragment(EventsFragment.getInstance());
+                        break;
+                    case R.id.chat:
+                        changeFragment(ChatLobbyFragment.getInstance());
+                        break;
+                    case R.id.profile:
+                        changeFragment(ProfileFragment.getInstance());
+                        break;
+                }
+
+
+             /*   if (item.getItemId() == R.id.home){
                     changeFragment(HomeFragment.getInstance());
                 }  else if (item.getItemId() == R.id.events)
                     changeFragment(EventsFragment.getInstance());
                 else if (item.getItemId() == R.id.chat)
                     changeFragment(ContainerForChat.getInstance());
                 else if (item.getItemId() == R.id.profile)
-                    changeFragment(ProfileFragment.getInstance());
+                    changeFragment(ProfileFragment.getInstance());*/
 
                 return true;
             }

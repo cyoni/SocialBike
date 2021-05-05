@@ -20,6 +20,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
         android:elevation="3dp"
+        android:layout_marginLeft="10dp"
         android:src="@drawable/profile_blank"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.074"
@@ -32,17 +33,68 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/profile_image"
-        android:text="TextView"
+        android:text="Yoni"
         android:textSize="20sp" />
 
     <TextView
-        android:id="@+id/info"
+        android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:layout_below="@id/profile_image"
-        android:text="TextView"
+        android:layout_below="@id/date"
+        android:text="This Sunday the best bibke ride is happening. The event cost 10 shekels and everyone is welcome."
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/city"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_toLeftOf="@id/country"
+        android:text="Tel Aviv"
+        android:textSize="20sp"
+        />
+
+    <TextView
+        android:id="@+id/country"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentEnd="true"
+        android:text="Israel"
+        android:textSize="20sp"
+        android:layout_alignParentRight="true" />
+
+    <TextView
+        android:id="@+id/people_going"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentEnd="true"
+        android:text="12 people going"
+        android:layout_below="@id/city"
+        android:textSize="20sp"
+        android:layout_alignParentRight="true" />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:text="Sunday, 25th May"
+        android:layout_below="@id/people_going"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/date"
+        android:text="10:00"
+        android:layout_below="@id/people_going"
         android:textSize="20sp" />
 
     <Button
@@ -51,7 +103,16 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:text="Interested"
-        android:layout_below="@id/info"/>
+        android:layout_below="@id/message"/>
+
+    <Button
+        android:id="@+id/who_is_coming"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/message"
+        android:layout_toRightOf="@id/interested"
+        android:layout_marginLeft="10dp"
+        android:text="Who is Coming" />
 
 </RelativeLayout>
 </androidx.cardview.widget.CardView>

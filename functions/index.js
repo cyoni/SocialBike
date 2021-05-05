@@ -159,6 +159,41 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
     })
 })
 
+
+exports.getEvents = functions.https.onCall(async (request, context) => {
+
+    var data = {}
+    data['events'] = []
+    var counter = 0;
+    // const location = 
+
+    return admin.database().ref('events').once('value').then(snapshot => {
+        snapshot.forEach(raw_data => {
+
+            const dataOfEvent = {
+                eventId: raw_data.key,
+                name: "",
+                userPublicKey: raw_data.child('userpublicKey').val(),
+                content: raw_data.child('content').val(),
+                createdEventTime: raw_data.child('createdEventTime').val(),
+                dateOfEvent: raw_data.child('eventDate').val(),
+                eventTime: raw_data.child('eventTime').val(),
+                amountOfInterestedPeople: raw_data.child('amountOfInterestedPeople').val(),
+                eventCity: raw_data.child('eventCity').val(),
+                eventCountry: raw_data.child('eventCountry').val(),
+                // coordinates 
+            }
+
+            data.events[counter++] = dataOfEvent
+        })
+        return admin.database().ref('public').once('value')
+    }).then(snapshot => {
+        for (var i = 0; i < data.events.length; i++) 
+            data.events[i].name = snapshot.child(data.events[i].userpublicKey).child('profile').child('nickname').val()
+        return util.inspect(data, { showHidden: false, depth: null }) 
+    })
+})
+
 exports.updateNickname = functions.https.onCall(async (data, context) => {
     const privateKey = context.auth.uid;
     var inputNickname = data.nickname.trim();
@@ -188,18 +223,21 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
 
     const eventTime = request.time
     const eventDate = request.date
-    const eventInfo = request.content
+    const eventContent = request.content
     const eventCity = request.city
+    const eventCountry = request.country
     const timestamp = Date.now()
 
     var data = {
         userPublicKey: account.publicKey,
-        timestamp: timestamp,
+        createdEventTime: timestamp,
         eventTime: eventTime,
         eventDate: eventDate,
-        eventContent: eventInfo,
-        eventCity: eventCity
+        eventContent: eventContent,
+        eventCity: eventCity,
+        eventCountry: eventCountry
     }
+
     const newKey = admin.database().ref('events').push().key
     await admin.database().ref('events').child(newKey).set(data)
 

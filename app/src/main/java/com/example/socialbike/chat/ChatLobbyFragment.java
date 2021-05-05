@@ -14,6 +14,8 @@ import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class ChatLobbyFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener {
 
@@ -23,6 +25,8 @@ public class ChatLobbyFragment extends Fragment implements RecyclerViewAdapter.I
     private RecyclerViewAdapter recyclerViewAdapter;
     //private EditText messageBox;
     private NavController nav;
+    HashMap<String, List<ChatMsgPreview>> incomingMessages;
+
 
     public static ChatLobbyFragment getInstance(){
         if (chatFragment == null){
@@ -32,7 +36,9 @@ public class ChatLobbyFragment extends Fragment implements RecyclerViewAdapter.I
     }
 
     public ChatLobbyFragment(){
+        System.out.println("#######################");
         container = new ArrayList<>();
+        incomingMessages = new HashMap<>();
     }
 
     private void initAdapter() {
@@ -44,6 +50,7 @@ public class ChatLobbyFragment extends Fragment implements RecyclerViewAdapter.I
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MainActivity.chatManager.chatLobbyFragment = this;
     }
 
     @Override
@@ -52,16 +59,16 @@ public class ChatLobbyFragment extends Fragment implements RecyclerViewAdapter.I
         recyclerView = root.findViewById(R.id.recyclerview);
         initAdapter();
 
-        this.container.add(new ChatMsgPreview("22", "Yoni", "Have a nice day!"));
+        this.container.add(new ChatMsgPreview("22", "444444", "Yoni", "Have a nice day!"));
         // Button send = root.findViewById(R.id.send);
         //messageBox = root.findViewById(R.id.messageBox);
 
         recyclerViewAdapter.setClassReference(this); // reference this class to the adaptor
-        nav = Navigation.findNavController(container);
+//        nav = Navigation.findNavController(container);
 
-        MainActivity.chatManager.chatLobbyFragment = this;
         MainActivity.chatManager.chatConversationFragment = null;
-
+        if (incomingMessages.get("-MYVCkWexSO_jumnbr0l") != null)
+            System.out.println("ChatLobbyFragment: " + incomingMessages.get("-MYVCkWexSO_jumnbr0l").size() + " items in incomingMessages list");
         return root;
     }
 
@@ -79,5 +86,13 @@ public class ChatLobbyFragment extends Fragment implements RecyclerViewAdapter.I
 
     public void updateLobbyList(ChatMessage chatMessage) {
        System.out.println("CHAT: a new message from " + chatMessage.getSendersName() + ": " + chatMessage.getMessage());
+    }
+
+    public void addNewIncomeMessage(String senderPublicKey, ChatMsgPreview chatMsgPreview) {
+        if (incomingMessages.get(senderPublicKey) == null) {
+            incomingMessages.put(senderPublicKey, new ArrayList<>());
+        }
+        incomingMessages.get(senderPublicKey).add(chatMsgPreview);
+        System.out.println("New message by " + senderPublicKey + " was recorded successfully");
     }
 }

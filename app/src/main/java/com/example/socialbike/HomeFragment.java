@@ -28,9 +28,11 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private RecyclerViewAdapter recyclerViewAdapter;
     private Updater updater;
     private MessageManager messageManager;
+    private boolean loadPosts = true;
 
     public HomeFragment() {
         container = new ArrayList<>();
+        System.out.println("!!!!!!!!!!");
     }
 
     public static HomeFragment getInstance(){
@@ -57,13 +59,16 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         floatingButton = root.findViewById(R.id.fab);
         recyclerView = root.findViewById(R.id.recyclerview);
+
         activateFloatingButton();
         initAdapter();
-        updater = new Updater(this.container, recyclerViewAdapter);
-        messageManager = new MessageManager(updater);
+        if (loadPosts) {
+            updater = new Updater(this.container, recyclerViewAdapter);
+            messageManager = new MessageManager(updater);
 
-        messageManager.getPosts();
-
+            messageManager.getPosts();
+            loadPosts = false;
+        }
         return root;
     }
 

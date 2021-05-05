@@ -49,14 +49,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView name, message, time, msgStyle, message_preview;
+        public TextView name, message, date, time, msgStyle, message_preview, city, country;
         public ImageView profilePicture;
         public Button start_conversation;
 
         ViewHolder(View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.name);
+            date = itemView.findViewById(R.id.date);
             message = itemView.findViewById(R.id.message);
+            city = itemView.findViewById(R.id.city);
+            country = itemView.findViewById(R.id.country);
+
             //profilePicture = itemView.findViewById(R.id.status);
             time = itemView.findViewById(R.id.time);
             msgStyle = itemView.findViewById(R.id.msgStyle);

@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class AddNewEventActivity extends AppCompatActivity {
 
-    private EditText city, country, time, date, info;
+    private EditText city, country, time, date, message;
     private Button b;
 
     @Override
@@ -32,7 +32,7 @@ public class AddNewEventActivity extends AppCompatActivity {
         country = findViewById(R.id.country);
         time = findViewById(R.id.time);
         date = findViewById(R.id.date);
-        info = findViewById(R.id.content);
+        message = findViewById(R.id.message);
 
         setButtonListener();
     }
@@ -53,9 +53,9 @@ public class AddNewEventActivity extends AppCompatActivity {
         Map<String, Object> data = new HashMap<>();
         data.put("city", city.getText().toString());
         data.put("country", country.getText().toString());
-        data.put("time", time.getText().toString());
         data.put("date", date.getText().toString());
-        data.put("content", info.getText().toString());
+        data.put("time", time.getText().toString());
+        data.put("content", message.getText().toString());
 
         MainActivity.mFunctions
                 .getHttpsCallable("AddNewEvent")

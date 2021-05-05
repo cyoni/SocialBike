@@ -18,11 +18,9 @@ public class ChatManager {
 
     public ChatConversationFragment chatConversationFragment;
     public ChatLobbyFragment chatLobbyFragment;
-    HashMap<String, List<ChatMsgPreview>> incomingMessages;
     boolean isChatEnabled = true;
 
     public ChatManager(){
-        incomingMessages = new HashMap<>();
     }
 
     public void listenForNewMessages(){
@@ -34,8 +32,7 @@ public class ChatManager {
                 if (snapshot.exists()) {
                     System.out.println("raw data: " + snapshot.toString());
                     for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-
-                        String senderPublicKey = String.valueOf(postSnapshot.child("senderPublicKey").toString());
+                        String senderPublicKey = String.valueOf(postSnapshot.child("senderPublicKey").getValue());
                         String message = String.valueOf(postSnapshot.child("message").getValue());
                         String sendersName = String.valueOf(postSnapshot.child("sendersName").toString());
                         String messageId = snapshot.getKey();
@@ -74,11 +71,9 @@ public class ChatManager {
             chatLobbyFragment.updateLobbyList(chatMessage);
         } else {
 
-            if (incomingMessages.get(senderPublicKey) == null) {
-                incomingMessages.put(senderPublicKey, new ArrayList<>());
-            }
-            incomingMessages.get(senderPublicKey).add(new ChatMsgPreview(messageId, senderPublicKey, sendersName, message);
-            //chatLobbyFragment.updateLobbyList(chatMessage);
+            ChatMsgPreview chatMsgPreview = new ChatMsgPreview(messageId, senderPublicKey, sendersName, message);
+            System.out.println("sender id: " + senderPublicKey);
+            ChatLobbyFragment.getInstance().addNewIncomeMessage(senderPublicKey, chatMsgPreview);
 
             System.out.println("A new message was added to the data structure in Chat Lobby.");
         }

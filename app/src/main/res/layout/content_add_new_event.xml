@@ -8,7 +8,6 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
@@ -23,7 +22,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="country"
+        android:text="Israel"
         tools:layout_editor_absoluteX="82dp"
         tools:layout_editor_absoluteY="87dp" />
 
@@ -33,35 +32,31 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="city"
-        tools:layout_editor_absoluteX="82dp"
-        tools:layout_editor_absoluteY="87dp" />
+        android:text="Tel Aviv" />
 
     <EditText
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="time"
-        tools:layout_editor_absoluteX="79dp"
-        tools:layout_editor_absoluteY="149dp" />
+        android:inputType="text"
+        android:text="10:00"/>
 
     <EditText
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="date"
-        tools:layout_editor_absoluteX="77dp"
-        tools:layout_editor_absoluteY="210dp" />
+        android:inputType="text"
+        android:text="10/05/2021" />
 
 
     <EditText
-        android:id="@+id/content"
+        android:id="@+id/message"
         android:layout_width="199dp"
         android:layout_height="178dp"
         android:gravity="start"
-
+        android:text="You are welcome to come!"
         android:inputType="textMultiLine|textCapSentences"
         android:minHeight="150dp"
         android:padding="5dp"
