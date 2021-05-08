@@ -17,6 +17,7 @@ public class Event extends Post{
                  String amountOfInterestedPeople, String city,
                  String country, String message) {
         super(eventId, userPublicKey, name, 1245, message);
+
         this.eventId = eventId;
         this.userPublicKey = userPublicKey;
         this.name = name;

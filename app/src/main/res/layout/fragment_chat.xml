@@ -33,23 +33,4 @@
         android:scrollbars="vertical"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 
-    <EditText
-        android:id="@+id/messageBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:ems="10"
-        android:layout_alignParentLeft="true"
-        android:inputType="textPersonName"
-        android:layout_toLeftOf="@+id/find_button"
-        android:text="" />
-
-    <Button
-        android:id="@+id/send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:text="Send" />
-
 </RelativeLayout>

@@ -34,7 +34,7 @@
         android:layout_marginRight="10dp"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/add_new_event_button"
-        android:text="Region: Israel" />
+        android:text="Change Region" />
 
 
     <androidx.recyclerview.widget.RecyclerView

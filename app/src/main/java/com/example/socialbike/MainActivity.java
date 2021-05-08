@@ -96,13 +96,12 @@ public class MainActivity extends AppCompatActivity {
                         changeFragment(EventsFragment.getInstance());
                         break;
                     case R.id.chat:
-                        changeFragment(ChatLobbyFragment.getInstance());
+                        changeFragment(ContainerForChat.getInstance());
                         break;
                     case R.id.profile:
                         changeFragment(ProfileFragment.getInstance());
                         break;
                 }
-
 
              /*   if (item.getItemId() == R.id.home){
                     changeFragment(HomeFragment.getInstance());

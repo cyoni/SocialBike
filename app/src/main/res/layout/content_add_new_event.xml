@@ -52,16 +52,14 @@
 
 
     <EditText
-        android:id="@+id/message"
+        android:id="@+id/content"
         android:layout_width="199dp"
         android:layout_height="178dp"
         android:gravity="start"
         android:text="You are welcome to come!"
         android:inputType="textMultiLine|textCapSentences"
         android:minHeight="150dp"
-        android:padding="5dp"
-        tools:layout_editor_absoluteX="74dp"
-        tools:layout_editor_absoluteY="285dp" />
+        android:padding="5dp" />
 
     <Button
         android:id="@+id/submit"

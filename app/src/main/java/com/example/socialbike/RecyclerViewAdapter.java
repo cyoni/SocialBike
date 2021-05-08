@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,6 +53,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public TextView name, message, date, time, msgStyle, message_preview, city, country;
         public ImageView profilePicture;
         public Button start_conversation;
+        public RelativeLayout layout;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -60,11 +62,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             message = itemView.findViewById(R.id.message);
             city = itemView.findViewById(R.id.city);
             country = itemView.findViewById(R.id.country);
+            layout = itemView.findViewById(R.id.layout);
 
             //profilePicture = itemView.findViewById(R.id.status);
             time = itemView.findViewById(R.id.time);
             msgStyle = itemView.findViewById(R.id.msgStyle);
-            start_conversation = itemView.findViewById(R.id.start_conversation);
+           // start_conversation = itemView.findViewById(R.id.start_conversation);
             message_preview = itemView.findViewById(R.id.message_preview);
         }
 

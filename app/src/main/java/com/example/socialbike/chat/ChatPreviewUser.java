@@ -1,8 +1,8 @@
 package com.example.socialbike.chat;
 
-public class ChatMsgPreview extends ChatMessage {
+public class ChatPreviewUser extends ChatMessage {
 
-    public ChatMsgPreview(String messageId, String publicKey, String name, String messagePreview){
+    public ChatPreviewUser(String messageId, String publicKey, String name, String messagePreview){
         super(messageId, publicKey, name, messagePreview,true);
     }
 
@@ -18,4 +18,7 @@ public class ChatMsgPreview extends ChatMessage {
         return senderPublicKey;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

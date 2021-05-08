@@ -83,9 +83,9 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
             for (int i = 0; i < messages_array.length(); i++) {
 
                 String userPublicKey = messages_array.getJSONObject(i).getString("userPublicKey");
-                String message = messages_array.getJSONObject(i).getString("content");
+                String message = messages_array.getJSONObject(i).getString("eventContent");
                 String name = messages_array.getJSONObject(i).getString("name");
-                String dateOfEvent = messages_array.getJSONObject(i).getString("dateOfEvent");
+                String dateOfEvent = messages_array.getJSONObject(i).getString("eventDate");
                 String timeOfEvent = messages_array.getJSONObject(i).getString("eventTime");
                 String createdEventTime = messages_array.getJSONObject(i).getString("createdEventTime");
                 String eventId = messages_array.getJSONObject(i).getString("eventId");

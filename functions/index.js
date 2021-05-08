@@ -174,14 +174,14 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 eventId: raw_data.key,
                 name: "",
                 userPublicKey: raw_data.child('userpublicKey').val(),
-                content: raw_data.child('content').val(),
+                eventContent: raw_data.child('eventContent').val(),
                 createdEventTime: raw_data.child('createdEventTime').val(),
-                dateOfEvent: raw_data.child('eventDate').val(),
+                eventDate: raw_data.child('eventDate').val(),
                 eventTime: raw_data.child('eventTime').val(),
                 amountOfInterestedPeople: raw_data.child('amountOfInterestedPeople').val(),
                 eventCity: raw_data.child('eventCity').val(),
                 eventCountry: raw_data.child('eventCountry').val(),
-                // coordinates 
+                // coordinates
             }
 
             data.events[counter++] = dataOfEvent
@@ -189,8 +189,10 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
         return admin.database().ref('public').once('value')
     }).then(snapshot => {
         for (var i = 0; i < data.events.length; i++) 
-            data.events[i].name = snapshot.child(data.events[i].userpublicKey).child('profile').child('nickname').val()
-        return util.inspect(data, { showHidden: false, depth: null }) 
+            data.events[i].name = snapshot.child(data.events[i].userPublicKey).child('profile').child('nickname').val()
+
+        data.events = data.events.reverse()
+        return util.inspect(data, { showHidden: false, depth: null })
     })
 })
 

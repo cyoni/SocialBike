@@ -32,7 +32,7 @@ public class AddNewEventActivity extends AppCompatActivity {
         country = findViewById(R.id.country);
         time = findViewById(R.id.time);
         date = findViewById(R.id.date);
-        message = findViewById(R.id.message);
+        message = findViewById(R.id.content);
 
         setButtonListener();
     }
