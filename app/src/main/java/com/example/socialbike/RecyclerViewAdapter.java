@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
+    private ViewHolder viewHolder;
     private List mData; // reference
     private LayoutInflater mInflater;
     private ItemClickListener msgItemListener;
@@ -50,10 +52,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView name, message, date, time, msgStyle, message_preview, city, country;
+        public TextView name, message, date, time, msgStyle, message_preview, city, country, commentText;
         public ImageView profilePicture;
         public Button start_conversation;
         public RelativeLayout layout;
+        public ImageButton commentsButton;
+        public Button commentButton, postCommentButton;
+
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -63,6 +68,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             city = itemView.findViewById(R.id.city);
             country = itemView.findViewById(R.id.country);
             layout = itemView.findViewById(R.id.layout);
+            commentsButton = itemView.findViewById(R.id.commentsButton);
+            commentButton = itemView.findViewById(R.id.commentButton);
+            postCommentButton = itemView.findViewById(R.id.postCommentButton);
+            commentText = itemView.findViewById(R.id.commentText);
+
 
             //profilePicture = itemView.findViewById(R.id.status);
             time = itemView.findViewById(R.id.time);

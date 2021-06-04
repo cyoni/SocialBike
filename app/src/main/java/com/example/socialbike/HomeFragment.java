@@ -13,13 +13,10 @@ import android.view.ViewGroup;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 
 
-public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener{
+public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener {
 
     private static HomeFragment homeFragment = null;
     private FloatingActionButton floatingButton;
@@ -27,15 +24,14 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private Updater updater;
-    private MessageManager messageManager;
+    private MessageGetter messageManager;
     private boolean loadPosts = true;
 
     public HomeFragment() {
         container = new ArrayList<>();
-        System.out.println("!!!!!!!!!!");
     }
 
-    public static HomeFragment getInstance(){
+    public static HomeFragment getInstance() {
         if (homeFragment == null)
             homeFragment = new HomeFragment();
         return homeFragment;
@@ -64,7 +60,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         initAdapter();
         if (loadPosts) {
             updater = new Updater(this.container, recyclerViewAdapter);
-            messageManager = new MessageManager(updater);
+            messageManager = new MessageGetter(updater);
 
             messageManager.getPosts();
             loadPosts = false;
@@ -78,7 +74,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
             @Override
             public void onClick(View view) {
                 //openNewPostActivity();
-                MessageManager messageManager = new MessageManager(updater);
+                MessageGetter messageManager = new MessageGetter(updater);
                 messageManager.getPosts();
             }
         });
@@ -93,6 +89,19 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         holder.message.setText(container.get(position).getMsg());
         holder.name.setText(container.get(position).getName());
+
+        holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+        holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+    }
+
+    private void commentsButtonClick(Post post) {
+        Intent intent = new Intent(getContext(), PostActivity.class);
+        intent.putExtra("post", post);
+        startActivity(intent);
+    }
+
+    private void openPost() {
+
     }
 
 

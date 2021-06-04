@@ -29,7 +29,8 @@ public class ChatLobbyFragment extends Fragment
     private final ArrayList<ChatPreviewUser> container = new ArrayList<>();
     public RecyclerViewAdapter recyclerViewAdapter;
     private NavController nav;
-    private HashMap<String, List<ChatPreviewUser>> incomingMessages = new HashMap<>();
+    private final HashMap<String, List<ChatPreviewUser>>
+            incomingMessages = new HashMap<>(); // TO REMOVE
 
 
     public static ChatLobbyFragment getInstance() {
@@ -83,14 +84,18 @@ public class ChatLobbyFragment extends Fragment
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.layout.setOnClickListener(holder);
+        holder.layout.setOnClickListener(view -> navigateToConversationFragment(holder));
         holder.name.setText(container.get(position).getName());
         holder.message_preview.setText(container.get(position).getMessagePreview());
     }
 
+    private void navigateToConversationFragment(RecyclerViewAdapter.ViewHolder holder) {
+        nav.navigate(R.id.action_chatFragment_to_chatConversationFragment);
+    }
+
     @Override
     public void onItemClick(@NonNull View holder, int position) {
-        nav.navigate(R.id.action_chatFragment_to_chatConversationFragment);
+       // nav.navigate(R.id.action_chatFragment_to_chatConversationFragment);
     }
 
     public void updateLobbyList(ChatMessage chatMessage) {

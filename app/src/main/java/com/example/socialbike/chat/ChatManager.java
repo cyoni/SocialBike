@@ -10,7 +10,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,10 +19,9 @@ public class ChatManager {
     public ChatLobbyFragment chatLobbyFragment;
     boolean isChatEnabled = true;
 
-    public ChatManager(){
-    }
+    public ChatManager() {}
 
-    public void listenForNewMessages(){
+    public void listenForNewMessages() {
         System.out.println("Chat has started");
         MainActivity.mDatabase.child("private_msgs").child(User.getPublicKey()).addChildEventListener(new ChildEventListener() {
 
@@ -45,13 +43,16 @@ public class ChatManager {
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            }
 
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+            }
 
             @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -60,61 +61,67 @@ public class ChatManager {
         });
     }
 
-    public boolean doesUserAppearInList(String userPublicKey){
+    public boolean doesUserAppearInList(String userPublicKey) {
         ArrayList<ChatPreviewUser> container = chatLobbyFragment.getUsersList();
         return container.stream().anyMatch(x -> x.senderPublicKey.equals(userPublicKey));
     }
 
-    public ChatPreviewUser getUserFromList(){
+    public ChatPreviewUser getUserFromList() {
         ArrayList<ChatPreviewUser> container = chatLobbyFragment.getUsersList();
-        return container.stream().filter(x -> x.senderPublicKey.equals(User.getPublicKey()) ).findAny().orElse(null);
+        return container.stream().filter(x -> x.senderPublicKey.equals(User.getPublicKey())).findAny().orElse(null);
     }
 
     private void passMessageToRelevantClass(String messageId, String senderPublicKey, String sendersName, String message, boolean isIncomingMessage) {
-        ChatMessage chatMessage = new ChatMessage(messageId, senderPublicKey, sendersName, message, isIncomingMessage);
-        //ChatConversationFragment.getInstance().addMessage(chatMessage);
-
-        ChatPreviewUser chatMsgPreview;
-
         if (chatLobbyFragment != null) {
-            // case: user is at top of the list
-            if (doesUserAppearInList(senderPublicKey) && chatLobbyFragment.getUsersList().get(0).getPublicKey().equals(senderPublicKey)) {
-                chatLobbyFragment.getUsersList().get(0).setMessage(message);
-                chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
+            ArrayList<ChatPreviewUser> usersList = chatLobbyFragment.getUsersList();
+            if (isUserOnTopOfTheList(senderPublicKey, usersList)) {
+                updateTopElement(message);
             } else if (doesUserAppearInList(senderPublicKey)) {
-                // element is not at the top of the list
-                int index = getIndexOfUserOnTheList(senderPublicKey);
-                chatLobbyFragment.getUsersList().get(index).setMessage(message);
-                chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(index);
-                Collections.swap(chatLobbyFragment.getUsersList(), 0, index);
-                chatLobbyFragment.recyclerViewAdapter.notifyItemMoved(0, index);
-            }
-            else{
-                // element is not in the list
-                chatMsgPreview = new ChatPreviewUser(messageId, senderPublicKey, sendersName, message);
-                System.out.println("sender id: " + senderPublicKey);
-                //ChatLobbyFragment.getInstance().addNewIncomeMessage(senderPublicKey, chatMsgPreview);
-                chatLobbyFragment.getUsersList().add(0, chatMsgPreview);
-                chatLobbyFragment.recyclerViewAdapter.notifyItemInserted (0);
-                System.out.println("A new message was added to the data structure in Chat Lobby.");
+                moveElementToTheTopOfTheList(senderPublicKey, message);
+            } else {
+                addNewMessageWhenElementNotInTheList
+                        (messageId, senderPublicKey, sendersName, message);
             }
         }
 
-        // addMessageToChatHistory()
+        // if (conversation is open){
+        //  if (conv.displayWindow().getUser.equals(senderId){
+        //    cov.displayWindow().addMessage(message)
+        //  }
+        // }
+    }
 
-/*
-        if (chatConversationFragmentDisplayed())
-            chatConversationFragment.addMessage(chatMessage);
-        else if (chatLobbyFragmentDisplayed()){
-            chatLobbyFragment.updateLobbyList(chatMessage);
-        } else {
+    private boolean isUserOnTopOfTheList(String senderPublicKey, ArrayList<ChatPreviewUser> usersList) {
+        return doesUserAppearInList(senderPublicKey) &&
+                usersList.get(0).getPublicKey().equals(senderPublicKey);
+    }
 
-        }*/
+    private void updateTopElement(String message) {
+        chatLobbyFragment.getUsersList().get(0).setMessage(message);
+        chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
+    }
 
+    private void moveElementToTheTopOfTheList(String senderPublicKey, String message) {
+        ArrayList<ChatPreviewUser> usersList = chatLobbyFragment.getUsersList();
+        int index = getIndexOfUserOnTheList(senderPublicKey);
+        usersList.get(index).setMessage(message);
+        chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(index);
+        ChatPreviewUser tmp = usersList.get(index);
+        usersList.remove(index);
+        usersList.add(0, tmp);
+        chatLobbyFragment.recyclerViewAdapter.notifyItemMoved(0, index);
+    }
+
+    private void addNewMessageWhenElementNotInTheList(String messageId, String senderPublicKey, String sendersName, String message) {
+        ChatPreviewUser chatMsgPreview = new ChatPreviewUser(messageId, senderPublicKey, sendersName, message);
+        //ChatLobbyFragment.getInstance().addNewIncomeMessage(senderPublicKey, chatMsgPreview);
+        chatLobbyFragment.getUsersList().add(0, chatMsgPreview);
+        chatLobbyFragment.recyclerViewAdapter.notifyItemInserted(0);
+        System.out.println("A new message was added to the data structure in Chat Lobby.");
     }
 
     private int getIndexOfUserOnTheList(String senderPublicKey) {
-        for (int i=0; i<chatLobbyFragment.getUsersList().size(); i++){
+        for (int i = 0; i < chatLobbyFragment.getUsersList().size(); i++) {
             if (chatLobbyFragment.getUsersList().get(i).getPublicKey().equals(senderPublicKey))
                 return i;
         }
@@ -130,14 +137,14 @@ public class ChatManager {
     }
 
 
-    public void sendMessage(String receiver, String message){
+    public void sendMessage(String receiver, String message) {
         Map<String, Object> data = new HashMap<>();
         data.put("receiver", "-MYVCkWexSO_jumnbr0l");
         data.put("publicKey", User.getPublicKey());
         data.put("message", message);
 
-        System.out.println("sending private msg to "+ receiver +"...");
-        passMessageToRelevantClass("123456", User.getPublicKey(), User.getNickname(), message, false);
+        System.out.println("sending private msg to " + receiver + "...");
+        passMessageToRelevantClass("123456", User.getPublicKey(), User.getName(), message, false);
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")

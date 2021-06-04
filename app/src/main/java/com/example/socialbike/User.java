@@ -19,7 +19,7 @@ public class User {
 
 
 
-    public static String getNickname() {
+    public static String getName() {
         return nickname;
     }
 

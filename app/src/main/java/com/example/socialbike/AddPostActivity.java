@@ -54,10 +54,7 @@ public class AddPostActivity extends AppCompatActivity {
         final String message = textBox.getText().toString();
         submit.setText("Posting");
         Map<String, Object> data = new HashMap<>();
-
         data.put("message", message);
-
-
         MainActivity.mFunctions
                 .getHttpsCallable("AddNewPost")
                 .call(data)
@@ -85,7 +82,7 @@ public class AddPostActivity extends AppCompatActivity {
 
     private void passItemToHome() {
 
-        homeFragment.addPost(new Post("77777", User.getPublicKey(), User.getNickname(), 123412, textBox.getText().toString()));
+        homeFragment.addPost(new Post("77777", User.getPublicKey(), User.getName(), 123412, textBox.getText().toString()));
     }
 
     private boolean isMessageValid() {

@@ -5,11 +5,11 @@ import com.google.android.gms.tasks.Task;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class MessageManager {
+public class MessageGetter {
 
     private final Updater updater;
 
-    public MessageManager(Updater updater){
+    public MessageGetter(Updater updater){
         this.updater = updater;
     }
 
@@ -34,7 +34,7 @@ public class MessageManager {
                 String messages = messages_array.getJSONObject(i).getString("message");
                 String nickname = messages_array.getJSONObject(i).getString("name");
                 String time = messages_array.getJSONObject(i).getString("timestamp");
-                //String messageId = messages_array.getJSONObject(i).getString("postId");
+                String postId = messages_array.getJSONObject(i).getString("postId");
 
                 if (messages_array.getJSONObject(i).has("likes_count")) {
                     likes = Integer.parseInt(messages_array.getJSONObject(i).getString("likes_count"));
@@ -52,7 +52,7 @@ public class MessageManager {
                     has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
                 }
 
-                Post post = new Post("7777", user_public_key, nickname, 8888, messages);
+                Post post = new Post(postId, user_public_key, nickname, 8888, messages);
                 updater.add(post);
                 updater.update();
 
@@ -64,7 +64,6 @@ public class MessageManager {
         }
     }
 
-
     public void getPosts(){
         System.out.println("getting posts...");
          MainActivity.mFunctions
@@ -73,15 +72,13 @@ public class MessageManager {
                 .continueWith(task -> {
 
                     String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
+                    System.out.println("response: " + response);
 
                     if (!response.isEmpty()) {
                         parseMessages(response);
                     }
                     return "";
                 });
-
     }
-
 
 }

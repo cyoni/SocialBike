@@ -155,7 +155,41 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
             data.posts[i].name = da.child(data.posts[i].publicKey).child('profile').child('nickname').val()
         }
 
-        return util.inspect(data, { showHidden: false, depth: null }) 
+        return JSON.stringify(data)
+    })
+})
+
+exports.getComments = functions.https.onCall(async (request, context) => {
+
+    const postId = request.postId
+    var data = {}
+    data['posts'] = []
+    var counter = 0;
+
+    return admin.database().ref('global_posts').child(postId).child('comments').once('value').then(snapshot => {
+
+        snapshot.forEach(raw_post => {
+            var dataOfUser = {
+                postId: raw_post.key,
+                publicKey: raw_post.child('senderPublicKey').val(),
+                name: "",
+                message: raw_post.child('comment').val(),
+                timestamp: raw_post.child('timestamp').val()
+            }
+            data.posts[counter++] = dataOfUser
+
+        })
+        return admin.database().ref('public').once('value')
+
+    }).then(da => {
+
+        for (var i = 0; i < data.posts.length; i++) {
+            data.posts[i].name = da.child(data.posts[i].publicKey).child('profile').child('nickname').val()
+        }
+        
+        data.posts = data.posts.reverse()
+
+        return JSON.stringify(data)
     })
 })
 
@@ -192,7 +226,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
             data.events[i].name = snapshot.child(data.events[i].userPublicKey).child('profile').child('nickname').val()
 
         data.events = data.events.reverse()
-        return util.inspect(data, { showHidden: false, depth: null })
+        return JSON.stringify(data) 
     })
 })
 
@@ -273,3 +307,64 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
     admin.database().ref('private_msgs').child(receiverPublicKey).child(messageId).child(senderPublicKey).set(data)
     return "OK"
 })
+
+
+exports.interestedPerson = functions.database.ref('/posts/{postid}/likes/{likeid}').onWrite(
+    async (change) => {
+      const collectionRef = change.after.ref.parent;
+      const countRef = collectionRef.parent.child('likes_count');
+
+      let increment;
+      if (change.after.exists() && !change.before.exists()) {
+        increment = 1;
+      } else if (!change.after.exists() && change.before.exists()) {
+        increment = -1;
+      } else {
+        return null;
+      }
+
+      // Return the promise from countRef.transaction() so our function
+      // waits for this async event to complete before it exits.
+      await countRef.transaction((current) => {
+        return (current || 0) + increment;
+      });
+      return null;
+    });
+
+
+exports.sendComment = functions.https.onCall(async (request, context) => {
+
+    const privateKey = context.auth.uid;
+    const account = await verifyUser(privateKey);
+
+    if (account === null)
+        return "[AUTH_FAILED]";
+
+    const comment = request.comment
+    const postId = request.postId
+    const replyTo = request.replyTo.trim()
+
+    const data = {
+        senderPublicKey: account.publicKey,
+        comment: comment,
+     //   postId: postId,
+        timestamp: Date.now(),
+    }
+
+    var messageId;
+
+    if (replyTo !== ""){
+        messageId = await admin.database().ref('global_posts').child(postId).child('comments').child(replyTo).push().key
+        admin.database().ref('global_posts').child(postId).child('comments').child(replyTo).child(messageId).set(data)
+    }
+    else{
+        messageId = await (await admin.database().ref('global_posts').child(postId).child('comments').push()).key
+        admin.database().ref('global_posts').child(postId).child('comments').child(messageId).set(data)
+    }
+
+    return messageId
+})
+
+
+
+
