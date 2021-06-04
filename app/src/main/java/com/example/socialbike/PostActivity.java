@@ -214,11 +214,20 @@ public class PostActivity extends Activity implements RecyclerViewAdapter.ItemCl
     private void sendCommentNow(RecyclerViewAdapter.ViewHolder holder) {
         System.out.println("sending comment. " + holder.commentText.getText().toString());
 
-     //   Button layoutinputButton = (Button) findViewById(R.id.layoutinputButton);
+        RelativeLayout layout = new RelativeLayout(this);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layout.setLayoutParams(layoutParams);
+
+        RelativeLayout.LayoutParams params1 = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+
+        //   Button layoutinputButton = (Button) findViewById(R.id.layoutinputButton);
         RelativeLayout mainLinearLayout = findViewById(R.id.mainLinearLayout);
         RelativeLayout linearLayout =
                 (RelativeLayout) View.inflate(this,
                 R.layout.pos, null);
+
+        params1.addRule(RelativeLayout.BELOW, 33);
         mainLinearLayout.addView(linearLayout);
 /*
         LinearLayout options_layout =  findViewById(R.id.options_list);
