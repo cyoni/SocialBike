@@ -62,6 +62,7 @@ public class MessageGetter {
         catch(Exception e){
             System.out.println("Error caught in message fetcher: " + e.getMessage());
         }
+
     }
 
     public void getPosts(){

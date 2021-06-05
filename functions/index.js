@@ -168,16 +168,39 @@ exports.getComments = functions.https.onCall(async (request, context) => {
 
     return admin.database().ref('global_posts').child(postId).child('comments').once('value').then(snapshot => {
 
+        data.posts[counter] = []
+
         snapshot.forEach(raw_post => {
-            var dataOfUser = {
+            var commentData = {
                 postId: raw_post.key,
                 publicKey: raw_post.child('senderPublicKey').val(),
                 name: "",
                 message: raw_post.child('comment').val(),
                 timestamp: raw_post.child('timestamp').val()
             }
-            data.posts[counter++] = dataOfUser
 
+
+            commentData['subComments'] = []
+
+            if (raw_post.child('subComments').exists()){
+
+                raw_post.child('subComments').forEach(subComment => {
+
+                    var subCommentToInsert = {
+                        commentId: subComment.key,
+                        senderPublicKey: subComment.child('senderPublicKey').val(),
+                        name: "TODO",
+                        comment: subComment.child('comment').val(),
+                        timestamp: subComment.child('timestamp').val(),
+                    }
+
+                    commentData.subComments.push(subCommentToInsert)
+                })
+                commentData.subComments = commentData.subComments.reverse()
+            }
+
+            data.posts[counter] = commentData
+            counter++
         })
         return admin.database().ref('public').once('value')
 
@@ -355,7 +378,7 @@ exports.sendComment = functions.https.onCall(async (request, context) => {
 
     if (replyTo !== ""){
         messageId = await admin.database().ref('global_posts').child(postId).child('comments').child(replyTo).push().key
-        admin.database().ref('global_posts').child(postId).child('comments').child(replyTo).child(messageId).set(data)
+        admin.database().ref('global_posts').child(postId).child('comments').child(replyTo).child('subComments').child(messageId).set(data)
     }
     else{
         messageId = await (await admin.database().ref('global_posts').child(postId).child('comments').push()).key
@@ -364,7 +387,3 @@ exports.sendComment = functions.https.onCall(async (request, context) => {
 
     return messageId
 })
-
-
-
-

@@ -1,30 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mainLinearLayout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/commentLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="5dp"
-        android:elevation="3dp"
-        android:src="@drawable/profile_blank" />
-
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="20dp"
-        android:layout_toRightOf="@id/profile_image"
-        android:text="Yoni"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:orientation="horizontal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:elevation="3dp"
+            android:src="@drawable/profile_blank" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_toRightOf="@id/profile_image"
+            android:text="Yoni"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/message"
@@ -37,51 +43,55 @@
         android:text="This is my comment"
         android:textSize="20sp" />
 
-    <Button
-        android:id="@+id/like"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/message"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="10dp"
-        android:text="Like" />
-
-    <Button
-        android:id="@+id/commentButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/message"
-        android:layout_marginRight="10dp"
-        android:layout_toLeftOf="@id/like"
-        android:text="Comment" />
-
-    <EditText
-        android:id="@+id/commentText"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/like"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginRight="5dp"
-        android:layout_toLeftOf="@id/postCommentButton"
-        android:ems="10"
-        android:hint="Type your comment here"
-        android:inputType="textPersonName"
-        android:visibility="gone" />
+        >
 
-    <Button
-        android:id="@+id/postCommentButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/like"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="5dp"
-        android:text="Send"
-        android:visibility="gone" />
+        <Button
+            android:id="@+id/like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="10dp"
+            android:text="Like" />
+
+        <Button
+            android:id="@+id/commentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@id/like"
+            android:text="Comment" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/newCommentSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/commentText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="5dp"
+            android:layout_toStartOf="@id/postCommentButton"
+            android:ems="10"
+            android:hint="Type your comment here"
+            android:inputType="textPersonName" />
+
+        <Button
+            android:id="@+id/postCommentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5dp"
+            android:text="Send" />
+    </RelativeLayout>
 
 
-
-
-
-</RelativeLayout>
+</LinearLayout>

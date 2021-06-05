@@ -2,12 +2,14 @@ package com.example.socialbike;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -45,12 +47,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         setFirebase();
         loadUser();
         startListeningBottomMenu();
         changeFragment(HomeFragment.getInstance());
         startChat();
+
+       // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     private void startChat() {
@@ -84,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startListeningBottomMenu() {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {

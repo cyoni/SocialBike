@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -26,6 +27,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private Updater updater;
     private MessageGetter messageManager;
     private boolean loadPosts = true;
+    private ProgressBar progressBar;
 
     public HomeFragment() {
         container = new ArrayList<>();
@@ -55,6 +57,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         floatingButton = root.findViewById(R.id.fab);
         recyclerView = root.findViewById(R.id.recyclerview);
+        progressBar = root.findViewById(R.id.progressBar);
 
         activateFloatingButton();
         initAdapter();

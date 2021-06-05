@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -58,7 +59,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public RelativeLayout layout;
         public ImageButton commentsButton;
         public Button commentButton, postCommentButton;
-
+        public RelativeLayout newCommentSection;
+        public LinearLayout commentLayout;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -72,7 +74,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             commentButton = itemView.findViewById(R.id.commentButton);
             postCommentButton = itemView.findViewById(R.id.postCommentButton);
             commentText = itemView.findViewById(R.id.commentText);
-
+            newCommentSection = itemView.findViewById(R.id.newCommentSection);
+            commentLayout = itemView.findViewById(R.id.commentLayout);
 
             //profilePicture = itemView.findViewById(R.id.status);
             time = itemView.findViewById(R.id.time);
