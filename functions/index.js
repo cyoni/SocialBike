@@ -332,10 +332,16 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
 })
 
 
-exports.interestedPerson = functions.database.ref('/posts/{postid}/likes/{likeid}').onWrite(
-    async (change) => {
+exports.updateParticipantsNumber = functions.database.ref('events/{eventId}/{going_or_interested}/{userId}').onWrite(
+    async (change, context) => {
+    
+        var childName
+        if (context.params.going_or_interested === "going")
+            childName = "numberOfParticipants"
+        else 
+            childName = "numOfInterestedMembers"
       const collectionRef = change.after.ref.parent;
-      const countRef = collectionRef.parent.child('likes_count');
+      const countRef = collectionRef.parent.child(childName);
 
       let increment;
       if (change.after.exists() && !change.before.exists()) {
@@ -386,4 +392,49 @@ exports.sendComment = functions.https.onCall(async (request, context) => {
     }
 
     return messageId
+})
+
+
+exports.interested = functions.https.onCall(async (request, context) => {
+
+    const privateKey = context.auth.uid;
+    const account = await verifyUser(privateKey);
+    const eventId = request.eventId
+
+    if (account === null)
+        return "[AUTH_FAILED]"
+
+    const a = await admin.database().ref('events').child(eventId).child('interested').child(account.publicKey).once('value')
+    if (a.exists()){
+        admin.database().ref('events').child(eventId).child('interested').child(account.publicKey).remove()
+    }
+    else
+        await admin.database().ref('events').child(eventId).child('interested').child(account.publicKey).set(Date.now())
+    return "OK"
+
+})
+
+exports.going = functions.https.onCall(async (request, context) => {
+
+    const privateKey = context.auth.uid;
+    const account = await verifyUser(privateKey);
+    const eventId = request.eventId
+
+    if (account === null)
+        return "[AUTH_FAILED]";
+
+        const a = await admin.database().ref('events').child(eventId).child('going').child(account.publicKey).once('value')
+        if (a.exists()){
+            admin.database().ref('events').child(eventId).child('going').child(account.publicKey).remove()
+        }
+        else
+            await admin.database().ref('events').child(eventId).child('going').child(account.publicKey).set(Date.now())
+        return "OK"
+
+})
+
+
+exports.getMemberList = functions.https.onCall(async (request, context) => {
+
+
 })
