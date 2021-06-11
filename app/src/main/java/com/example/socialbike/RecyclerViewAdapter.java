@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,17 +54,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView name, message, date, time, msgStyle, message_preview, city, country, commentText;
+        public TextView name, message, date,
+                time, msgStyle, message_preview,
+                city, country, commentText, people_going;
         public ImageView profilePicture;
-        public Button start_conversation;
+        public Button start_conversation, interested, coming;
         public RelativeLayout layout;
         public ImageButton commentsButton;
-        public Button commentButton, postCommentButton;
+        public Button commentButton, postCommentButton, who_is_coming;
         public RelativeLayout newCommentSection;
         public LinearLayout commentLayout;
+        public Button who_is_interested;
 
         ViewHolder(View itemView) {
             super(itemView);
+
             name = itemView.findViewById(R.id.name);
             date = itemView.findViewById(R.id.date);
             message = itemView.findViewById(R.id.message);
@@ -76,11 +81,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             commentText = itemView.findViewById(R.id.commentText);
             newCommentSection = itemView.findViewById(R.id.newCommentSection);
             commentLayout = itemView.findViewById(R.id.commentLayout);
+            interested = itemView.findViewById(R.id.interested);
+            coming = itemView.findViewById(R.id.coming);
+            who_is_coming = itemView.findViewById(R.id.who_is_coming);
+            who_is_interested = itemView.findViewById(R.id.who_is_interested);
+            people_going = itemView.findViewById(R.id.people_going);
+
 
             //profilePicture = itemView.findViewById(R.id.status);
             time = itemView.findViewById(R.id.time);
             msgStyle = itemView.findViewById(R.id.msgStyle);
-           // start_conversation = itemView.findViewById(R.id.start_conversation);
+            // start_conversation = itemView.findViewById(R.id.start_conversation);
             message_preview = itemView.findViewById(R.id.message_preview);
         }
 
@@ -93,8 +104,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // convenience method for getting data at click position
     //Item getItem(int id) {
-     //   return mData.get(id);
-  //  }
+    //   return mData.get(id);
+    //  }
 
     // allows click events to be caught
     public void setClassReference(Object itemClickListener) {
@@ -104,6 +115,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onBinding(@NonNull ViewHolder holder, int position);
+
         void onItemClick(@NonNull View holder, int position);
     }
 }

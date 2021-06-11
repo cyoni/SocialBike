@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
@@ -34,20 +35,17 @@ import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 
-public class EventsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener{
+public class EventsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
     static EventsFragment eventsFragment = null;
     private RecyclerView recyclerView;
-    private final ArrayList<Event> container;
+    private final ArrayList<Event> container = new ArrayList<>();
     private RecyclerViewAdapter recyclerViewAdapter;
     private Updater updater;
     private boolean loadMore = true;
     private static int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private ProgressBar progressBar;
 
-
-    public EventsFragment() {
-        container = new ArrayList<>();
-    }
 
     private void initAdapter() {
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_events, container);
@@ -60,14 +58,14 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         super.onCreate(savedInstanceState);
     }
 
-    public static EventsFragment getInstance(){
-        if (eventsFragment == null){
+    public static EventsFragment getInstance() {
+        if (eventsFragment == null) {
             eventsFragment = new EventsFragment();
         }
         return eventsFragment;
     }
 
-    public void getPosts(){
+    public void getPosts() {
 
         System.out.println("getting Events...");
 
@@ -90,7 +88,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
     }
 
-    public void parseMessages(String fresh_msgs){
+    public void parseMessages(String fresh_msgs) {
 
         try {
             JSONObject obj = new JSONObject(fresh_msgs);
@@ -109,16 +107,19 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
                 String city = messages_array.getJSONObject(i).getString("eventCity");
                 String country = messages_array.getJSONObject(i).getString("eventCountry");
 
+                int numberOfParticipants = 0;
+                if (messages_array.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
+                    numberOfParticipants  = messages_array.getJSONObject(i).getInt("numberOfParticipants");
+
                 Event event = new Event(eventId, userPublicKey, name,
                         dateOfEvent, timeOfEvent, createdEventTime,
-                        amountOfInterestedPeople, city, country, message);
+                        amountOfInterestedPeople, numberOfParticipants, city, country, message);
                 updater.add(event);
-                updater.update();
 
                 System.out.println("post " + i + " " + message);
             }
-        }
-        catch(Exception e){
+            onFinishedTakingNewMessages();
+        } catch (Exception e) {
             System.out.println("An error was caught in message fetcher: " + e.getMessage());
         }
     }
@@ -128,9 +129,13 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         View root = inflater.inflate(R.layout.fragment_events, container, false);
         recyclerView = root.findViewById(R.id.recyclerview);
         initAdapter();
+        progressBar = root.findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
 
-        updater = new Updater(this.container, recyclerViewAdapter);
+        updater = new Updater(this, this.container, recyclerViewAdapter);
         if (loadMore) {
+            recyclerView.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             getPosts();
             loadMore = false;
         }
@@ -150,10 +155,9 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         Button sortButton = root.findViewById(R.id.sort_button);
         sortButton.setOnClickListener(view -> {
 
-            if (sortButton.getText().equals("Most relevant")){
+            if (sortButton.getText().equals("Most relevant")) {
                 sortButton.setText("New Activity");
-            }
-            else{
+            } else {
                 sortButton.setText("Most relevant");
             }
 
@@ -204,11 +208,69 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         holder.time.setText(container.get(position).getTimeOfEvent());
         holder.date.setText(container.get(position).getDateOfEvent());
         holder.name.setText(container.get(position).getName());
-       // holder.amountOfInterestedPeople.setText(container.get(position).getAmountOfInterestedPeople());
+        holder.people_going.setText(container.get(position).getNumberOfParticipants() + " people coming");
+        holder.interested.setOnClickListener(view -> interested(holder, position));
+        holder.coming.setOnClickListener(view -> markAsGoing(holder, position));
+        holder.who_is_coming.setOnClickListener(view -> who_is_going(holder, position));
+        holder.who_is_interested.setOnClickListener(view -> who_is_interested(holder, position));
+        // holder.amountOfInterestedPeople.setText(container.get(position).getAmountOfInterestedPeople());
+    }
+
+    private void who_is_going(RecyclerViewAdapter.ViewHolder holder, int position) {
+        MembersList membersList = new MembersList(getActivity(), container.get(position).getEventId(), "going");
+        membersList.show();
+    }
+
+    private void who_is_interested(RecyclerViewAdapter.ViewHolder holder, int position) {
+        MembersList membersList = new MembersList(getActivity(), container.get(position).getEventId(), "interested");
+        membersList.show();
+    }
+
+    private void markAsGoing(RecyclerViewAdapter.ViewHolder holder, int position) {
+        holder.coming.setEnabled(false);
+
+        System.out.println(container.get(position).getEventId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("eventId", container.get(position).getEventId());
+
+        MainActivity.mFunctions
+                .getHttpsCallable("going")
+                .call(data)
+                .continueWith(task -> {
+                    String response = String.valueOf(task.getResult().getData());
+                    System.out.println("response:" + response);
+                    holder.coming.setEnabled(true);
+                    return "";
+                });
+    }
+
+    private void interested(RecyclerViewAdapter.ViewHolder holder, int position) {
+        holder.interested.setEnabled(false);
+
+        System.out.println(container.get(position).getEventId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("eventId", container.get(position).getEventId());
+
+        MainActivity.mFunctions
+                .getHttpsCallable("interested")
+                .call(data)
+                .continueWith(task -> {
+
+                    String response = String.valueOf(task.getResult().getData());
+                    System.out.println("response:" + response);
+                    holder.interested.setEnabled(true);
+                    return "";
+                });
     }
 
     @Override
     public void onItemClick(@NonNull View holder, int position) {
 
+    }
+
+    @Override
+    public void onFinishedTakingNewMessages() {
+        recyclerView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }

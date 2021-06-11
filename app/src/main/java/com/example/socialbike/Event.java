@@ -11,10 +11,12 @@ public class Event extends Post{
     private final String amountOfInterestedPeople;
     private final String city;
     private final String country;
+    private final int numberOfParticipants;
 
     public Event(String eventId, String userPublicKey, String name,
                  String dateOfEvent, String timeOfEvent, String createdEventTime,
-                 String amountOfInterestedPeople, String city,
+                 String amountOfInterestedPeople, int numberOfParticipants,
+                 String city,
                  String country, String message) {
         super(eventId, userPublicKey, name, 1245, message);
 
@@ -25,6 +27,7 @@ public class Event extends Post{
         this.timeOfEvent = timeOfEvent;
         this.createdEventTime = createdEventTime;
         this.amountOfInterestedPeople = amountOfInterestedPeople;
+        this.numberOfParticipants = numberOfParticipants;
         this.city = city;
         this.country = country;
     }
@@ -55,6 +58,10 @@ public class Event extends Post{
 
     public String getAmountOfInterestedPeople() {
         return amountOfInterestedPeople;
+    }
+
+    public int getNumberOfParticipants() {
+        return numberOfParticipants;
     }
 
     public String getCity() {

@@ -11,7 +11,7 @@ public class Comment extends Post {
     }
 
     public void addSubComment(String subComment){
-        subComments.add( subComment);
+        subComments.add(0, subComment);
     }
 
     public ArrayList<String> getSubComments(){

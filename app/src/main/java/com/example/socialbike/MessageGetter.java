@@ -1,7 +1,5 @@
 package com.example.socialbike;
 
-import com.google.android.gms.tasks.Task;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -54,10 +52,10 @@ public class MessageGetter {
 
                 Post post = new Post(postId, user_public_key, nickname, 8888, messages);
                 updater.add(post);
-                updater.update();
 
                 System.out.println("msg " + i + " " + messages);
             }
+            updater.referenceClass.onFinishedTakingNewMessages();
         }
         catch(Exception e){
             System.out.println("Error caught in message fetcher: " + e.getMessage());
@@ -67,7 +65,7 @@ public class MessageGetter {
 
     public void getPosts(){
         System.out.println("getting posts...");
-         MainActivity.mFunctions
+        MainActivity.mFunctions
                 .getHttpsCallable("getPosts")
                 .call(null)
                 .continueWith(task -> {

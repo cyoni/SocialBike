@@ -17,7 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 
 
-public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener {
+public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
     private static HomeFragment homeFragment = null;
     private FloatingActionButton floatingButton;
@@ -58,11 +58,15 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         floatingButton = root.findViewById(R.id.fab);
         recyclerView = root.findViewById(R.id.recyclerview);
         progressBar = root.findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
 
         activateFloatingButton();
         initAdapter();
         if (loadPosts) {
-            updater = new Updater(this.container, recyclerViewAdapter);
+            progressBar.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
+
+            updater = new Updater(this, this.container, recyclerViewAdapter);
             messageManager = new MessageGetter(updater);
 
             messageManager.getPosts();
@@ -73,13 +77,10 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
 
 
     private void activateFloatingButton() {
-        floatingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //openNewPostActivity();
-                MessageGetter messageManager = new MessageGetter(updater);
-                messageManager.getPosts();
-            }
+        floatingButton.setOnClickListener(view -> {
+            //openNewPostActivity();
+            MessageGetter messageManager = new MessageGetter(updater);
+            messageManager.getPosts();
         });
     }
 
@@ -116,6 +117,11 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
 
     public void addPost(Post post) {
         updater.add(post);
-        updater.update();
+    }
+
+    @Override
+    public void onFinishedTakingNewMessages() {
+        recyclerView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
     }
 }

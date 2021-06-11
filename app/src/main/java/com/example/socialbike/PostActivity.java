@@ -28,7 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PostActivity extends AppCompatActivity implements RecyclerViewAdapter.ItemClickListener{
+public class PostActivity extends AppCompatActivity
+        implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
     private ArrayList<Comment> commentsContainer = new ArrayList<>();
     private RecyclerView recyclerView;
@@ -62,7 +63,7 @@ public class PostActivity extends AppCompatActivity implements RecyclerViewAdapt
         recyclerView = findViewById(R.id.recyclerview);
         initAdapter();
 
-        updater = new Updater(this.commentsContainer, recyclerViewAdapter);
+        updater = new Updater(this, this.commentsContainer, recyclerViewAdapter);
         messageManager = new MessageGetter(updater);
         commentsCounter = findViewById(R.id.commentsCounter);
         progressBar = findViewById(R.id.progressBar);
@@ -174,7 +175,6 @@ public class PostActivity extends AppCompatActivity implements RecyclerViewAdapt
                 }
 
                 updater.add(comment);
-                updater.update();
 
                 System.out.println("msg " + i + " " + message);
             }
@@ -352,4 +352,8 @@ public class PostActivity extends AppCompatActivity implements RecyclerViewAdapt
     }
 
 
+    @Override
+    public void onFinishedTakingNewMessages() {
+        System.out.println("Finished!!!");
+    }
 }
