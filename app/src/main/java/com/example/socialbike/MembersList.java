@@ -48,7 +48,7 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
         getMembers();
     }
 
-    private void getMembers(){
+    private void getMembers() {
         Map<String, Object> data = new HashMap<>();
         data.put("eventId", eventId);
         data.put("keyName", keyName);
@@ -62,7 +62,10 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
                     parseStr(response);
                     updater.referenceClass.onFinishedTakingNewMessages();
                     return "";
-                });
+                }).addOnFailureListener(e -> {
+            updater.referenceClass.onFinishedTakingNewMessages();
+            System.out.println("ERROR");
+        });
     }
 
     private void parseStr(String response) {
@@ -70,11 +73,10 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
             JSONObject obj = new JSONObject(response);
             JSONArray jsonArray = obj.getJSONArray("members");
 
-            for (int i=0; i<jsonArray.length(); i++){
+            for (int i = 0; i < jsonArray.length(); i++) {
                 container.add((String) jsonArray.get(i));
             }
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
         recyclerViewAdapter.notifyDataSetChanged();

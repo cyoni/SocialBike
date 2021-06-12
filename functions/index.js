@@ -219,23 +219,26 @@ exports.getComments = functions.https.onCall(async (request, context) => {
 
 exports.getEvents = functions.https.onCall(async (request, context) => {
 
+    const dataType = request.dataType
     var data = {}
     data['events'] = []
     var counter = 0;
     // const location = 
 
+    
     return admin.database().ref('events').once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
             const dataOfEvent = {
                 eventId: raw_data.key,
                 name: "",
-                userPublicKey: raw_data.child('userpublicKey').val(),
+                userPublicKey: raw_data.child('userPublicKey').val(),
                 eventContent: raw_data.child('eventContent').val(),
                 createdEventTime: raw_data.child('createdEventTime').val(),
                 eventDate: raw_data.child('eventDate').val(),
                 eventTime: raw_data.child('eventTime').val(),
                 amountOfInterestedPeople: raw_data.child('amountOfInterestedPeople').val(),
+                numberOfParticipants: raw_data.child('numberOfParticipants').val(),
                 eventCity: raw_data.child('eventCity').val(),
                 eventCountry: raw_data.child('eventCountry').val(),
                 // coordinates
@@ -247,6 +250,20 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     }).then(snapshot => {
         for (var i = 0; i < data.events.length; i++) 
             data.events[i].name = snapshot.child(data.events[i].userPublicKey).child('profile').child('nickname').val()
+
+
+
+        if (dataType === "TRADING"){
+            var scoreArray = []
+            for (i = 0; i < data.events.length; i++) {
+                const score = 2*data.events[i].numberOfParticipants + data.events[i].amountOfInterestedPeople
+                scoreArray.push(score)
+            }
+
+            var sortedScoreArray = scoreArray.sort()
+            
+
+        }
 
         data.events = data.events.reverse()
         return JSON.stringify(data) 
@@ -436,5 +453,31 @@ exports.going = functions.https.onCall(async (request, context) => {
 
 exports.getMemberList = functions.https.onCall(async (request, context) => {
 
+    const privateKey = context.auth.uid;
+    const account = await verifyUser(privateKey);
+    const eventId = request.eventId
+    const keyName = request.keyName
+
+    if (account === null)
+        return "[AUTH_FAILED]"
+
+    if (keyName !== "going" && keyName !== "interested")
+        return "FAIL #3213"
+
+    var data = {}
+    data['members'] = []
+    return admin.database().ref('events').child(eventId).child(keyName).once('value').then(snapshot => {
+    
+        snapshot.forEach(raw_data => {
+            data.members.push(raw_data.key)
+        })
+        return admin.database().ref('public').once('value')
+    }).then(snapshot => {
+        for (var i = 0; i < data.members.length; i++) 
+            data.members[i] = snapshot.child(data.members[i]).child('profile').child('nickname').val()
+
+        data.members = data.members.reverse()
+        return JSON.stringify(data) 
+    })
 
 })

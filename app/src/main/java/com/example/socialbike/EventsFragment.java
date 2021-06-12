@@ -45,6 +45,9 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     private boolean loadMore = true;
     private static int AUTOCOMPLETE_REQUEST_CODE = 1;
     private ProgressBar progressBar;
+    private final String MOST_RECENT_CODE = "MOST_RECENT";
+    private final String TRADING_CODE = "TRADING";
+    private String dataType = MOST_RECENT_CODE;
 
 
     private void initAdapter() {
@@ -70,7 +73,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         System.out.println("getting Events...");
 
         Map<String, Object> data = new HashMap<>();
-        data.put("xxx", "message");
+        data.put("dataType", dataType);
 
         MainActivity.mFunctions
                 .getHttpsCallable("getEvents")
@@ -92,28 +95,30 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
         try {
             JSONObject obj = new JSONObject(fresh_msgs);
-            JSONArray messages_array = obj.getJSONArray("events");
+            JSONArray data = obj.getJSONArray("events");
 
-            for (int i = 0; i < messages_array.length(); i++) {
+            for (int i = 0; i < data.length(); i++) {
 
-                String userPublicKey = messages_array.getJSONObject(i).getString("userPublicKey");
-                String message = messages_array.getJSONObject(i).getString("eventContent");
-                String name = messages_array.getJSONObject(i).getString("name");
-                String dateOfEvent = messages_array.getJSONObject(i).getString("eventDate");
-                String timeOfEvent = messages_array.getJSONObject(i).getString("eventTime");
-                String createdEventTime = messages_array.getJSONObject(i).getString("createdEventTime");
-                String eventId = messages_array.getJSONObject(i).getString("eventId");
-                String amountOfInterestedPeople = messages_array.getJSONObject(i).getString("amountOfInterestedPeople");
-                String city = messages_array.getJSONObject(i).getString("eventCity");
-                String country = messages_array.getJSONObject(i).getString("eventCountry");
+                String userPublicKey = data.getJSONObject(i).getString("userPublicKey");
+                String message = data.getJSONObject(i).getString("eventContent");
+                String name = data.getJSONObject(i).getString("name");
+                String dateOfEvent = data.getJSONObject(i).getString("eventDate");
+                String timeOfEvent = data.getJSONObject(i).getString("eventTime");
+                String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
+                String eventId = data.getJSONObject(i).getString("eventId");
+                String amountOfInterestedPeople = data.getJSONObject(i).getString("amountOfInterestedPeople");
+                String city = data.getJSONObject(i).getString("eventCity");
+                String country = data.getJSONObject(i).getString("eventCountry");
 
                 int numberOfParticipants = 0;
-                if (messages_array.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
-                    numberOfParticipants  = messages_array.getJSONObject(i).getInt("numberOfParticipants");
+                if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
+                    numberOfParticipants  = data.getJSONObject(i).getInt("numberOfParticipants");
 
-                Event event = new Event(eventId, userPublicKey, name,
+                Event event = new Event(
+                        eventId, userPublicKey, name,
                         dateOfEvent, timeOfEvent, createdEventTime,
-                        amountOfInterestedPeople, numberOfParticipants, city, country, message);
+                        amountOfInterestedPeople, numberOfParticipants,
+                        city, country, message);
                 updater.add(event);
 
                 System.out.println("post " + i + " " + message);
@@ -132,10 +137,12 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         progressBar = root.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
+
+
         updater = new Updater(this, this.container, recyclerViewAdapter);
         if (loadMore) {
-            recyclerView.setVisibility(View.INVISIBLE);
-            progressBar.setVisibility(View.VISIBLE);
+            showProgressbar();
+
             getPosts();
             loadMore = false;
         }
@@ -156,14 +163,37 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         sortButton.setOnClickListener(view -> {
 
             if (sortButton.getText().equals("Most relevant")) {
+                getTradingData();
                 sortButton.setText("New Activity");
             } else {
+                getRecentData();
                 sortButton.setText("Most relevant");
             }
 
         });
 
         return root;
+    }
+
+    private void showProgressbar() {
+        recyclerView.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressbar() {
+        recyclerView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+    }
+
+
+    private void getRecentData() {
+        showProgressbar();
+        dataType = MOST_RECENT_CODE;
+    }
+
+    private void getTradingData() {
+        showProgressbar();
+        dataType = TRADING_CODE;
     }
 
     private void openSearchWindow() {
@@ -208,7 +238,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         holder.time.setText(container.get(position).getTimeOfEvent());
         holder.date.setText(container.get(position).getDateOfEvent());
         holder.name.setText(container.get(position).getName());
-        holder.people_going.setText(container.get(position).getNumberOfParticipants() + " people coming");
+        holder.people_going.setText(container.get(position).getNumberOfParticipants() + " people going");
         holder.interested.setOnClickListener(view -> interested(holder, position));
         holder.coming.setOnClickListener(view -> markAsGoing(holder, position));
         holder.who_is_coming.setOnClickListener(view -> who_is_going(holder, position));
@@ -270,7 +300,6 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
     @Override
     public void onFinishedTakingNewMessages() {
-        recyclerView.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.INVISIBLE);
+        hideProgressbar();
     }
 }
