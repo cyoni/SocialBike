@@ -136,6 +136,56 @@
             android:layout_marginLeft="10dp"
             android:text="Interested" />
 
+        <Button
+            android:id="@+id/commentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/who_is_interested"
+            android:layout_below="@id/coming"
+            android:layout_marginLeft="10dp"
+            android:text="Comment" />
+
+        <LinearLayout
+            android:id="@+id/commentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_below="@id/commentButton"
+            android:orientation="vertical"
+            >
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+
+                <EditText
+                    android:id="@+id/headCommentText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_toStartOf="@id/postCommentButton"
+                    android:ems="10"
+                    android:hint="Type your comment..."
+                    android:inputType="textPersonName" />
+
+                <Button
+                    android:id="@+id/postCommentButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginRight="5dp"
+                    android:text="Send" />
+
+            </RelativeLayout>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
 
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

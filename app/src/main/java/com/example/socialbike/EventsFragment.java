@@ -12,7 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
@@ -68,9 +72,10 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         return eventsFragment;
     }
 
-    public void getPosts() {
+    public void getEvents() {
 
         System.out.println("getting Events...");
+
 
         Map<String, Object> data = new HashMap<>();
         data.put("dataType", dataType);
@@ -97,6 +102,11 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
             JSONObject obj = new JSONObject(fresh_msgs);
             JSONArray data = obj.getJSONArray("events");
 
+            if (container.size() > 0 && data.length() > 0) {
+                container.clear();
+                recyclerViewAdapter.notifyDataSetChanged();
+            }
+
             for (int i = 0; i < data.length(); i++) {
 
                 String userPublicKey = data.getJSONObject(i).getString("userPublicKey");
@@ -106,18 +116,18 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
                 String timeOfEvent = data.getJSONObject(i).getString("eventTime");
                 String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
                 String eventId = data.getJSONObject(i).getString("eventId");
-                String amountOfInterestedPeople = data.getJSONObject(i).getString("amountOfInterestedPeople");
+                String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
                 String city = data.getJSONObject(i).getString("eventCity");
                 String country = data.getJSONObject(i).getString("eventCountry");
 
                 int numberOfParticipants = 0;
                 if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
-                    numberOfParticipants  = data.getJSONObject(i).getInt("numberOfParticipants");
+                    numberOfParticipants = data.getJSONObject(i).getInt("numberOfParticipants");
 
                 Event event = new Event(
                         eventId, userPublicKey, name,
                         dateOfEvent, timeOfEvent, createdEventTime,
-                        amountOfInterestedPeople, numberOfParticipants,
+                        numOfInterestedMembers, numberOfParticipants,
                         city, country, message);
                 updater.add(event);
 
@@ -138,12 +148,11 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         progressBar.setVisibility(View.INVISIBLE);
 
 
-
         updater = new Updater(this, this.container, recyclerViewAdapter);
         if (loadMore) {
             showProgressbar();
 
-            getPosts();
+            getEvents();
             loadMore = false;
         }
 
@@ -162,12 +171,12 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         Button sortButton = root.findViewById(R.id.sort_button);
         sortButton.setOnClickListener(view -> {
 
-            if (sortButton.getText().equals("Most relevant")) {
+            if (sortButton.getText().equals("Trending")) {
                 getTradingData();
-                sortButton.setText("New Activity");
+                sortButton.setText("Recent Activity");
             } else {
                 getRecentData();
-                sortButton.setText("Most relevant");
+                sortButton.setText("Trending");
             }
 
         });
@@ -189,11 +198,13 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     private void getRecentData() {
         showProgressbar();
         dataType = MOST_RECENT_CODE;
+        getEvents();
     }
 
     private void getTradingData() {
         showProgressbar();
         dataType = TRADING_CODE;
+        getEvents();
     }
 
     private void openSearchWindow() {
@@ -243,8 +254,160 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         holder.coming.setOnClickListener(view -> markAsGoing(holder, position));
         holder.who_is_coming.setOnClickListener(view -> who_is_going(holder, position));
         holder.who_is_interested.setOnClickListener(view -> who_is_interested(holder, position));
+        holder.commentButton.setOnClickListener(view -> commentButton(holder, position));
+
         // holder.amountOfInterestedPeople.setText(container.get(position).getAmountOfInterestedPeople());
     }
+
+    private void handleSubComments(RecyclerViewAdapter.ViewHolder holder, int position) {
+        // first download the sub-comments then process them
+        System.out.println("??");
+
+        if (container.get(position).hasComments()) {
+            System.out.println("############");
+            //    readSubComments(holder, container.get(position).commentsContainer);
+        }
+    }
+
+    private void readSubComments(RecyclerViewAdapter.ViewHolder holder,
+                                 ArrayList<Comment> subComments) {
+        for (int i = 0; i < subComments.size(); i++) {
+            System.out.println("sub comment: " + subComments.get(i).getMsg());
+            //addSubCommentToLayout(subComments.get(i).getMsg(), holder,  null);
+        }
+    }
+
+    private void commentButton(RecyclerViewAdapter.ViewHolder holder, int position) {
+        holder.commentLayout.setVisibility(View.VISIBLE);
+        holder.postCommentButton.setOnClickListener(view -> sendMainComment(holder, position));
+    }
+
+    private void sendMainComment(RecyclerViewAdapter.ViewHolder holder, int position) {
+
+        String comment = holder.commentText.getText().toString();
+
+        if (comment.isEmpty())
+            return;
+
+        container.get(position).addComment(new Comment(
+                "postIdFromServer",
+                User.getPublicKey(),
+                User.getName(),
+                121221,
+                comment));
+
+        addCommentToLayout(R.layout.item_comment, comment, holder, position);
+
+        holder.commentText.setText("");
+
+        System.out.println("Done.");
+    }
+
+    private void addSUBCommentToLayout(LinearLayout headComment, String message, RecyclerViewAdapter.ViewHolder holder, int position) {
+        RelativeLayout layout = new RelativeLayout(getContext());
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        layout.setLayoutParams(layoutParams);
+
+        LinearLayout commentLayout = holder.commentLayout;
+        LinearLayout linearLayout = (LinearLayout) View.inflate(getContext(), R.layout.item_sub_comment, null);
+
+        linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, headComment));
+
+
+        TextView commentText = linearLayout.findViewById(R.id.message);
+        commentText.setText(message);
+
+        commentLayout.addView(linearLayout);
+    }
+
+    private void addCommentToLayout(int commentType, String message, RecyclerViewAdapter.ViewHolder holder, int position) {
+        RelativeLayout layout = new RelativeLayout(getContext());
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        layout.setLayoutParams(layoutParams);
+
+        LinearLayout commentLayout = holder.commentLayout;
+        LinearLayout linearLayout = (LinearLayout) View.inflate(getContext(), commentType, null);
+
+        if (commentType == R.layout.item_sub_comment)
+            linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, linearLayout));
+
+        else if (commentType == R.layout.item_comment) {
+            linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> showOrHideNewCommentSection(linearLayout));
+            linearLayout.findViewById(R.id.postCommentButton).setOnClickListener(view -> sendSubComment(linearLayout, holder, position));
+        }
+
+        TextView commentText = linearLayout.findViewById(R.id.message);
+        commentText.setText(message);
+
+        commentLayout.addView(linearLayout);
+    }
+
+    private void sendSubComment(LinearLayout linearLayout, RecyclerViewAdapter.ViewHolder holder, int position) {
+        EditText comment = linearLayout.findViewById(R.id.headCommentText);
+        String commentStr = comment.getText().toString();
+        addSUBCommentToLayout(linearLayout, commentStr, holder, position);
+        comment.setText("");
+    }
+
+    private void showOrHideNewCommentSection(LinearLayout linearLayout) {
+        RelativeLayout relativeLayout = linearLayout.findViewById(R.id.newCommentSection);
+
+        if (relativeLayout.getVisibility() == View.GONE)
+            relativeLayout.setVisibility(View.VISIBLE);
+        else
+            relativeLayout.setVisibility(View.GONE);
+    }
+
+    private void sendComment(String eventId, String replyTo, String comment) {
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("eventId", eventId);
+        data.put("replyTo", replyTo);
+        data.put("comment", comment);
+
+/*
+        MainActivity.mFunctions
+                .getHttpsCallable("sendComment")
+                .call(data)
+                .continueWith(task -> {
+
+                    String postIdFromServer = String.valueOf(task.getResult().getData());
+                    System.out.println("response: " + postIdFromServer);
+
+                    return null;
+                });
+*/
+
+    }
+
+    private void addSubCommentToLayout(String message, RecyclerViewAdapter.ViewHolder holder, int position) {
+        RelativeLayout layout = new RelativeLayout(getContext());
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        layout.setLayoutParams(layoutParams);
+
+        LinearLayout commentLayout = holder.commentLayout;
+        RelativeLayout relativeLayout = (RelativeLayout) View.inflate(getContext(), R.layout.item_sub_comment, null);
+
+        relativeLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, null));
+        TextView commentText = relativeLayout.findViewById(R.id.message);
+        commentText.setText(message);
+
+        commentLayout.addView(relativeLayout);
+    }
+
+    private void quoteMember(RecyclerViewAdapter.ViewHolder holder, int position, LinearLayout linearLayout) {
+        Post currentPost = container.get(position);
+        String str = "@" + currentPost.getName() + " ";
+        EditText headCommentText = linearLayout.findViewById(R.id.headCommentText);
+        headCommentText.setText(str);
+    }
+
 
     private void who_is_going(RecyclerViewAdapter.ViewHolder holder, int position) {
         MembersList membersList = new MembersList(getActivity(), container.get(position).getEventId(), "going");

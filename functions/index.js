@@ -217,6 +217,17 @@ exports.getComments = functions.https.onCall(async (request, context) => {
 })
 
 
+function compare(a, b) {
+    if ( a.elementScore < b.elementScore ){
+      return -1;
+    }
+    if ( a.elementScore > b.elementScore ){
+      return 1;
+    }
+    return 0;
+  }
+
+
 exports.getEvents = functions.https.onCall(async (request, context) => {
 
     const dataType = request.dataType
@@ -237,12 +248,14 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 createdEventTime: raw_data.child('createdEventTime').val(),
                 eventDate: raw_data.child('eventDate').val(),
                 eventTime: raw_data.child('eventTime').val(),
-                amountOfInterestedPeople: raw_data.child('amountOfInterestedPeople').val(),
+                numOfInterestedMembers: raw_data.child('numOfInterestedMembers').val(),
                 numberOfParticipants: raw_data.child('numberOfParticipants').val(),
                 eventCity: raw_data.child('eventCity').val(),
                 eventCountry: raw_data.child('eventCountry').val(),
                 // coordinates
             }
+            const score = 2*dataOfEvent.numberOfParticipants + dataOfEvent.numOfInterestedMembers
+            dataOfEvent['elementScore'] = score
 
             data.events[counter++] = dataOfEvent
         })
@@ -254,15 +267,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
 
 
         if (dataType === "TRADING"){
-            var scoreArray = []
-            for (i = 0; i < data.events.length; i++) {
-                const score = 2*data.events[i].numberOfParticipants + data.events[i].amountOfInterestedPeople
-                scoreArray.push(score)
-            }
-
-            var sortedScoreArray = scoreArray.sort()
-            
-
+            data.events = data.events.sort(compare)
         }
 
         data.events = data.events.reverse()

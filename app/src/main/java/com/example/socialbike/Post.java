@@ -3,10 +3,13 @@ package com.example.socialbike;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 public class Post implements Parcelable {
 
     private final String postId, publicKey, name, msg;
     private final int time;
+    private final ArrayList<Comment> commentsContainer = new ArrayList<>();
 
     public Post(String postId, String publicKey, String name, int time, String msg) {
         this.postId = postId;
@@ -15,7 +18,6 @@ public class Post implements Parcelable {
         this.time = time;
         this.msg = msg;
     }
-
 
     protected Post(Parcel in) {
         postId = in.readString();
@@ -71,4 +73,11 @@ public class Post implements Parcelable {
         return time;
     }
 
+    public boolean hasComments() {
+        return commentsContainer.size() > 0;
+    }
+
+    public void addComment(Comment comment) {
+        commentsContainer.add(0, comment);
+    }
 }

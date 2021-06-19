@@ -14,7 +14,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.BreakIterator;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -78,7 +77,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             commentsButton = itemView.findViewById(R.id.commentsButton);
             commentButton = itemView.findViewById(R.id.commentButton);
             postCommentButton = itemView.findViewById(R.id.postCommentButton);
-            commentText = itemView.findViewById(R.id.commentText);
+            commentText = itemView.findViewById(R.id.headCommentText);
             newCommentSection = itemView.findViewById(R.id.newCommentSection);
             commentLayout = itemView.findViewById(R.id.commentLayout);
             interested = itemView.findViewById(R.id.interested);
@@ -99,6 +98,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public void onClick(View view) {
             if (msgItemListener != null)
                 msgItemListener.onItemClick(view, getAdapterPosition());
+        }
+
+        public void fresh() {
+            commentText = itemView.findViewById(R.id.headCommentText);
         }
     }
 

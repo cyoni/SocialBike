@@ -1,11 +1,8 @@
 package com.example.socialbike;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -18,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import org.json.JSONArray;
@@ -203,7 +199,6 @@ public class PostActivity extends AppCompatActivity
                 .getHttpsCallable("sendComment")
                 .call(data)
                 .continueWith(task -> {
-
                     String postIdFromServer = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + postIdFromServer);
 
@@ -213,10 +208,7 @@ public class PostActivity extends AppCompatActivity
                             User.getName(),
                             121221,
                             comment));
-
-
                     recyclerViewAdapter.notifyItemInserted(0);
-
                     newComment.setText("");
                     sendComment.setEnabled(true);
                     updateCommentsCounter();
@@ -224,8 +216,6 @@ public class PostActivity extends AppCompatActivity
 
                     return null;
                 });
-
-
     }
 
 
@@ -331,16 +321,16 @@ public class PostActivity extends AppCompatActivity
         layout.setLayoutParams(layoutParams);
 
         LinearLayout commentLayout = holder.commentLayout;
-        RelativeLayout relativeLayout = (RelativeLayout) View.inflate(this, R.layout.item_sub_comment, null);
+        LinearLayout relativeLayout = (LinearLayout) View.inflate(this, R.layout.item_sub_comment, null);
 
-        relativeLayout.findViewById(R.id.commentButton).setOnClickListener(view -> setam(holder));
+        relativeLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder));
         TextView commentText = relativeLayout.findViewById(R.id.message);
         commentText.setText(message);
 
         commentLayout.addView(relativeLayout);
     }
 
-    private void setam(RecyclerViewAdapter.ViewHolder holder) {
+    private void quoteMember(RecyclerViewAdapter.ViewHolder holder) {
         showOrHideNewCommentSection(holder);
         String str = "@Yoni ";
         holder.commentText.setText(str);
