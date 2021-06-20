@@ -162,11 +162,16 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 exports.getComments = functions.https.onCall(async (request, context) => {
 
     const postId = request.postId
+    const container = request.container
+     
+    if (container !== "global_posts" && container !== "events")
+        return "BAD REQUEST"
+    
     var data = {}
     data['posts'] = []
     var counter = 0;
 
-    return admin.database().ref('global_posts').child(postId).child('comments').once('value').then(snapshot => {
+    return admin.database().ref(container).child(postId).child('comments').once('value').then(snapshot => {
 
         data.posts[counter] = []
 
@@ -252,6 +257,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 numberOfParticipants: raw_data.child('numberOfParticipants').val(),
                 eventCity: raw_data.child('eventCity').val(),
                 eventCountry: raw_data.child('eventCountry').val(),
+                commentsNumber: raw_data.child('comments').numChildren(),
                 // coordinates
             }
             const score = 2*dataOfEvent.numberOfParticipants + dataOfEvent.numOfInterestedMembers
@@ -391,9 +397,13 @@ exports.sendComment = functions.https.onCall(async (request, context) => {
     if (account === null)
         return "[AUTH_FAILED]";
 
+    const container = request.container
     const comment = request.comment
     const postId = request.postId
     const replyTo = request.replyTo.trim()
+
+    if (container !== "global_posts" && container !== "events")
+        return "WRONG_CONTAINER";
 
     const data = {
         senderPublicKey: account.publicKey,
@@ -405,12 +415,12 @@ exports.sendComment = functions.https.onCall(async (request, context) => {
     var messageId;
 
     if (replyTo !== ""){
-        messageId = await admin.database().ref('global_posts').child(postId).child('comments').child(replyTo).push().key
-        admin.database().ref('global_posts').child(postId).child('comments').child(replyTo).child('subComments').child(messageId).set(data)
+        messageId = await admin.database().ref(container).child(postId).child('comments').child(replyTo).push().key
+        admin.database().ref(container).child(postId).child('comments').child(replyTo).child('subComments').child(messageId).set(data)
     }
     else{
-        messageId = await (await admin.database().ref('global_posts').child(postId).child('comments').push()).key
-        admin.database().ref('global_posts').child(postId).child('comments').child(messageId).set(data)
+        messageId = await (await admin.database().ref(container).child(postId).child('comments').push()).key
+        admin.database().ref(container).child(postId).child('comments').child(messageId).set(data)
     }
 
     return messageId

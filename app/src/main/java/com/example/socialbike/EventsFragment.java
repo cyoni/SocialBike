@@ -19,12 +19,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.firebase.functions.HttpsCallableResult;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,6 +39,7 @@ import java.util.Map;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
+import static com.example.socialbike.Event.EVENTS_CONTAINER_CODE;
 
 
 public class EventsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
@@ -119,6 +122,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
                 String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
                 String city = data.getJSONObject(i).getString("eventCity");
                 String country = data.getJSONObject(i).getString("eventCountry");
+                int commentsNumber = data.getJSONObject(i).getInt("commentsNumber");
 
                 int numberOfParticipants = 0;
                 if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
@@ -128,7 +132,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
                         eventId, userPublicKey, name,
                         dateOfEvent, timeOfEvent, createdEventTime,
                         numOfInterestedMembers, numberOfParticipants,
-                        city, country, message);
+                        city, country, message, commentsNumber);
                 updater.add(event);
 
                 System.out.println("post " + i + " " + message);
@@ -278,8 +282,105 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     }
 
     private void commentButton(RecyclerViewAdapter.ViewHolder holder, int position) {
+
+        if (container.get(position).hasComments()){
+            holder.progressBar.setVisibility(View.VISIBLE);
+            getComments(holder, position);
+        }
+        else{
+            holder.progressBar.setVisibility(View.GONE);
+        }
+
         holder.commentLayout.setVisibility(View.VISIBLE);
         holder.postCommentButton.setOnClickListener(view -> sendMainComment(holder, position));
+    }
+
+    private void getComments(RecyclerViewAdapter.ViewHolder holder, int position) {
+            container.get(position).getComments()
+                    .continueWith(task -> {
+
+                        String response = String.valueOf(task.getResult().getData());
+                        System.out.println("response: " + response);
+
+                        if (!response.isEmpty()) {
+                            holder.progressBar.setVisibility(View.GONE);
+
+                            processComments(response, holder, position);
+
+                        }
+
+                        return "";
+                    });
+    }
+
+    private void processComments(String response, RecyclerViewAdapter.ViewHolder holder, int position) {
+
+        String tmp_category;
+        try {
+            JSONObject obj = new JSONObject(response);
+            JSONArray messages_array = obj.getJSONArray("posts");
+
+/*            if (obj.has("upNext")) {
+                upNext = obj.getString("upNext");
+            }
+            else
+                upNext = DEFAULT_END_OF_LIST;*/
+
+            for (int i = 0; i < messages_array.length(); i++) {
+                int likes = 0, comments = 0;
+                boolean doILike = false, isAuthor = false, has_profile_img = false;
+
+                String publicKey = messages_array.getJSONObject(i).getString("publicKey");
+                String message = messages_array.getJSONObject(i).getString("message");
+                String name = messages_array.getJSONObject(i).getString("name");
+                String time = messages_array.getJSONObject(i).getString("timestamp");
+                String commentId = messages_array.getJSONObject(i).getString("postId");
+
+                JSONArray subCommentsArray = messages_array.getJSONObject(i).getJSONArray("subComments");
+
+
+                if (messages_array.getJSONObject(i).has("likes_count")) {
+                    likes = Integer.parseInt(messages_array.getJSONObject(i).getString("likes_count"));
+                }
+                if (messages_array.getJSONObject(i).has("comments_count")) {
+                    comments = Integer.parseInt(messages_array.getJSONObject(i).getString("comments_count"));
+                }
+                if (messages_array.getJSONObject(i).has("doILike")) {
+                    doILike = messages_array.getJSONObject(i).getBoolean("doILike");
+                }
+                if (messages_array.getJSONObject(i).has("isauthor")) {
+                    isAuthor = messages_array.getJSONObject(i).getBoolean("isauthor");
+                }
+                if (messages_array.getJSONObject(i).has("has_p_img")) {
+                    has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
+                }
+
+                Comment comment = new Comment(EVENTS_CONTAINER_CODE, container.get(position).getEventId(), commentId, publicKey, name, 8888, message);
+
+                addCommentToLayout(R.layout.item_comment, message, holder, position);
+
+                for (int j = 0; j < subCommentsArray.length(); j++) {
+                    String subCommentMessage = subCommentsArray.getJSONObject(j).getString("comment");
+                    String subCommentName = subCommentsArray.getJSONObject(j).getString("name");
+                    String subCommentId = subCommentsArray.getJSONObject(j).getString("name");
+                    String subCommentSenderPublicKey = subCommentsArray.getJSONObject(j).getString("senderPublicKey");
+                    int subCommentTimestamp = subCommentsArray.getJSONObject(j).getInt("timestamp");
+
+                    System.out.println("Got subComment: " + subCommentsArray.getJSONObject(j).getString("commentId"));
+                  //  SubComment subComment = new SubComment(subCommentId, subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
+
+                    comment.addSubComment(subCommentMessage);
+                }
+
+                System.out.println("comment " + i + " " + message);
+
+
+            }
+        } catch (Exception e) {
+            System.out.println("Error caught in message fetcher: " + e.getMessage());
+        }
+
+
     }
 
     private void sendMainComment(RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -289,18 +390,30 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         if (comment.isEmpty())
             return;
 
-        container.get(position).addComment(new Comment(
-                "postIdFromServer",
-                User.getPublicKey(),
-                User.getName(),
-                121221,
-                comment));
+        sendComment(container.get(position).getEventId(), "", comment).continueWith(task -> {
 
-        addCommentToLayout(R.layout.item_comment, comment, holder, position);
+                    String commentIdFromServer = String.valueOf(task.getResult().getData());
+                    System.out.println("response: " + commentIdFromServer);
 
-        holder.commentText.setText("");
+                    container.get(position).addComment(new Comment(
+                            EVENTS_CONTAINER_CODE,
+                            container.get(position).getEventId(),
+                            commentIdFromServer,
+                            User.getPublicKey(),
+                            User.getName(),
+                            121221,
+                            comment));
 
-        System.out.println("Done.");
+                    addCommentToLayout(R.layout.item_comment, comment, holder, position);
+
+                    holder.commentText.setText("");
+                    System.out.println("Done.");
+
+                    return null;
+                }
+        );
+
+
     }
 
     private void addSUBCommentToLayout(LinearLayout headComment, String message, RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -310,16 +423,14 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         layout.setLayoutParams(layoutParams);
 
-        LinearLayout commentLayout = holder.commentLayout;
         LinearLayout linearLayout = (LinearLayout) View.inflate(getContext(), R.layout.item_sub_comment, null);
 
         linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, headComment));
 
-
         TextView commentText = linearLayout.findViewById(R.id.message);
         commentText.setText(message);
 
-        commentLayout.addView(linearLayout);
+        headComment.addView(linearLayout);
     }
 
     private void addCommentToLayout(int commentType, String message, RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -362,26 +473,20 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
             relativeLayout.setVisibility(View.GONE);
     }
 
-    private void sendComment(String eventId, String replyTo, String comment) {
+
+    private Task<HttpsCallableResult> sendComment(String eventId, String replyTo, String comment) {
 
         Map<String, Object> data = new HashMap<>();
-        data.put("eventId", eventId);
+        data.put("postId", eventId);
         data.put("replyTo", replyTo);
         data.put("comment", comment);
+        data.put("container", "events");
 
-/*
-        MainActivity.mFunctions
+        System.out.println(comment + "," + eventId + ", " + replyTo);
+
+        return MainActivity.mFunctions
                 .getHttpsCallable("sendComment")
-                .call(data)
-                .continueWith(task -> {
-
-                    String postIdFromServer = String.valueOf(task.getResult().getData());
-                    System.out.println("response: " + postIdFromServer);
-
-                    return null;
-                });
-*/
-
+                .call(data);
     }
 
     private void addSubCommentToLayout(String message, RecyclerViewAdapter.ViewHolder holder, int position) {

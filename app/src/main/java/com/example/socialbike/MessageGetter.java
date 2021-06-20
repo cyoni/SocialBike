@@ -50,7 +50,7 @@ public class MessageGetter {
                     has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
                 }
 
-                Post post = new Post(postId, user_public_key, nickname, 8888, messages);
+                Post post = new Post(postId, user_public_key, nickname, 8888, messages, 0);
                 updater.add(post);
 
                 System.out.println("msg " + i + " " + messages);

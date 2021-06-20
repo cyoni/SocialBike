@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -64,6 +65,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public RelativeLayout newCommentSection;
         public LinearLayout commentLayout;
         public Button who_is_interested;
+        public ProgressBar progressBar;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -85,6 +87,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             who_is_coming = itemView.findViewById(R.id.who_is_coming);
             who_is_interested = itemView.findViewById(R.id.who_is_interested);
             people_going = itemView.findViewById(R.id.people_going);
+            progressBar = itemView.findViewById(R.id.progressBar);
 
 
             //profilePicture = itemView.findViewById(R.id.status);

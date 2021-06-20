@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.socialbike.Post.POSTS_CONTAINER_CODE;
+
 public class PostActivity extends AppCompatActivity
         implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
@@ -88,15 +90,7 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void getComments() {
-
-        System.out.println("Getting comments... " + post.getPostId());
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("postId", post.getPostId());
-
-        MainActivity.mFunctions
-                .getHttpsCallable("getComments")
-                .call(data)
+        post.getComments()
                 .continueWith(task -> {
 
                     String response = String.valueOf(task.getResult().getData());
@@ -134,7 +128,7 @@ public class PostActivity extends AppCompatActivity
                 String message = messages_array.getJSONObject(i).getString("message");
                 String name = messages_array.getJSONObject(i).getString("name");
                 String time = messages_array.getJSONObject(i).getString("timestamp");
-                String postId = messages_array.getJSONObject(i).getString("postId");
+                String commentId = messages_array.getJSONObject(i).getString("postId");
 
                 JSONArray subCommentsArray = messages_array.getJSONObject(i).getJSONArray("subComments");
 
@@ -155,7 +149,7 @@ public class PostActivity extends AppCompatActivity
                     has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
                 }
 
-                Comment comment = new Comment(postId, publicKey, name, 8888, message);
+                Comment comment = new Comment(POSTS_CONTAINER_CODE, post.getPostId(), commentId, publicKey, name, 8888, message);
 
                 for (int j = 0; j < subCommentsArray.length(); j++) {
                     String subCommentMessage = subCommentsArray.getJSONObject(j).getString("comment");
@@ -165,7 +159,7 @@ public class PostActivity extends AppCompatActivity
                     int subCommentTimestamp = subCommentsArray.getJSONObject(j).getInt("timestamp");
 
                     System.out.println("Got subComment: " + subCommentsArray.getJSONObject(j).getString("commentId"));
-                    SubComment subComment = new SubComment(subCommentId, subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
+                  //  SubComment subComment = new SubComment(subCommentId, subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
 
                     comment.addSubComment(subCommentMessage);
                 }
@@ -194,6 +188,8 @@ public class PostActivity extends AppCompatActivity
         data.put("comment", comment);
         data.put("postId", post.getPostId());
         data.put("replyTo", "");
+        data.put("container", "global_posts");
+
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendComment")
@@ -203,6 +199,8 @@ public class PostActivity extends AppCompatActivity
                     System.out.println("response: " + postIdFromServer);
 
                     commentsContainer.add(0, new Comment(
+                            POSTS_CONTAINER_CODE,
+                            post.getPostId(),
                             postIdFromServer,
                             User.getPublicKey(),
                             User.getName(),
@@ -235,6 +233,7 @@ public class PostActivity extends AppCompatActivity
     private void getPost() {
         Bundle data = getIntent().getExtras();
         post = data.getParcelable("post");
+        post.container = POSTS_CONTAINER_CODE;
     }
 
     @Override
@@ -268,8 +267,7 @@ public class PostActivity extends AppCompatActivity
         if (holder.newCommentSection.getVisibility() == View.VISIBLE) {
             holder.newCommentSection.setVisibility(View.GONE);
             Utils.hideKeyboard(this);
-        }
-        else {
+        } else {
             holder.newCommentSection.setVisibility(View.VISIBLE);
             holder.commentText.requestFocus();
             //Utils.showKeyboard(this);
@@ -282,35 +280,22 @@ public class PostActivity extends AppCompatActivity
         if (comment.isEmpty())
             return;
 
-        System.out.println("sending sub-comment. " + comment + ". CommentId: " + commentsContainer.get(position).getPostId());
+        commentsContainer.get(position).sendSubComment(comment).continueWith(task -> {
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("comment", comment);
-        data.put("postId", post.getPostId());
-        data.put("replyTo", commentsContainer.get(position).getPostId());
+            String postIdFromServer = String.valueOf(task.getResult().getData());
+            System.out.println("response: " + postIdFromServer);
 
-        MainActivity.mFunctions
-                .getHttpsCallable("sendComment")
-                .call(data)
-                .continueWith(task -> {
+            commentsContainer.get(position).addSubComment(comment);
+            addSubCommentToLayout(holder.commentText.getText().toString(), holder);
 
-                    String postIdFromServer = String.valueOf(task.getResult().getData());
-                    System.out.println("response: " + postIdFromServer);
+            holder.commentText.setText("");
 
-                    commentsContainer.get(position).addSubComment(comment);
-                    addSubCommentToLayout(holder.commentText.getText().toString(), holder);
+            showOrHideNewCommentSection(holder);
+            Utils.hideKeyboard(this);
+            System.out.println("Done.");
 
-                    holder.commentText.setText("");
-
-                    showOrHideNewCommentSection(holder);
-                    Utils.hideKeyboard(this);
-                    System.out.println("Done.");
-
-
-                    return null;
-                });
-
-
+            return null;
+        });;
     }
 
     private void addSubCommentToLayout(String message, RecyclerViewAdapter.ViewHolder holder) {

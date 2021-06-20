@@ -3,20 +3,28 @@ package com.example.socialbike;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.functions.HttpsCallableResult;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Post implements Parcelable {
 
     private final String postId, publicKey, name, msg;
-    private final int time;
+    private final int time, commentsNumber;
+    public static String POSTS_CONTAINER_CODE = "global_posts";
+    public String container;
     private final ArrayList<Comment> commentsContainer = new ArrayList<>();
 
-    public Post(String postId, String publicKey, String name, int time, String msg) {
+    public Post(String postId, String publicKey, String name, int time, String msg, int commentsNumber) {
         this.postId = postId;
         this.publicKey = publicKey;
         this.name = name;
         this.time = time;
         this.msg = msg;
+        this.commentsNumber = commentsNumber;
     }
 
     protected Post(Parcel in) {
@@ -25,6 +33,7 @@ public class Post implements Parcelable {
         name = in.readString();
         msg = in.readString();
         time = in.readInt();
+        commentsNumber = in.readInt();
     }
 
     @Override
@@ -73,11 +82,26 @@ public class Post implements Parcelable {
         return time;
     }
 
+    public int getCommentsNumber() {
+        return commentsNumber;
+    }
+
     public boolean hasComments() {
-        return commentsContainer.size() > 0;
+        return commentsNumber > 0;
     }
 
     public void addComment(Comment comment) {
         commentsContainer.add(0, comment);
     }
+
+    public Task<HttpsCallableResult> getComments() {
+        System.out.println("Getting comments for post #" + getPostId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("postId", getPostId());
+        data.put("container", container);
+        return MainActivity.mFunctions
+                .getHttpsCallable("getComments")
+                .call(data);
+    }
+
 }

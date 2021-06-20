@@ -2,8 +2,7 @@ package com.example.socialbike;
 
 public class Event extends Post{
 
-    private final String eventId;
-    private final String userPublicKey;
+    private final String eventId, userPublicKey;
     private final String name;
     private final String dateOfEvent;
     private final String timeOfEvent;
@@ -13,12 +12,15 @@ public class Event extends Post{
     private final String country;
     private final int numberOfParticipants;
 
+    public static String EVENTS_CONTAINER_CODE = "events";
+
     public Event(String eventId, String userPublicKey, String name,
                  String dateOfEvent, String timeOfEvent, String createdEventTime,
                  String amountOfInterestedPeople, int numberOfParticipants,
                  String city,
-                 String country, String message) {
-        super(eventId, userPublicKey, name, 1245, message);
+                 String country, String message, int commentsNumber) {
+        super(eventId, userPublicKey, name, 1245, message, commentsNumber);
+        container = EVENTS_CONTAINER_CODE;
 
         this.eventId = eventId;
         this.userPublicKey = userPublicKey;
@@ -71,4 +73,5 @@ public class Event extends Post{
     public String getCountry() {
         return country;
     }
+
 }
