@@ -371,15 +371,21 @@ exports.updateParticipantsNumber = functions.database.ref('events/{eventId}/{goi
       const collectionRef = change.after.ref.parent;
       const countRef = collectionRef.parent.child(childName);
 
+    if (!change.after.exists() && change.before.exists() && change.before.val <= 0){
+        console.log('Exiting function . . . ')
+        return null;
+    }
+
       let increment;
       if (change.after.exists() && !change.before.exists()) {
         increment = 1;
       } else if (!change.after.exists() && change.before.exists()) {
-        increment = -1;
+        increment = -1;        
       } else {
         return null;
       }
 
+    
       // Return the promise from countRef.transaction() so our function
       // waits for this async event to complete before it exits.
       await countRef.transaction((current) => {
