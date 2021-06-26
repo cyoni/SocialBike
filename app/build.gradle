@@ -27,11 +27,20 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
+
+    implementation 'com.google.maps:google-maps-services:0.9.3'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
+
+
     implementation 'androidx.wear:wear:1.0.0'
     implementation 'com.google.firebase:firebase-firestore:22.1.2'
+    implementation 'com.google.android.gms:play-services-maps:17.0.1'
     compileOnly 'com.google.android.wearable:wearable:2.6.0'
     def room_version = "2.3.0"
 

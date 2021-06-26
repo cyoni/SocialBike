@@ -50,7 +50,6 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     private RecyclerViewAdapter recyclerViewAdapter;
     private Updater updater;
     private boolean loadMore = true;
-    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
     private ProgressBar progressBar;
     private final String MOST_RECENT_CODE = "MOST_RECENT";
     private final String TRADING_CODE = "TRADING";
@@ -213,38 +212,10 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     }
 
     private void openSearchWindow() {
-        // Initialize the SDK
-        Places.initialize(getActivity().getApplicationContext(), "AIzaSyB-ZfB7qwZpFVizXuvYwTSP3NGo0J0ZsDc");
 
-        // Create a new PlacesClient instance
-        PlacesClient placesClient = Places.createClient(getContext());
-
-        // Set the fields to specify which types of place data to
-        // return after the user has made a selection.
-        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
-        // Start the autocomplete intent.
-        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                .build(getContext());
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Place place = Autocomplete.getPlaceFromIntent(data);
-                System.out.println("Place: " + place.getName() + ", " + place.getId());
-            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                // TODO: Handle the error.
-                Status status = Autocomplete.getStatusFromIntent(data);
-                System.out.println(status.getStatusMessage());
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-            return;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -262,24 +233,6 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         holder.commentButton.setOnClickListener(view -> commentButton(holder, position));
 
         // holder.amountOfInterestedPeople.setText(container.get(position).getAmountOfInterestedPeople());
-    }
-
-    private void handleSubComments(RecyclerViewAdapter.ViewHolder holder, int position) {
-        // first download the sub-comments then process them
-        System.out.println("??");
-
-        if (container.get(position).hasComments()) {
-            System.out.println("############");
-            //    readSubComments(holder, container.get(position).commentsContainer);
-        }
-    }
-
-    private void readSubComments(RecyclerViewAdapter.ViewHolder holder,
-                                 ArrayList<Comment> subComments) {
-        for (int i = 0; i < subComments.size(); i++) {
-            System.out.println("sub comment: " + subComments.get(i).getMsg());
-            //addSubCommentToLayout(subComments.get(i).getMsg(), holder,  null);
-        }
     }
 
     private void commentButton(RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -368,10 +321,9 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
                     //System.out.println("Got subComment: " + subCommentsArray.getJSONObject(j).getString("commentId"));
                     System.out.println("got subcomment: " + subCommentMessage);
-                    addSUBCommentToLayout(layout, subCommentMessage, holder, position);
-                  //  SubComment subComment = new SubComment(subCommentId, subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
-
-                    comment.addSubComment(subCommentMessage); // בנתיים אין תת תגובות
+                    SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, commentId, subCommentId, subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
+                    addSUBCommentToLayout(layout, subComment, holder, position);
+                    //comment.addSubComment(subCommentMessage);
                 }
 
                 System.out.println("comment " + i + " " + message);
@@ -419,7 +371,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
     }
 
-    private void addSUBCommentToLayout(LinearLayout headComment, String message, RecyclerViewAdapter.ViewHolder holder, int position) {
+    private void addSUBCommentToLayout(LinearLayout headComment, Comment comment, RecyclerViewAdapter.ViewHolder holder, int position) {
         RelativeLayout layout = new RelativeLayout(getContext());
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -430,8 +382,11 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
         linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, headComment));
 
+
         TextView commentText = linearLayout.findViewById(R.id.message);
-        commentText.setText(message);
+        TextView commentName = linearLayout.findViewById(R.id.name);
+        commentText.setText(comment.getMsg());
+        commentName.setText(comment.getName());
 
         headComment.addView(linearLayout);
     }
@@ -455,7 +410,9 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
          }
 
         TextView commentText = linearLayout.findViewById(R.id.message);
+        TextView commentName = linearLayout.findViewById(R.id.name);
         commentText.setText(comment.getMsg());
+        commentName.setText(comment.getName());
 
         commentLayout.addView(linearLayout);
         return linearLayout;
@@ -465,17 +422,18 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         EditText viewComment = linearLayout.findViewById(R.id.headCommentText);
         String commentStr = viewComment.getText().toString();
 
-
         //sendComment(container.get(position).getEventId(), comment.getPostId(), commentStr).continueWith(response -> {
           comment.sendSubComment(commentStr).continueWith(task -> {
               String response = String.valueOf(task.getResult().getData());
-              System.out.println("res: "+ response);
+              System.out.println("res: " + response);
+
+              SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, comment.getPostId(), response, User.getPublicKey(), User.getName(), 12345, commentStr);
+              addSUBCommentToLayout(linearLayout, subComment, holder, position);
+              viewComment.setText("");
               return null;
           });
 
 
-        addSUBCommentToLayout(linearLayout, commentStr, holder, position);
-        viewComment.setText("");
     }
 
     private void showOrHideNewCommentSection(LinearLayout linearLayout) {

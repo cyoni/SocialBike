@@ -27,6 +27,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.GeocodingResult;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static FirebaseFunctions mFunctions;
     private BottomNavigationView bottomNavigationView;
     public static ChatManager chatManager;
+    public static GeoApiContext geoApiContext;
 
     public static void toast(Context context, String msg, int isLong) {
         Toast.makeText(context, msg, isLong).show();
@@ -48,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setGeoContext();
         setContentView(R.layout.activity_main);
         setFirebase();
         loadUser();
@@ -56,6 +66,13 @@ public class MainActivity extends AppCompatActivity {
         startChat();
 
        // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    private void setGeoContext() {
+
+        geoApiContext = new GeoApiContext.Builder()
+                .apiKey("AIzaSyD86dWwLyv1w2TwmseD04jRDvo7L8rVAxo")
+                .build();
     }
 
     private void startChat() {

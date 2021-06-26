@@ -36,7 +36,7 @@
        android:padding="10dp"
         android:layout_below="@id/profile_image"
         android:layout_marginStart="30dp"
-        android:layout_marginEnd="50dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginTop="5dp"
         android:background="@drawable/sub_comment_style"
         android:text="This is my comment"
