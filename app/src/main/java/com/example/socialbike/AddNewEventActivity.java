@@ -7,57 +7,42 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.maps.GeoApiContext;
-import com.google.maps.GeocodingApi;
-import com.google.maps.errors.ApiException;
-import com.google.maps.model.GeocodingResult;
-import com.google.maps.model.LatLng;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.example.socialbike.MainActivity.geoApiContext;
-
 public class AddNewEventActivity extends AppCompatActivity {
 
-    private EditText city, country, time, date, message, location;
+    private EditText time, date, message, location;
     private Button submitButton;
     private Button dateButton;
-    private Button timeButton, mapButton;
+    private Button timeButton, mapButton, locationAutoCompleteButton;
     private static int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private String placeId;
+    private EventsFragment eventsFragment;
+    private LatLng eventLocation = new LatLng(0,0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_event);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        city = findViewById(R.id.city);
-        country = findViewById(R.id.country);
+        Toolbar toolbar = findViewById(R.id.flexible_example_toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
         time = findViewById(R.id.time);
         date = findViewById(R.id.date);
         message = findViewById(R.id.content);
@@ -65,7 +50,11 @@ public class AddNewEventActivity extends AppCompatActivity {
         timeButton = findViewById(R.id.timeButton);
         mapButton = findViewById(R.id.mapButton);
         location = findViewById(R.id.location);
-
+        locationAutoCompleteButton = findViewById(R.id.locationAutoCompleteButton);
+        location.setFocusable(false);
+        location.setHint("Find a location or press 'no location yet'");
+        Bundle data = getIntent().getExtras();
+        // eventsFragment = data.getParcelable("eventsClass");
         setButtonListeners();
     }
 
@@ -74,8 +63,10 @@ public class AddNewEventActivity extends AppCompatActivity {
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
+                placeId = place.getId();
                 //System.out.println("Place: " + place.getName() + ", " + place.getId());
                 location.setText(place.getName());
+                eventLocation = place.getLatLng();
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 // TODO: Handle the error.
                 Status status = Autocomplete.getStatusFromIntent(data);
@@ -112,15 +103,10 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void setLocationInputListener() {
-        location.setOnFocusChangeListener((view, hasFocus) -> {
-            if (hasFocus) {
-                openLocationWindow();
-            }
-        });
-        location.setOnClickListener(view -> openLocationWindow());
+        locationAutoCompleteButton.setOnClickListener(view -> openLocationWindow());
     }
 
-    private void openLocationWindow(){
+    private void openLocationWindow() {
         // Initialize the SDK
         Places.initialize(getApplicationContext(), "AIzaSyBNXcAnL0GPcywUubwmo_nDRzFeEyTAHMw");
 
@@ -129,15 +115,15 @@ public class AddNewEventActivity extends AppCompatActivity {
 
         // Set the fields to specify which types of place data to
         // return after the user has made a selection.
-        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
         // Start the autocomplete intent.
         Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
                 .build(this);
         startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
     }
 
-    private void startMapsActivity() {
-
+    private void getCoordinates() {
+        /*  looks up a place and returns coordinates
         String locationName = location.getText().toString();
         GeocodingResult[] request = null;
         try {
@@ -151,9 +137,14 @@ public class AddNewEventActivity extends AppCompatActivity {
         }
         LatLng coordinates = request[0].geometry.location;
         System.out.println("Coordinates: " + coordinates.toString());
+*/
+    }
 
-
-        //   startActivity(new Intent(this, MapsActivity.class));
+    private void startMapsActivity() {
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("lng", eventLocation.longitude);
+        intent.putExtra("lat", eventLocation.latitude);
+        startActivity(intent);
     }
 
     private void openDateAndTimeDialog(boolean isDataLayout) {
@@ -164,8 +155,8 @@ public class AddNewEventActivity extends AppCompatActivity {
     private void postEvent() {
 
         Map<String, Object> data = new HashMap<>();
-        data.put("city", city.getText().toString());
-        data.put("country", country.getText().toString());
+        data.put("city", "city.getText().toString()");
+        data.put("country", "country.getText().toString()");
         data.put("date", date.getText().toString());
         data.put("time", time.getText().toString());
         data.put("content", message.getText().toString());
@@ -177,7 +168,8 @@ public class AddNewEventActivity extends AppCompatActivity {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("add new event -> response:" + response);
 
-                    MainActivity.toast(getApplicationContext(), "Your event is live.", 1);
+                    MainActivity.toast(getApplicationContext(), "Your event is LIVE!", 1);
+                    //     eventsFragment.getEvents();
                     finish();
 
                     if (response.equals("NOT_OK")) {

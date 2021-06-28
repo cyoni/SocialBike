@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +33,7 @@ import com.google.firebase.functions.HttpsCallableResult;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,7 +45,7 @@ import static android.app.Activity.RESULT_OK;
 import static com.example.socialbike.Event.EVENTS_CONTAINER_CODE;
 
 
-public class EventsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
+public class EventsFragment extends Fragment implements Parcelable, RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
     static EventsFragment eventsFragment = null;
     private RecyclerView recyclerView;
@@ -54,6 +57,8 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     private final String MOST_RECENT_CODE = "MOST_RECENT";
     private final String TRADING_CODE = "TRADING";
     private String dataType = MOST_RECENT_CODE;
+    private LinearLayout searchSection;
+    private RelativeLayout topMenu;
 
 
     private void initAdapter() {
@@ -150,7 +155,10 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         initAdapter();
         progressBar = root.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
+        searchSection = root.findViewById(R.id.searchSection);
+        topMenu = root.findViewById(R.id.topMenu);
 
+        hideSearchSectionAndShowTopMenu();
 
         updater = new Updater(this, this.container, recyclerViewAdapter);
         if (loadMore) {
@@ -169,6 +177,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
         addEvent.setOnClickListener(view -> {
             Intent intent = new Intent(getContext(), AddNewEventActivity.class);
+          //  intent.putExtra("eventsClass", (Parcelable) this);
             startActivity(intent);
         });
 
@@ -187,6 +196,17 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
         return root;
     }
+
+    private void hideSearchSectionAndShowTopMenu() {
+        searchSection.setVisibility(View.GONE);
+        topMenu.setVisibility(View.VISIBLE);
+    }
+
+    private void showSearchSectionAndHideTopMenu() {
+        searchSection.setVisibility(View.VISIBLE);
+        topMenu.setVisibility(View.GONE);
+    }
+
 
     private void showProgressbar() {
         recyclerView.setVisibility(View.INVISIBLE);
@@ -212,9 +232,8 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     }
 
     private void openSearchWindow() {
-
+        showSearchSectionAndHideTopMenu();
     }
-
 
 
     @Override
@@ -543,5 +562,15 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     @Override
     public void onFinishedTakingNewMessages() {
         hideProgressbar();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+
     }
 }
