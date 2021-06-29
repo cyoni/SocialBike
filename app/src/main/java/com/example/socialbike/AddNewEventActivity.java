@@ -7,8 +7,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
@@ -26,14 +28,15 @@ import java.util.Map;
 
 public class AddNewEventActivity extends AppCompatActivity {
 
-    private EditText time, date, message, location;
+    private EditText time, date, message, locationName, locationAddress;
     private Button submitButton;
     private Button dateButton;
     private Button timeButton, mapButton, locationAutoCompleteButton;
     private static int AUTOCOMPLETE_REQUEST_CODE = 1;
     private String placeId;
     private EventsFragment eventsFragment;
-    private LatLng eventLocation = new LatLng(0,0);
+    private LatLng eventLocation = new LatLng(0, 0);
+    private LinearLayout locationAddressSection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +52,16 @@ public class AddNewEventActivity extends AppCompatActivity {
         dateButton = findViewById(R.id.dateButton);
         timeButton = findViewById(R.id.timeButton);
         mapButton = findViewById(R.id.mapButton);
-        location = findViewById(R.id.location);
+        locationName = findViewById(R.id.location);
+        locationAddressSection = findViewById(R.id.locationAddressSection);
         locationAutoCompleteButton = findViewById(R.id.locationAutoCompleteButton);
-        location.setFocusable(false);
-        location.setHint("Find a location or press 'no location yet'");
+        locationAddress = findViewById(R.id.location_address);
+        locationName.setFocusable(false);
+        locationName.setHint("Find a location or press 'no location yet'");
         Bundle data = getIntent().getExtras();
         // eventsFragment = data.getParcelable("eventsClass");
+
+        locationAddressSection.setVisibility(View.GONE);
         setButtonListeners();
     }
 
@@ -62,13 +69,14 @@ public class AddNewEventActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
+                locationAddressSection.setVisibility(View.VISIBLE);
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 placeId = place.getId();
                 //System.out.println("Place: " + place.getName() + ", " + place.getId());
-                location.setText(place.getName());
+                locationName.setText(place.getName());
+                locationAddress.setText(getPureAddress(place.getAddress()));
                 eventLocation = place.getLatLng();
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                // TODO: Handle the error.
                 Status status = Autocomplete.getStatusFromIntent(data);
                 System.out.println(status.getStatusMessage());
             } else if (resultCode == RESULT_CANCELED) {
@@ -77,6 +85,13 @@ public class AddNewEventActivity extends AppCompatActivity {
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private String getPureAddress(String address) {
+        if (address == null)
+            return "";
+        int index = address.indexOf(",") + 1;
+        return address.substring(index).trim();
     }
 
     private void setButtonListeners() {

@@ -184,12 +184,12 @@ public class EventsFragment extends Fragment implements Parcelable, RecyclerView
         Button sortButton = root.findViewById(R.id.sort_button);
         sortButton.setOnClickListener(view -> {
 
-            if (sortButton.getText().equals("Trending")) {
+            if (sortButton.getText().equals("Treading")) {
                 getRecentData();
                 sortButton.setText("Recent Activity");
             } else {
                 getTradingData();
-                sortButton.setText("Trending");
+                sortButton.setText("Treading");
             }
 
         });

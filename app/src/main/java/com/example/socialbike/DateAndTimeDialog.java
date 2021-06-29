@@ -56,7 +56,7 @@ public class DateAndTimeDialog extends Dialog {
 
     private void apply() {
         if (isDateLayout)
-            callerClass.setDate(date_picker.getDayOfMonth() + "/" + (date_picker.getMonth() + 1) + "/" + date_picker.getYear() + ", ");
+            callerClass.setDate(date_picker.getDayOfMonth() + "/" + (date_picker.getMonth() + 1) + "/" + date_picker.getYear());
         else
             callerClass.setTime(time_picker.getHour() + ":" + time_picker.getMinute());
         dismiss();
