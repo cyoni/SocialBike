@@ -28,6 +28,7 @@ import java.util.Map;
 
 public class AddNewEventActivity extends AppCompatActivity {
 
+    public static final int MAPS_CODE = 1050;
     private EditText time, date, message, locationName, locationAddress;
     private Button submitButton;
     private Button dateButton;
@@ -67,7 +68,18 @@ public class AddNewEventActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+
+        if (requestCode == MAPS_CODE) {
+            if (resultCode == RESULT_OK) {
+                double lat = data.getDoubleExtra("lat", -1);
+                double lng = data.getDoubleExtra("lng", -1);
+                String address = data.getStringExtra("address");
+                String name = data.getStringExtra("name");
+                locationAddress.setText(address);
+                locationName.setText(name);
+                eventLocation = new LatLng(lat, lng);
+            }
+        } else if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 locationAddressSection.setVisibility(View.VISIBLE);
                 Place place = Autocomplete.getPlaceFromIntent(data);
@@ -79,8 +91,6 @@ public class AddNewEventActivity extends AppCompatActivity {
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
                 System.out.println(status.getStatusMessage());
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
             }
             return;
         }
@@ -122,16 +132,8 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void openLocationWindow() {
-        // Initialize the SDK
-        Places.initialize(getApplicationContext(), "AIzaSyBNXcAnL0GPcywUubwmo_nDRzFeEyTAHMw");
-
-        // Create a new PlacesClient instance
         PlacesClient placesClient = Places.createClient(this);
-
-        // Set the fields to specify which types of place data to
-        // return after the user has made a selection.
         List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
-        // Start the autocomplete intent.
         Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
                 .build(this);
         startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
@@ -159,7 +161,9 @@ public class AddNewEventActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MapsActivity.class);
         intent.putExtra("lng", eventLocation.longitude);
         intent.putExtra("lat", eventLocation.latitude);
-        startActivity(intent);
+        intent.putExtra("name", locationName.getText().toString());
+        intent.putExtra("address", locationAddress.getText().toString());
+        startActivityForResult(intent, MAPS_CODE);
     }
 
     private void openDateAndTimeDialog(boolean isDataLayout) {

@@ -22,6 +22,7 @@ import com.example.socialbike.chat.ChatManager;
 import com.example.socialbike.chat.ContainerForChat;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.libraries.places.api.Places;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -64,8 +65,13 @@ public class MainActivity extends AppCompatActivity {
         startListeningBottomMenu();
         changeFragment(HomeFragment.getInstance());
         startChat();
+        initiatePlaces();
 
        // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    private void initiatePlaces() {
+        Places.initialize(getApplicationContext(), "AIzaSyBNXcAnL0GPcywUubwmo_nDRzFeEyTAHMw");
     }
 
     private void setGeoContext() {
