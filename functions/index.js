@@ -249,14 +249,16 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 eventId: raw_data.key,
                 name: "",
                 userPublicKey: raw_data.child('userPublicKey').val(),
-                eventContent: raw_data.child('eventContent').val(),
+                eventDetails: raw_data.child('eventDetails').val(),
                 createdEventTime: raw_data.child('createdEventTime').val(),
                 eventDate: raw_data.child('eventDate').val(),
                 eventTime: raw_data.child('eventTime').val(),
                 numOfInterestedMembers: raw_data.child('numOfInterestedMembers').val(),
                 numberOfParticipants: raw_data.child('numberOfParticipants').val(),
-                eventCity: raw_data.child('eventCity').val(),
-                eventCountry: raw_data.child('eventCountry').val(),
+                lat: raw_data.child('lat').val(),
+                lng: raw_data.child('lng').val(),
+                locationName: raw_data.child('locationName').val(),
+                locationAddress: raw_data.child('locationAddress').val(),
                 commentsNumber: raw_data.child('comments').numChildren(),
                 // coordinates
             }
@@ -310,9 +312,11 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
 
     const eventTime = request.time
     const eventDate = request.date
-    const eventContent = request.content
-    const eventCity = request.city
-    const eventCountry = request.country
+    const eventDetails = request.eventDetails
+    const lat = request.lat
+    const lng = request.lng
+    const locationName = request.locationName
+    const locationAddress = request.locationAddress
     const timestamp = Date.now()
 
     var data = {
@@ -320,9 +324,11 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
         createdEventTime: timestamp,
         eventTime: eventTime,
         eventDate: eventDate,
-        eventContent: eventContent,
-        eventCity: eventCity,
-        eventCountry: eventCountry
+        locationName: locationName,
+        locationAddress: locationAddress,
+        eventDetails: eventDetails,
+        lat: lat,
+        lng: lng
     }
 
     const newKey = admin.database().ref('events').push().key

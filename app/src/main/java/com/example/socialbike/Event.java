@@ -1,5 +1,7 @@
 package com.example.socialbike;
 
+import com.google.maps.model.LatLng;
+
 public class Event extends Post{
 
     private final String eventId, userPublicKey;
@@ -8,17 +10,14 @@ public class Event extends Post{
     private final String timeOfEvent;
     private final String createdEventTime;
     private final String amountOfInterestedPeople;
-    private final String city;
-    private final String country;
     private final int numberOfParticipants;
-
     public static String EVENTS_CONTAINER_CODE = "events";
+    private final LatLng latLng;
 
     public Event(String eventId, String userPublicKey, String name,
                  String dateOfEvent, String timeOfEvent, String createdEventTime,
                  String amountOfInterestedPeople, int numberOfParticipants,
-                 String city,
-                 String country, String message, int commentsNumber) {
+                 LatLng latLng, String message, int commentsNumber) {
         super(eventId, userPublicKey, name, 1245, message, commentsNumber);
         container = EVENTS_CONTAINER_CODE;
 
@@ -30,8 +29,7 @@ public class Event extends Post{
         this.createdEventTime = createdEventTime;
         this.amountOfInterestedPeople = amountOfInterestedPeople;
         this.numberOfParticipants = numberOfParticipants;
-        this.city = city;
-        this.country = country;
+        this.latLng = latLng;
     }
 
     public String getEventId() {
@@ -66,12 +64,8 @@ public class Event extends Post{
         return numberOfParticipants;
     }
 
-    public String getCity() {
-        return city;
-    }
-
-    public String getCountry() {
-        return country;
+    public LatLng getLatLng(){
+        return latLng;
     }
 
 }

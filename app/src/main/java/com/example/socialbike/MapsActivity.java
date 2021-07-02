@@ -1,6 +1,5 @@
 package com.example.socialbike;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
@@ -10,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+
+import com.example.socialbike.databinding.ActivityMapsBinding;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -17,22 +18,23 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.example.socialbike.databinding.ActivityMapsBinding;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-
-import org.jetbrains.annotations.NotNull;
+import com.google.maps.GeocodingApi;
+import com.google.maps.model.GeocodingResult;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static com.example.socialbike.MainActivity.geoApiContext;
+
 class Position {
-    LatLng latLng;
-    String name, address;
+    public LatLng latLng;
+    public String name, address;
 
     public Position(LatLng latLng, String name, String address) {
         this.latLng = latLng;
@@ -52,14 +54,23 @@ class Position {
         return address;
     }
 
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
-    private LinearLayout search_layout, layout_options, layout_map_search;
+    private LinearLayout search_layout;
     private Position position = null;
+    private Button set_button;
+    private boolean wasPlacesUsed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +79,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         search_layout = findViewById(R.id.search_layout);
-        layout_options = findViewById(R.id.layout_options);
-        layout_map_search = findViewById(R.id.layout_map_search);
-        Button cancel = findViewById(R.id.cancel);
+
         Button search_button = findViewById(R.id.search_button);
-        Button set_button = findViewById(R.id.set_button);
+        set_button = findViewById(R.id.set_button);
 
         showOnlyLayout(search_layout);
 
-        cancel.setOnClickListener(view -> showOnlyLayout(search_layout));
         search_button.setOnClickListener(view -> search());
         set_button.setOnClickListener(view -> set());
 
@@ -106,6 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 setMarker(new Position(place.getLatLng(), place.getName(), place.getAddress()));
+                wasPlacesUsed = true;
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
                 System.out.println(status.getStatusMessage());
@@ -119,8 +128,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (position == null)
             MainActivity.toast(this, "Please choose a place on the map.", 1);
         else {
+            if (!wasPlacesUsed) {
+                set_button.setText("Setting...");
+                getAddressByCoordinates(position.getLatLng());
+            }
             sendDataToActivity();
             finish();
+        }
+    }
+
+    private void getAddressByCoordinates(LatLng latLng) {
+
+        GeocodingResult[] results = null;
+        try {
+            com.google.maps.model.LatLng newLatLng = new com.google.maps.model.LatLng(latLng.latitude, latLng.longitude);
+            results = GeocodingApi.newRequest(geoApiContext).latlng(newLatLng).await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (results == null) {
+            // MainActivity.toast(this, "No result.", 0);
+        } else {
+            String address = results[0].formattedAddress;
+            position.setAddress(address);
+            if (address.contains(",")) {
+                position.setName(address.substring(0, address.indexOf(",")));
+            } else
+                position.setName("");
         }
     }
 
@@ -130,13 +164,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         intent.putExtra("lng", position.getLatLng().longitude);
         intent.putExtra("name", position.getName());
         intent.putExtra("address", position.getAddress());
+        System.out.println("Passing data: " + position.getAddress() + ", " + position.getName() + ", " + position.getLatLng().toString());
         setResult(RESULT_OK, intent);
     }
 
     private void showOnlyLayout(LinearLayout layout) {
         search_layout.setVisibility(View.GONE);
-        layout_options.setVisibility(View.GONE);
-        layout_map_search.setVisibility(View.GONE);
         layout.setVisibility(View.VISIBLE);
     }
 
@@ -165,7 +198,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             setMarker(new Position(latLng, name, address));
         }
 
-        googleMap.setOnMapClickListener(tmpLatLng -> setMarker(new Position(tmpLatLng, name, address)));
+        googleMap.setOnMapClickListener(tmpLatLng -> {
+            setMarker(new Position(tmpLatLng, name, address));
+            wasPlacesUsed = false;
+        });
     }
 
     private void setMarker(Position position) {
@@ -173,6 +209,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.position = position;
         mMap.addMarker(new MarkerOptions()
                 .position(position.getLatLng()));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position.getLatLng(), 15));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position.getLatLng(), 15));
     }
 }

@@ -28,8 +28,8 @@ import java.util.Map;
 
 public class AddNewEventActivity extends AppCompatActivity {
 
-    public static final int MAPS_CODE = 1050;
-    private EditText time, date, message, locationName, locationAddress;
+    public static final int ADDRESS_FROM_MAPS_CODE = 1050;
+    private EditText time, date, details, locationName, locationAddress;
     private Button submitButton;
     private Button dateButton;
     private Button timeButton, mapButton, locationAutoCompleteButton;
@@ -49,7 +49,7 @@ public class AddNewEventActivity extends AppCompatActivity {
 
         time = findViewById(R.id.time);
         date = findViewById(R.id.date);
-        message = findViewById(R.id.content);
+        details = findViewById(R.id.content);
         dateButton = findViewById(R.id.dateButton);
         timeButton = findViewById(R.id.timeButton);
         mapButton = findViewById(R.id.mapButton);
@@ -57,19 +57,18 @@ public class AddNewEventActivity extends AppCompatActivity {
         locationAddressSection = findViewById(R.id.locationAddressSection);
         locationAutoCompleteButton = findViewById(R.id.locationAutoCompleteButton);
         locationAddress = findViewById(R.id.location_address);
-        locationName.setFocusable(false);
-        locationName.setHint("Find a location or press 'no location yet'");
+        locationName.setHint("Location name");
+        locationAddress.setHint("Optional");
         Bundle data = getIntent().getExtras();
-        // eventsFragment = data.getParcelable("eventsClass");
 
-        locationAddressSection.setVisibility(View.GONE);
+        locationAddressSection.setVisibility(View.VISIBLE);
         setButtonListeners();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
-        if (requestCode == MAPS_CODE) {
+        if (requestCode == ADDRESS_FROM_MAPS_CODE) {
             if (resultCode == RESULT_OK) {
                 double lat = data.getDoubleExtra("lat", -1);
                 double lng = data.getDoubleExtra("lng", -1);
@@ -77,6 +76,7 @@ public class AddNewEventActivity extends AppCompatActivity {
                 String name = data.getStringExtra("name");
                 locationAddress.setText(address);
                 locationName.setText(name);
+                locationAddressSection.setVisibility(View.VISIBLE);
                 eventLocation = new LatLng(lat, lng);
             }
         } else if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
@@ -100,8 +100,8 @@ public class AddNewEventActivity extends AppCompatActivity {
     private String getPureAddress(String address) {
         if (address == null)
             return "";
-        int index = address.indexOf(",") + 1;
-        return address.substring(index).trim();
+        int index = address.indexOf(",");
+        return address.substring(index+1).trim();
     }
 
     private void setButtonListeners() {
@@ -112,13 +112,9 @@ public class AddNewEventActivity extends AppCompatActivity {
             startMapsActivity();
         });
 
-        dateButton.setOnClickListener(view -> {
-            openDateAndTimeDialog(true);
-        });
+        dateButton.setOnClickListener(view -> openDateAndTimeDialog(true));
 
-        timeButton.setOnClickListener(view -> {
-            openDateAndTimeDialog(false);
-        });
+        timeButton.setOnClickListener(view -> openDateAndTimeDialog(false));
 
         submitButton = findViewById(R.id.submit);
         submitButton.setOnClickListener(view -> {
@@ -163,7 +159,7 @@ public class AddNewEventActivity extends AppCompatActivity {
         intent.putExtra("lat", eventLocation.latitude);
         intent.putExtra("name", locationName.getText().toString());
         intent.putExtra("address", locationAddress.getText().toString());
-        startActivityForResult(intent, MAPS_CODE);
+        startActivityForResult(intent, ADDRESS_FROM_MAPS_CODE);
     }
 
     private void openDateAndTimeDialog(boolean isDataLayout) {
@@ -174,11 +170,13 @@ public class AddNewEventActivity extends AppCompatActivity {
     private void postEvent() {
 
         Map<String, Object> data = new HashMap<>();
-        data.put("city", "city.getText().toString()");
-        data.put("country", "country.getText().toString()");
+        //data.put("city", "city.getText().toString()");
+        //data.put("country", "country.getText().toString()");
+        data.put("lat", eventLocation.latitude);
+        data.put("lng", eventLocation.longitude);
         data.put("date", date.getText().toString());
         data.put("time", time.getText().toString());
-        data.put("content", message.getText().toString());
+        data.put("eventDetails", details.getText().toString());
 
         MainActivity.mFunctions
                 .getHttpsCallable("AddNewEvent")
@@ -187,8 +185,10 @@ public class AddNewEventActivity extends AppCompatActivity {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("add new event -> response:" + response);
 
-                    MainActivity.toast(getApplicationContext(), "Your event is LIVE!", 1);
-                    //     eventsFragment.getEvents();
+                    MainActivity.toast(getApplicationContext(), "Your event is live.", 1);
+                    Intent intent = new Intent();
+                    intent.putExtra("status", "newEvent");
+                    setResult(RESULT_OK, intent);
                     finish();
 
                     if (response.equals("NOT_OK")) {

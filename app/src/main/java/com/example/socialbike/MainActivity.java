@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setGeoContext() {
-
         geoApiContext = new GeoApiContext.Builder()
                 .apiKey("AIzaSyD86dWwLyv1w2TwmseD04jRDvo7L8rVAxo")
                 .build();

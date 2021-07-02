@@ -2,14 +2,10 @@ package com.example.socialbike;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,31 +18,24 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.firebase.functions.HttpsCallableResult;
-
+import com.google.maps.model.LatLng;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static com.example.socialbike.Event.EVENTS_CONTAINER_CODE;
 
+public class EventsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
-public class EventsFragment extends Fragment implements Parcelable, RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
-
+    private final int NEW_EVENT_CODE = 100;
     static EventsFragment eventsFragment = null;
     private RecyclerView recyclerView;
     private final ArrayList<Event> container = new ArrayList<>();
@@ -104,12 +93,15 @@ public class EventsFragment extends Fragment implements Parcelable, RecyclerView
 
     }
 
-    public void parseMessages(String fresh_msgs) {
-
+    public void parseMessages(String rawData) {
+        JSONArray data = null;
+        JSONObject obj;
         try {
-            JSONObject obj = new JSONObject(fresh_msgs);
-            JSONArray data = obj.getJSONArray("events");
-
+            obj = new JSONObject(rawData);
+            data = obj.getJSONArray("events");
+        } catch (Exception e) {
+            System.out.println("An error was caught in message fetcher: " + e.getMessage());
+        }
             if (container.size() > 0 && data.length() > 0) {
                 container.clear();
                 recyclerViewAdapter.notifyDataSetChanged();
@@ -117,35 +109,52 @@ public class EventsFragment extends Fragment implements Parcelable, RecyclerView
 
             for (int i = 0; i < data.length(); i++) {
 
-                String userPublicKey = data.getJSONObject(i).getString("userPublicKey");
-                String message = data.getJSONObject(i).getString("eventContent");
-                String name = data.getJSONObject(i).getString("name");
-                String dateOfEvent = data.getJSONObject(i).getString("eventDate");
-                String timeOfEvent = data.getJSONObject(i).getString("eventTime");
-                String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
-                String eventId = data.getJSONObject(i).getString("eventId");
-                String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
-                String city = data.getJSONObject(i).getString("eventCity");
-                String country = data.getJSONObject(i).getString("eventCountry");
-                int commentsNumber = data.getJSONObject(i).getInt("commentsNumber");
+                String userPublicKey = null;
+                try {
+                    userPublicKey = data.getJSONObject(i).getString("userPublicKey");
+                    String eventDetails = data.getJSONObject(i).getString("eventDetails");
+                    String name = data.getJSONObject(i).getString("name");
+                    String dateOfEvent = data.getJSONObject(i).getString("eventDate");
+                    String timeOfEvent = data.getJSONObject(i).getString("eventTime");
+                    String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
+                    String eventId = data.getJSONObject(i).getString("eventId");
+                    String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
+                    String locationName = data.getJSONObject(i).getString("locationName");
+                    String locationAddress = data.getJSONObject(i).getString("locationAddress");
+                    double lat = data.getJSONObject(i).getDouble("lat");
+                    double lng = data.getJSONObject(i).getDouble("lng");
+                    int commentsNumber = data.getJSONObject(i).getInt("commentsNumber");
 
-                int numberOfParticipants = 0;
-                if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
-                    numberOfParticipants = data.getJSONObject(i).getInt("numberOfParticipants");
+                    int numberOfParticipants = 0;
+                    if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
+                        numberOfParticipants = data.getJSONObject(i).getInt("numberOfParticipants");
 
-                Event event = new Event(
-                        eventId, userPublicKey, name,
-                        dateOfEvent, timeOfEvent, createdEventTime,
-                        numOfInterestedMembers, numberOfParticipants,
-                        city, country, message, commentsNumber);
-                updater.add(event);
+                    Event event = new Event(
+                            eventId, userPublicKey, name,
+                            dateOfEvent, timeOfEvent, createdEventTime,
+                            numOfInterestedMembers, numberOfParticipants,
+                            new LatLng(lat, lng), eventDetails, commentsNumber);
+                    updater.add(event);
 
-                System.out.println("post " + i + " " + message);
+                    System.out.println("event  " + i + " " + eventDetails);
+                }
+                catch (JSONException e) {
+                    System.out.println("An error was caught in message fetcher: " + e.getMessage());
+                }
+
             }
             onFinishedTakingNewMessages();
-        } catch (Exception e) {
-            System.out.println("An error was caught in message fetcher: " + e.getMessage());
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == NEW_EVENT_CODE) {
+            if (resultCode == RESULT_OK) {
+                getRecentData();
+            }
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -177,8 +186,7 @@ public class EventsFragment extends Fragment implements Parcelable, RecyclerView
 
         addEvent.setOnClickListener(view -> {
             Intent intent = new Intent(getContext(), AddNewEventActivity.class);
-          //  intent.putExtra("eventsClass", (Parcelable) this);
-            startActivity(intent);
+            startActivityForResult(intent, NEW_EVENT_CODE);
         });
 
         Button sortButton = root.findViewById(R.id.sort_button);
@@ -239,8 +247,8 @@ public class EventsFragment extends Fragment implements Parcelable, RecyclerView
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         holder.message.setText(container.get(position).getMsg());
-        holder.country.setText(container.get(position).getCountry());
-        holder.city.setText(container.get(position).getCity());
+        holder.country.setText("country");
+        holder.city.setText("city");
         holder.time.setText(container.get(position).getTimeOfEvent());
         holder.date.setText(container.get(position).getDateOfEvent());
         holder.name.setText(container.get(position).getName());
@@ -564,13 +572,4 @@ public class EventsFragment extends Fragment implements Parcelable, RecyclerView
         hideProgressbar();
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-
-    }
 }
