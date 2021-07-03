@@ -170,13 +170,13 @@ public class AddNewEventActivity extends AppCompatActivity {
     private void postEvent() {
 
         Map<String, Object> data = new HashMap<>();
-        //data.put("city", "city.getText().toString()");
-        //data.put("country", "country.getText().toString()");
         data.put("lat", eventLocation.latitude);
         data.put("lng", eventLocation.longitude);
         data.put("date", date.getText().toString());
         data.put("time", time.getText().toString());
         data.put("eventDetails", details.getText().toString());
+        data.put("locationName", locationName.getText().toString());
+        data.put("locationAddress", locationAddress.getText().toString());
 
         MainActivity.mFunctions
                 .getHttpsCallable("AddNewEvent")

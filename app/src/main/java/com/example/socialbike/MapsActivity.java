@@ -32,36 +32,6 @@ import java.util.List;
 
 import static com.example.socialbike.MainActivity.geoApiContext;
 
-class Position {
-    public LatLng latLng;
-    public String name, address;
-
-    public Position(LatLng latLng, String name, String address) {
-        this.latLng = latLng;
-        this.name = name;
-        this.address = address;
-    }
-
-    public LatLng getLatLng() {
-        return latLng;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-}
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -152,9 +122,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String address = results[0].formattedAddress;
             position.setAddress(address);
             if (address.contains(",")) {
-                position.setName(address.substring(0, address.indexOf(",")));
+                position.setLocationName(address.substring(0, address.indexOf(",")));
             } else
-                position.setName("");
+                position.setLocationName("");
         }
     }
 
@@ -162,9 +132,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = new Intent();
         intent.putExtra("lat", position.getLatLng().latitude);
         intent.putExtra("lng", position.getLatLng().longitude);
-        intent.putExtra("name", position.getName());
+        intent.putExtra("name", position.getLocationName());
         intent.putExtra("address", position.getAddress());
-        System.out.println("Passing data: " + position.getAddress() + ", " + position.getName() + ", " + position.getLatLng().toString());
+        System.out.println("Passing data: " + position.getAddress() + ", " + position.getLocationName() + ", " + position.getLatLng().toString());
         setResult(RESULT_OK, intent);
     }
 

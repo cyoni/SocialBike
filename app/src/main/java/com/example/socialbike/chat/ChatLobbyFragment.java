@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
-import com.example.socialbike.User;
+import com.example.socialbike.ConnectedUser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public class ChatLobbyFragment extends Fragment
         initAdapter();
 
         this.container.add(new ChatPreviewUser("22", "444444", "John", "Hi"));
-        this.container.add(new ChatPreviewUser("1245", User.getPublicKey(), "Yoni", "Shalom Everybody"));
+        this.container.add(new ChatPreviewUser("1245", ConnectedUser.getPublicKey(), "Yoni", "Shalom Everybody"));
         this.container.add(new ChatPreviewUser("123", "4343", "Yoram", "Let's ride tonight"));
 
 

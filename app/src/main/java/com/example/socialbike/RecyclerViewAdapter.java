@@ -56,9 +56,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView name, message, date,
                 time, msgStyle, message_preview,
-                city, country, commentText, people_going;
-        public ImageView profilePicture;
-        public Button start_conversation, interested, coming;
+                  commentText, people_going, locationName;
+        public Button mapButton, interested, coming;
         public RelativeLayout layout;
         public ImageButton commentsButton;
         public Button commentButton, postCommentButton, who_is_coming;
@@ -73,8 +72,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             name = itemView.findViewById(R.id.name);
             date = itemView.findViewById(R.id.date);
             message = itemView.findViewById(R.id.message);
-            city = itemView.findViewById(R.id.city);
-            country = itemView.findViewById(R.id.country);
             layout = itemView.findViewById(R.id.layout);
             commentsButton = itemView.findViewById(R.id.commentsButton);
             commentButton = itemView.findViewById(R.id.commentButton);
@@ -88,9 +85,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             who_is_interested = itemView.findViewById(R.id.who_is_interested);
             people_going = itemView.findViewById(R.id.people_going);
             progressBar = itemView.findViewById(R.id.progressBar);
+            mapButton = itemView.findViewById(R.id.mapButton);
+            locationName = itemView.findViewById(R.id.locationName);
 
-
-            //profilePicture = itemView.findViewById(R.id.status);
             time = itemView.findViewById(R.id.time);
             msgStyle = itemView.findViewById(R.id.msgStyle);
             // start_conversation = itemView.findViewById(R.id.start_conversation);

@@ -201,8 +201,8 @@ public class PostActivity extends AppCompatActivity
                             POSTS_CONTAINER_CODE,
                             post.getPostId(),
                             postIdFromServer,
-                            User.getPublicKey(),
-                            User.getName(),
+                            ConnectedUser.getPublicKey(),
+                            ConnectedUser.getName(),
                             121221,
                             comment));
                     recyclerViewAdapter.notifyItemInserted(0);

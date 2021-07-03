@@ -2,7 +2,6 @@ package com.example.socialbike;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -11,13 +10,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.example.socialbike.chat.ChatLobbyFragment;
 import com.example.socialbike.chat.ChatManager;
 import com.example.socialbike.chat.ContainerForChat;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -28,14 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.functions.FirebaseFunctions;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.maps.GeoApiContext;
-import com.google.maps.GeocodingApi;
-import com.google.maps.errors.ApiException;
-import com.google.maps.model.GeocodingResult;
-
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -86,8 +76,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadUser() {
         if (checkIfUserConnected()){
-            User.setPublicKey(MyPreferences.getUserPublicKey(this));
-            User.setNickname(MyPreferences.getNicknameFromDevice(this));
+            ConnectedUser.setPublicKey(MyPreferences.getUserPublicKey(this));
+            ConnectedUser.setNickname(MyPreferences.getNicknameFromDevice(this));
         }
     }
 

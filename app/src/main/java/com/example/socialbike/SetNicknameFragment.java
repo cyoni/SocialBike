@@ -42,7 +42,7 @@ public class SetNicknameFragment extends Fragment {
 
         continueButton.setOnClickListener(view -> {
 
-            if (User.getName() == null || !User.getName().toLowerCase().equals(nickname_txt.getText().toString().toLowerCase())){
+            if (ConnectedUser.getName() == null || !ConnectedUser.getName().toLowerCase().equals(nickname_txt.getText().toString().toLowerCase())){
                 setNickname();
             }
             else
@@ -86,7 +86,7 @@ public class SetNicknameFragment extends Fragment {
                                 MainActivity.toast(getContext(), answer, 1);
                                 break;
                             default:
-                                User.setNickname(answer);
+                                ConnectedUser.setNickname(answer);
                                 MyPreferences.setSharedPreference(getActivity(), MyPreferences.USER_FOLDER, "nickname", answer);
                                 proceedToTheNextFragment();
                                 return null;

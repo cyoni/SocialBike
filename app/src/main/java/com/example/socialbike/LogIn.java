@@ -131,7 +131,7 @@ public class LogIn extends AppCompatActivity {
                         }
                     else {
                         savePublicKeyOnDevice(publicKey);
-                        User.setPublicKey(publicKey);
+                        ConnectedUser.setPublicKey(publicKey);
                         getNicknameFromDBAndSave();
                     }
                 }
@@ -146,12 +146,12 @@ public class LogIn extends AppCompatActivity {
     }
 
     private void getNicknameFromDBAndSave() {
-        MainActivity.mDatabase.child("public").child(User.getPublicKey()).child("profile").child("nickname").addListenerForSingleValueEvent(new ValueEventListener() {
+        MainActivity.mDatabase.child("public").child(ConnectedUser.getPublicKey()).child("profile").child("nickname").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!  dataSnapshot.exists()) {
                     String nickname = (String) dataSnapshot.getValue();
-                    User.setNickname(nickname);
+                    ConnectedUser.setNickname(nickname);
                     saveNicknameOnDevice(nickname);
                     closeActivity();
                     MainActivity.toast(getApplicationContext(), "Hi " + nickname, 0);

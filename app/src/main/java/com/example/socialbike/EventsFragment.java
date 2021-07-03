@@ -2,10 +2,12 @@ package com.example.socialbike;
 
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,16 +18,14 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.firebase.functions.HttpsCallableResult;
-import com.google.maps.model.LatLng;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,48 +102,50 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         } catch (Exception e) {
             System.out.println("An error was caught in message fetcher: " + e.getMessage());
         }
-            if (container.size() > 0 && data.length() > 0) {
-                container.clear();
-                recyclerViewAdapter.notifyDataSetChanged();
+        if (container.size() > 0 && data.length() > 0) {
+            container.clear();
+            recyclerViewAdapter.notifyDataSetChanged();
+        }
+
+        for (int i = 0; i < data.length(); i++) {
+
+            String userPublicKey = null;
+            try {
+                userPublicKey = data.getJSONObject(i).getString("userPublicKey");
+                String eventDetails = data.getJSONObject(i).getString("eventDetails");
+                String name = data.getJSONObject(i).getString("name");
+                String dateOfEvent = data.getJSONObject(i).getString("eventDate");
+                String timeOfEvent = data.getJSONObject(i).getString("eventTime");
+                String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
+                String eventId = data.getJSONObject(i).getString("eventId");
+                String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
+                String locationName = data.getJSONObject(i).getString("locationName");
+                String locationAddress = data.getJSONObject(i).getString("locationAddress");
+                double lat = data.getJSONObject(i).getDouble("lat");
+                double lng = data.getJSONObject(i).getDouble("lng");
+                int commentsNumber = data.getJSONObject(i).getInt("commentsNumber");
+
+                int numberOfParticipants = 0;
+                if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
+                    numberOfParticipants = data.getJSONObject(i).getInt("numberOfParticipants");
+
+                Position position = new Position(new LatLng(lat, lng), locationName, locationAddress);
+                Event event = new Event(
+                        eventId, userPublicKey, name,
+                        dateOfEvent, timeOfEvent, createdEventTime,
+                        numOfInterestedMembers, numberOfParticipants,
+                        position, eventDetails, commentsNumber
+                );
+
+                updater.add(event);
+
+                System.out.println("event  " + i + " " + eventDetails);
+            } catch (JSONException e) {
+                System.out.println("An error was caught in message fetcher: " + e.getMessage());
             }
 
-            for (int i = 0; i < data.length(); i++) {
-
-                String userPublicKey = null;
-                try {
-                    userPublicKey = data.getJSONObject(i).getString("userPublicKey");
-                    String eventDetails = data.getJSONObject(i).getString("eventDetails");
-                    String name = data.getJSONObject(i).getString("name");
-                    String dateOfEvent = data.getJSONObject(i).getString("eventDate");
-                    String timeOfEvent = data.getJSONObject(i).getString("eventTime");
-                    String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
-                    String eventId = data.getJSONObject(i).getString("eventId");
-                    String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
-                    String locationName = data.getJSONObject(i).getString("locationName");
-                    String locationAddress = data.getJSONObject(i).getString("locationAddress");
-                    double lat = data.getJSONObject(i).getDouble("lat");
-                    double lng = data.getJSONObject(i).getDouble("lng");
-                    int commentsNumber = data.getJSONObject(i).getInt("commentsNumber");
-
-                    int numberOfParticipants = 0;
-                    if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
-                        numberOfParticipants = data.getJSONObject(i).getInt("numberOfParticipants");
-
-                    Event event = new Event(
-                            eventId, userPublicKey, name,
-                            dateOfEvent, timeOfEvent, createdEventTime,
-                            numOfInterestedMembers, numberOfParticipants,
-                            new LatLng(lat, lng), eventDetails, commentsNumber);
-                    updater.add(event);
-
-                    System.out.println("event  " + i + " " + eventDetails);
-                }
-                catch (JSONException e) {
-                    System.out.println("An error was caught in message fetcher: " + e.getMessage());
-                }
-
-            }
-            onFinishedTakingNewMessages();
+        }
+        onFinishedTakingNewMessages();
 
     }
 
@@ -247,8 +249,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         holder.message.setText(container.get(position).getMsg());
-        holder.country.setText("country");
-        holder.city.setText("city");
+        holder.locationName.setText(container.get(position).getPosition().getLocationName());
         holder.time.setText(container.get(position).getTimeOfEvent());
         holder.date.setText(container.get(position).getDateOfEvent());
         holder.name.setText(container.get(position).getName());
@@ -258,40 +259,47 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         holder.who_is_coming.setOnClickListener(view -> who_is_going(holder, position));
         holder.who_is_interested.setOnClickListener(view -> who_is_interested(holder, position));
         holder.commentButton.setOnClickListener(view -> commentButton(holder, position));
+        holder.mapButton.setOnClickListener(view -> openMap(container.get(position).getLatLng()));
 
         // holder.amountOfInterestedPeople.setText(container.get(position).getAmountOfInterestedPeople());
     }
 
+    private void openMap(LatLng latLng) {
+        Intent intent = new Intent(getContext(), Maps.class);
+        intent.putExtra("lat", latLng.latitude);
+        intent.putExtra("lng", latLng.longitude);
+        startActivity(intent);
+    }
+
     private void commentButton(RecyclerViewAdapter.ViewHolder holder, int position) {
 
-        if (container.get(position).hasComments()){
+        if (container.get(position).hasComments()) {
             holder.progressBar.setVisibility(View.VISIBLE);
             getComments(holder, position);
-        }
-        else{
+        } else {
             holder.progressBar.setVisibility(View.GONE);
         }
 
         holder.commentLayout.setVisibility(View.VISIBLE);
-        holder.postCommentButton.setOnClickListener(view -> sendMainComment(holder, position));
+        holder.postCommentButton.setOnClickListener(view -> sendHeadComment(holder, position));
     }
 
     private void getComments(RecyclerViewAdapter.ViewHolder holder, int position) {
-            container.get(position).getComments()
-                    .continueWith(task -> {
+        container.get(position).getComments()
+                .continueWith(task -> {
 
-                        String response = String.valueOf(task.getResult().getData());
-                        System.out.println("response: " + response);
+                    String response = String.valueOf(task.getResult().getData());
+                    System.out.println("response: " + response);
 
-                        if (!response.isEmpty()) {
-                            holder.progressBar.setVisibility(View.GONE);
+                    if (!response.isEmpty()) {
+                        holder.progressBar.setVisibility(View.GONE);
 
-                            processComments(response, holder, position);
+                        processComments(response, holder, position);
 
-                        }
+                    }
 
-                        return "";
-                    });
+                    return "";
+                });
     }
 
     private void processComments(String response, RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -363,8 +371,9 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
     }
 
-    private void sendMainComment(RecyclerViewAdapter.ViewHolder holder, int position) {
+    private void sendHeadComment(RecyclerViewAdapter.ViewHolder holder, int position) {
 
+        holder.postCommentButton.setText("SENDING...");
         String comment = holder.commentText.getText().toString();
 
         if (comment.isEmpty())
@@ -379,8 +388,8 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
                             EVENTS_CONTAINER_CODE,
                             container.get(position).getEventId(),
                             commentIdFromServer,
-                            User.getPublicKey(),
-                            User.getName(),
+                            ConnectedUser.getPublicKey(),
+                            ConnectedUser.getName(),
                             121221,
                             comment);
 
@@ -389,6 +398,7 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
                     addCommentToLayout(R.layout.item_comment, newComment, holder, position);
 
                     holder.commentText.setText("");
+                    holder.postCommentButton.setText("Send");
                     System.out.println("Done.");
 
                     return null;
@@ -428,13 +438,13 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         LinearLayout commentLayout = holder.commentLayout;
         LinearLayout linearLayout = (LinearLayout) View.inflate(getContext(), commentType, null);
 
-      //  if (commentType == R.layout.item_sub_comment)
-      //     linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, linearLayout));
+        //  if (commentType == R.layout.item_sub_comment)
+        //     linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, linearLayout));
 
-         if (commentType == R.layout.item_comment) {
+        if (commentType == R.layout.item_comment) {
             linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> showOrHideNewCommentSection(linearLayout));
             linearLayout.findViewById(R.id.postCommentButton).setOnClickListener(view -> sendSubComment(linearLayout, holder, position, comment));
-         }
+        }
 
         TextView commentText = linearLayout.findViewById(R.id.message);
         TextView commentName = linearLayout.findViewById(R.id.name);
@@ -447,18 +457,21 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
 
     private void sendSubComment(LinearLayout linearLayout, RecyclerViewAdapter.ViewHolder holder, int position, Comment comment) {
         EditText viewComment = linearLayout.findViewById(R.id.headCommentText);
+        Button commentButton = linearLayout.findViewById(R.id.commentButton);
+        commentButton.setText("Sending...");
         String commentStr = viewComment.getText().toString();
 
         //sendComment(container.get(position).getEventId(), comment.getPostId(), commentStr).continueWith(response -> {
-          comment.sendSubComment(commentStr).continueWith(task -> {
-              String response = String.valueOf(task.getResult().getData());
-              System.out.println("res: " + response);
+        comment.sendSubComment(commentStr).continueWith(task -> {
+            String response = String.valueOf(task.getResult().getData());
+            System.out.println("res: " + response);
 
-              SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, comment.getPostId(), response, User.getPublicKey(), User.getName(), 12345, commentStr);
-              addSUBCommentToLayout(linearLayout, subComment, holder, position);
-              viewComment.setText("");
-              return null;
-          });
+            SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, comment.getPostId(), response, ConnectedUser.getPublicKey(), ConnectedUser.getName(), 12345, commentStr);
+            addSUBCommentToLayout(linearLayout, subComment, holder, position);
+            viewComment.setText("");
+            commentButton.setText("Send");
+            return null;
+        });
 
 
     }

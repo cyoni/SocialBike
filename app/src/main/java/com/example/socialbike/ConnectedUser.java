@@ -1,6 +1,6 @@
 package com.example.socialbike;
 
-public class User {
+public class ConnectedUser {
 
     private static String publicKey;
     private static String nickname;

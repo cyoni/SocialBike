@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.socialbike.MainActivity;
-import com.example.socialbike.User;
+import com.example.socialbike.ConnectedUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,7 +23,7 @@ public class ChatManager {
 
     public void listenForNewMessages() {
         System.out.println("Chat has started");
-        MainActivity.mDatabase.child("private_msgs").child(User.getPublicKey()).addChildEventListener(new ChildEventListener() {
+        MainActivity.mDatabase.child("private_msgs").child(ConnectedUser.getPublicKey()).addChildEventListener(new ChildEventListener() {
 
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -68,7 +68,7 @@ public class ChatManager {
 
     public ChatPreviewUser getUserFromList() {
         ArrayList<ChatPreviewUser> container = chatLobbyFragment.getUsersList();
-        return container.stream().filter(x -> x.senderPublicKey.equals(User.getPublicKey())).findAny().orElse(null);
+        return container.stream().filter(x -> x.senderPublicKey.equals(ConnectedUser.getPublicKey())).findAny().orElse(null);
     }
 
     private void passMessageToRelevantClass(String messageId, String senderPublicKey, String sendersName, String message, boolean isIncomingMessage) {
@@ -140,11 +140,11 @@ public class ChatManager {
     public void sendMessage(String receiver, String message) {
         Map<String, Object> data = new HashMap<>();
         data.put("receiver", "-MYVCkWexSO_jumnbr0l");
-        data.put("publicKey", User.getPublicKey());
+        data.put("publicKey", ConnectedUser.getPublicKey());
         data.put("message", message);
 
         System.out.println("sending private msg to " + receiver + "...");
-        passMessageToRelevantClass("123456", User.getPublicKey(), User.getName(), message, false);
+        passMessageToRelevantClass("123456", ConnectedUser.getPublicKey(), ConnectedUser.getName(), message, false);
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")

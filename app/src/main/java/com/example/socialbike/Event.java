@@ -1,6 +1,7 @@
 package com.example.socialbike;
 
-import com.google.maps.model.LatLng;
+
+import com.google.android.gms.maps.model.LatLng;
 
 public class Event extends Post{
 
@@ -12,15 +13,16 @@ public class Event extends Post{
     private final String amountOfInterestedPeople;
     private final int numberOfParticipants;
     public static String EVENTS_CONTAINER_CODE = "events";
-    private final LatLng latLng;
+    private final Position position;
 
     public Event(String eventId, String userPublicKey, String name,
                  String dateOfEvent, String timeOfEvent, String createdEventTime,
                  String amountOfInterestedPeople, int numberOfParticipants,
-                 LatLng latLng, String message, int commentsNumber) {
-        super(eventId, userPublicKey, name, 1245, message, commentsNumber);
-        container = EVENTS_CONTAINER_CODE;
+                 Position position, String message, int commentsNumber) {
 
+        super(eventId, userPublicKey, name, 1245, message, commentsNumber);
+
+        this.container = EVENTS_CONTAINER_CODE;
         this.eventId = eventId;
         this.userPublicKey = userPublicKey;
         this.name = name;
@@ -29,7 +31,7 @@ public class Event extends Post{
         this.createdEventTime = createdEventTime;
         this.amountOfInterestedPeople = amountOfInterestedPeople;
         this.numberOfParticipants = numberOfParticipants;
-        this.latLng = latLng;
+        this.position = position;
     }
 
     public String getEventId() {
@@ -65,7 +67,11 @@ public class Event extends Post{
     }
 
     public LatLng getLatLng(){
-        return latLng;
+        return position.getLatLng();
+    }
+
+    public Position getPosition() {
+        return position;
     }
 
 }
