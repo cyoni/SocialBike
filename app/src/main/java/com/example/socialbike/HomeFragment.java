@@ -63,6 +63,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         activateFloatingButton();
         initAdapter();
         if (loadPosts) {
+
             progressBar.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.INVISIBLE);
 
@@ -77,11 +78,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
 
 
     private void activateFloatingButton() {
-        floatingButton.setOnClickListener(view -> {
-            //openNewPostActivity();
-            MessageGetter messageManager = new MessageGetter(updater);
-            messageManager.getPosts();
-        });
+        floatingButton.setOnClickListener(view -> openNewPostActivity());
     }
 
     private void openNewPostActivity() {

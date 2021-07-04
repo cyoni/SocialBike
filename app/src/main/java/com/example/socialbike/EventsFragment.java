@@ -1,13 +1,16 @@
 package com.example.socialbike;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +19,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -33,7 +37,7 @@ import java.util.Map;
 import static android.app.Activity.RESULT_OK;
 import static com.example.socialbike.Event.EVENTS_CONTAINER_CODE;
 
-public class EventsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
+public class EventsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate, SeekBar.OnSeekBarChangeListener {
 
     private final int NEW_EVENT_CODE = 100;
     static EventsFragment eventsFragment = null;
@@ -46,9 +50,10 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
     private final String MOST_RECENT_CODE = "MOST_RECENT";
     private final String TRADING_CODE = "TRADING";
     private String dataType = MOST_RECENT_CODE;
-    private LinearLayout searchSection;
-    private RelativeLayout topMenu;
-
+    private RelativeLayout topMenu, searchSection;
+    private SeekBar seekBar;
+    private TextView rangeText, cityText;
+    private Button set_button, cancel_button;
 
     private void initAdapter() {
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_events, container);
@@ -168,6 +173,16 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         progressBar.setVisibility(View.INVISIBLE);
         searchSection = root.findViewById(R.id.searchSection);
         topMenu = root.findViewById(R.id.topMenu);
+        rangeText = root.findViewById(R.id.rangeText);
+        cityText = root.findViewById(R.id.city);
+        cancel_button = root.findViewById(R.id.cancel_button);
+        set_button = root.findViewById(R.id.set_button);
+
+        cancel_button.setOnClickListener(view -> hideSearchSectionAndShowTopMenu());
+        set_button.setOnClickListener(view -> setEditSearch());
+
+        setCityText();
+        setSeekBar(root);
 
         hideSearchSectionAndShowTopMenu();
 
@@ -207,6 +222,26 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         return root;
     }
 
+    private void setEditSearch() {
+        // TODO
+        hideSearchSectionAndShowTopMenu();
+    }
+
+
+
+    private void setCityText() {
+        cityText.setText(HtmlCompat.fromHtml("<u><b>Tel Aviv</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+    }
+
+    private void setSeekBar(View root) {
+        seekBar = root.findViewById(R.id.seekBar);
+        seekBar.setOnSeekBarChangeListener(this);
+        seekBar.setMax(100);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            seekBar.setMin(10);
+        }
+    }
+
     private void hideSearchSectionAndShowTopMenu() {
         searchSection.setVisibility(View.GONE);
         topMenu.setVisibility(View.VISIBLE);
@@ -217,7 +252,6 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         topMenu.setVisibility(View.GONE);
     }
 
-
     private void showProgressbar() {
         recyclerView.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
@@ -227,7 +261,6 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
     }
-
 
     private void getRecentData() {
         showProgressbar();
@@ -245,6 +278,28 @@ public class EventsFragment extends Fragment implements RecyclerViewAdapter.Item
         showSearchSectionAndHideTopMenu();
     }
 
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        int stepSize = 10;
+        progress = (seekBar.getProgress() / stepSize) * stepSize;
+        seekBar.setProgress(progress);
+        System.out.println(progress);
+        updateSearchText();
+    }
+
+    private void updateSearchText() {
+        int range = seekBar.getProgress();
+        String str = "Finds events within " + range + " km of";
+        rangeText.setText(str);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+    }
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {

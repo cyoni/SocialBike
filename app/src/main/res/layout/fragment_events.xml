@@ -7,41 +7,54 @@
     tools:context=".EventsFragment"
     android:orientation="vertical">
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/searchSection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/searchSection"
-        android:orientation="vertical">
-
+        android:padding="5dp"
+        >
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/rangeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Finds events within XX KM of XXXX" />
+
+        <TextView
+            android:id="@+id/city"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/blue"
+            android:layout_marginLeft="3dp"
+            android:layout_toRightOf="@id/rangeText"
+            android:text="Tel Aviv"
+
+            />
 
 
         <SeekBar
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-
+            android:layout_below="@id/rangeText"
             />
 
         <Button
-            android:id="@+id/button7"
+            android:id="@+id/set_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/seekBar"
             android:text="Set" />
 
         <Button
-            android:id="@+id/button8"
+            android:id="@+id/cancel_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/set_button"
             android:text="Cancel" />
 
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/topMenu"
