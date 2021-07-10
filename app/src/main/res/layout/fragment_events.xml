@@ -4,30 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EventsFragment"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".EventsFragment">
 
     <RelativeLayout
         android:id="@+id/searchSection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
-        >
+        android:padding="5dp">
 
         <TextView
             android:id="@+id/rangeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Finds events within XX KM of XXXX" />
+            android:text="Finds events within XX KM of" />
 
         <TextView
             android:id="@+id/city"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/blue"
-            android:layout_marginLeft="3dp"
-            android:layout_toRightOf="@id/rangeText"
+            android:layout_marginStart="3dp"
+            android:layout_toEndOf="@id/rangeText"
             android:text="Tel Aviv"
+            android:textColor="@color/blue"
 
             />
 
@@ -36,8 +35,7 @@
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:layout_below="@id/rangeText"
-            />
+            android:layout_below="@id/rangeText" />
 
         <Button
             android:id="@+id/set_button"
@@ -68,7 +66,7 @@
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@id/sort_button"
+            android:layout_toStartOf="@id/sort_button"
             android:text="Add New Event" />
 
         <Button
@@ -76,8 +74,8 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="170dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
             android:text="Treading" />
 
 
@@ -86,7 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/add_new_event_button"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:text="Edit search" />
@@ -105,7 +103,6 @@
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/search_places"
         android:scrollbars="vertical"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 

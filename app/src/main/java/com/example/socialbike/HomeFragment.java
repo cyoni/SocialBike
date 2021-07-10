@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -21,17 +23,13 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
 
     private static HomeFragment homeFragment = null;
     private FloatingActionButton floatingButton;
-    private final ArrayList<Post> container;
+    private final ArrayList<Post> container = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private Updater updater;
     private MessageGetter messageManager;
     private boolean loadPosts = true;
     private ProgressBar progressBar;
-
-    public HomeFragment() {
-        container = new ArrayList<>();
-    }
 
     public static HomeFragment getInstance() {
         if (homeFragment == null)
@@ -51,7 +49,6 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         super.onCreate(savedInstanceState);
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
@@ -60,6 +57,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         progressBar = root.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
+        setToolbar(root);
         activateFloatingButton();
         initAdapter();
         if (loadPosts) {
@@ -70,55 +68,71 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
             updater = new Updater(this, this.container, recyclerViewAdapter);
             messageManager = new MessageGetter(updater);
 
-            messageManager.getPosts();
+          //  messageManager.getPosts();
             loadPosts = false;
         }
         return root;
     }
 
+    private void setToolbar(View root) {
+        Toolbar toolbar = root.findViewById(R.id.toolbar);
+        toolbar.setSubtitle("Home");
+        toolbar.inflateMenu(R.menu.main_menu);
+        toolbar.setOnMenuItemClickListener(this::toolbarClickListener);
+    }
+
+    private boolean toolbarClickListener(MenuItem item) {
+            if (item.getItemId() == R.id.login) {
+                openLoginActivity();
+                return true;
+            }
+            return false;
+    }
+
+    private void openLoginActivity() {
+        Intent intent = new Intent(getContext(), LogInActivity.class);
+        startActivity(intent);
+    }
 
     private void activateFloatingButton() {
-        floatingButton.setOnClickListener(view -> openNewPostActivity());
-    }
+                floatingButton.setOnClickListener(view -> openNewPostActivity());
+            }
 
-    private void openNewPostActivity() {
-        Intent intent = new Intent(getContext(), AddPostActivity.class);
-        startActivity(intent);
-    }
+            private void openNewPostActivity() {
+                Intent intent = new Intent(getContext(), AddPostActivity.class);
+                startActivity(intent);
+            }
 
-    @Override
-    public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.message.setText(container.get(position).getMsg());
-        holder.name.setText(container.get(position).getName());
+            @Override
+            public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
+                holder.message.setText(container.get(position).getMsg());
+                holder.name.setText(container.get(position).getName());
 
-        holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-        holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-    }
+                holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+                holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+            }
 
-    private void commentsButtonClick(Post post) {
-        Intent intent = new Intent(getContext(), PostActivity.class);
-        intent.putExtra("post", post);
-        startActivity(intent);
-    }
+            private void commentsButtonClick(Post post) {
+                Intent intent = new Intent(getContext(), PostActivity.class);
+                intent.putExtra("post", post);
+                startActivity(intent);
+            }
 
-    private void openPost() {
+            @Override
+            public void onItemClick(@NonNull View holder, int position) {
 
-    }
-
-
-    @Override
-    public void onItemClick(@NonNull View holder, int position) {
-
-    }
+            }
 
 
-    public void addPost(Post post) {
-        updater.add(post);
-    }
+            public void addPost(Post post) {
+                updater.add(post);
+            }
 
-    @Override
-    public void onFinishedTakingNewMessages() {
-        recyclerView.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.GONE);
-    }
-}
+            @Override
+            public void onFinishedTakingNewMessages() {
+                recyclerView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+            }
+
+
+        }

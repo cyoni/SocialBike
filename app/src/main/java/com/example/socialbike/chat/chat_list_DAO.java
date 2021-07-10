@@ -1,4 +1,4 @@
-package com.example.socialbike;
+package com.example.socialbike.chat;
 /*
 
 import androidx.room.Dao;

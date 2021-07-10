@@ -16,8 +16,8 @@ public class DateAndTimeDialog extends Dialog {
     private final int layout;
     private final boolean isDateLayout;
     private final AddNewEventActivity callerClass;
-    DatePicker date_picker;
-    TimePicker time_picker;
+    private DatePicker date_picker;
+    private TimePicker time_picker;
 
     Button cancelButton, applyButton;
 

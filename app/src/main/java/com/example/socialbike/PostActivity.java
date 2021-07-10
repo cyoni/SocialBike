@@ -232,7 +232,7 @@ public class PostActivity extends AppCompatActivity
     private void getPost() {
         Bundle data = getIntent().getExtras();
         post = data.getParcelable("post");
-        post.container = POSTS_CONTAINER_CODE;
+        post.DatabaseContainer = POSTS_CONTAINER_CODE;
     }
 
     @Override

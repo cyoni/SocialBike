@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
+        inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
@@ -153,6 +153,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void login() {
-        startActivity(new Intent(this, LogIn.class));
+        startActivity(new Intent(this, LogInActivity.class));
     }
 }

@@ -22,7 +22,7 @@ public class Event extends Post{
 
         super(eventId, userPublicKey, name, 1245, message, commentsNumber);
 
-        this.container = EVENTS_CONTAINER_CODE;
+        this.DatabaseContainer = EVENTS_CONTAINER_CODE;
         this.eventId = eventId;
         this.userPublicKey = userPublicKey;
         this.name = name;

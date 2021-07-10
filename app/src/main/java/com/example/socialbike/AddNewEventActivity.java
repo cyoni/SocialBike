@@ -33,7 +33,6 @@ public class AddNewEventActivity extends AppCompatActivity {
     private Button submitButton;
     private Button dateButton;
     private Button timeButton, mapButton, locationAutoCompleteButton;
-    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
     private String placeId;
     private EventsFragment eventsFragment;
     private LatLng eventLocation = new LatLng(0, 0);
@@ -79,14 +78,14 @@ public class AddNewEventActivity extends AppCompatActivity {
                 locationAddressSection.setVisibility(View.VISIBLE);
                 eventLocation = new LatLng(lat, lng);
             }
-        } else if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+        } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 locationAddressSection.setVisibility(View.VISIBLE);
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 placeId = place.getId();
                 //System.out.println("Place: " + place.getName() + ", " + place.getId());
                 locationName.setText(place.getName());
-                locationAddress.setText(getPureAddress(place.getAddress()));
+                locationAddress.setText(place.getAddress());
                 eventLocation = place.getLatLng();
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
@@ -97,23 +96,12 @@ public class AddNewEventActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private String getPureAddress(String address) {
-        if (address == null)
-            return "";
-        int index = address.indexOf(",");
-        return address.substring(index+1).trim();
-    }
-
     private void setButtonListeners() {
 
         setLocationInputListener();
 
-        mapButton.setOnClickListener(view -> {
-            startMapsActivity();
-        });
-
+        mapButton.setOnClickListener(view -> startMapsActivity());
         dateButton.setOnClickListener(view -> openDateAndTimeDialog(true));
-
         timeButton.setOnClickListener(view -> openDateAndTimeDialog(false));
 
         submitButton = findViewById(R.id.submit);
@@ -128,11 +116,8 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void openLocationWindow() {
-        PlacesClient placesClient = Places.createClient(this);
-        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
-        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                .build(this);
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+        GoogleAPI googleAPI = new GoogleAPI();
+        googleAPI.Places(this, this, AutocompleteActivityMode.FULLSCREEN);
     }
 
     private void getCoordinates() {

@@ -64,7 +64,7 @@
             android:theme="@style/Theme.SocialBike.NoActionBar" />
         <activity android:name=".WelcomeActivity" />
         <activity
-            android:name=".LogIn"
+            android:name=".LogInActivity"
             android:label="@string/title_activity_log_in"
             android:theme="@style/Theme.SocialBike.NoActionBar" />
         <activity android:name=".MainActivity">

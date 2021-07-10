@@ -25,7 +25,7 @@ import android.view.View;
 
 import java.util.HashMap;
 
-public class LogIn extends AppCompatActivity {
+public class LogInActivity extends AppCompatActivity {
 
     private SignInButton logInButton;
     private GoogleSignInOptions gso;
@@ -173,7 +173,7 @@ public class LogIn extends AppCompatActivity {
 
 
     private void saveNicknameOnDevice(String nickname) {
-        MyPreferences.setSharedPreference(LogIn.this, MyPreferences.USER_FOLDER, "nickname", nickname);
+        MyPreferences.setSharedPreference(LogInActivity.this, MyPreferences.USER_FOLDER, "nickname", nickname);
     }
 
     private void openSetNicknameActivity() {

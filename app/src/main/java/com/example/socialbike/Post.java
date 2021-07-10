@@ -15,8 +15,8 @@ public class Post implements Parcelable {
     private final String postId, publicKey, name, msg;
     private final int time, commentsNumber;
     public static String POSTS_CONTAINER_CODE = "global_posts";
-    public String container;
-    private final ArrayList<Comment> commentsContainer = new ArrayList<>();
+    public String DatabaseContainer;
+    protected final ArrayList<Comment> commentsContainer = new ArrayList<>();
 
     public Post(String postId, String publicKey, String name, int time, String msg, int commentsNumber) {
         this.postId = postId;
@@ -98,7 +98,7 @@ public class Post implements Parcelable {
         System.out.println("Getting comments for post #" + getPostId());
         Map<String, Object> data = new HashMap<>();
         data.put("postId", getPostId());
-        data.put("container", container);
+        data.put("container", DatabaseContainer);
         return MainActivity.mFunctions
                 .getHttpsCallable("getComments")
                 .call(data);

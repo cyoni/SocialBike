@@ -17,12 +17,8 @@ public class ConnectedUser {
         return publicKey;
     }
 
-
-
     public static String getName() {
         return nickname;
     }
-
-
 
 }
