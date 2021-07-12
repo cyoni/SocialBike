@@ -1,6 +1,7 @@
 package com.example.socialbike;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -20,6 +21,8 @@ import com.example.socialbike.chat.ContainerForChat;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -60,6 +63,13 @@ public class MainActivity extends AppCompatActivity {
        // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        System.out.println("$$$$$$$$$$");
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     private void initiatePlaces() {
         Places.initialize(getApplicationContext(), "AIzaSyBNXcAnL0GPcywUubwmo_nDRzFeEyTAHMw");
     }
@@ -84,7 +94,10 @@ public class MainActivity extends AppCompatActivity {
     private void setFirebase() {
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        mFunctions = FirebaseFunctions.getInstance();
+
+       mFunctions = FirebaseFunctions.getInstance();
+        //mFunctions.useEmulator("127.0.0.1", 5001);
+
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

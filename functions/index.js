@@ -232,6 +232,9 @@ function compare(a, b) {
     return 0;
   }
 
+  function distanceFromMe(lan_p1, lng_q1, lan_p2, lng_q2){
+    return 0
+}
 
 exports.getEvents = functions.https.onCall(async (request, context) => {
 
@@ -239,12 +242,22 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     var data = {}
     data['events'] = []
     var counter = 0;
-    // const location = 
-
     
+    const lat = request.lat
+    const lng = request.lng
+    const range = request.range
+    const country = request.country
+
+ //   if (!isCountry(country))
+   //     return "[false]"
+       
+
     return admin.database().ref('events').once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
+            if (raw_data.child('country').val() === country 
+                   && distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range){
+                
             const dataOfEvent = {
                 eventId: raw_data.key,
                 name: "",
@@ -260,18 +273,18 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 locationName: raw_data.child('locationName').val(),
                 locationAddress: raw_data.child('locationAddress').val(),
                 commentsNumber: raw_data.child('comments').numChildren(),
-                // coordinates
             }
             const score = 2*dataOfEvent.numberOfParticipants + dataOfEvent.numOfInterestedMembers
             dataOfEvent['elementScore'] = score
 
-            data.events[counter++] = dataOfEvent
+            data['events'].push(dataOfEvent)
+            }
+
         })
         return admin.database().ref('public').once('value')
     }).then(snapshot => {
         for (var i = 0; i < data.events.length; i++) 
             data.events[i].name = snapshot.child(data.events[i].userPublicKey).child('profile').child('nickname').val()
-
 
 
         if (dataType === "TRADING"){
@@ -489,7 +502,7 @@ exports.getMemberList = functions.https.onCall(async (request, context) => {
         return "[AUTH_FAILED]"
 
     if (keyName !== "going" && keyName !== "interested")
-        return "FAIL #3213"
+        return "[FAIL]"
 
     var data = {}
     data['members'] = []
@@ -508,3 +521,30 @@ exports.getMemberList = functions.https.onCall(async (request, context) => {
     })
 
 })
+
+
+exports.getPlaces = functions.https.onCall(async (request, context) => {
+
+    const lat = request.lat
+    const lng = request.lng
+    const range = request.range
+    const country = request.country
+
+ //   if (!isCountry(country))
+   //     return "[false]"
+    
+    var events = []
+
+    return admin.database().ref('events').once('value').then(snapshot => {
+        snapshot.forEach(raw_data => {
+           if (raw_data.child('country').val() === country 
+                && distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range){
+                events.push(raw_data)
+           }
+        })
+        return null
+    }).then(x => {
+        return JSON.stringify(events)
+    })
+})
+

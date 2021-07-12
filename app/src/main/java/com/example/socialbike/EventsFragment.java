@@ -20,6 +20,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
 import org.json.JSONArray;
@@ -51,11 +53,14 @@ public class EventsFragment extends Fragment
     private RelativeLayout topMenu, searchSection;
     private SeekBar seekBar;
     private TextView rangeText, cityText;
-    private EventsCommentsExtension eventsCommentsExtension;
+    private final EventsCommentsExtension eventsCommentsExtension;
+    private int range = 10;
+    private Position position;
 
-    public EventsFragment(){
+    public EventsFragment() {
         eventsCommentsExtension = new EventsCommentsExtension(this);
     }
+
     private void initAdapter() {
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_events, container);
         recyclerView.setAdapter(recyclerViewAdapter);
@@ -82,6 +87,10 @@ public class EventsFragment extends Fragment
 
         Map<String, Object> data = new HashMap<>();
         data.put("dataType", dataType);
+        data.put("range", range);
+        data.put("country", position.getAddress());
+        data.put("lat", position.getLatLng().latitude);
+        data.put("lng", position.getLatLng().longitude);
 
         MainActivity.mFunctions
                 .getHttpsCallable("getEvents")
@@ -152,25 +161,19 @@ public class EventsFragment extends Fragment
             } catch (JSONException e) {
                 System.out.println("An error was caught in message fetcher: " + e.getMessage());
             }
-
         }
         onFinishedTakingNewMessages();
 
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == NEW_EVENT_CODE) {
-            if (resultCode == RESULT_OK) {
-                getRecentData();
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_events, container, false);
+        initiateScreen(root);
+        return root;
+    }
+
+    private void initiateScreen(View root) {
         recyclerView = root.findViewById(R.id.recyclerview);
         initAdapter();
         progressBar = root.findViewById(R.id.progressBar);
@@ -181,11 +184,12 @@ public class EventsFragment extends Fragment
         cityText = root.findViewById(R.id.city);
         Button cancel_button = root.findViewById(R.id.cancel_button);
         Button set_button = root.findViewById(R.id.set_button);
+        position = new Position(new LatLng(1,1), "te; avv", "Israel");
 
         cancel_button.setOnClickListener(view -> hideSearchSectionAndShowTopMenu());
         set_button.setOnClickListener(view -> setEditSearch());
 
-        setCityTextView();
+        setCityTextView("Tel Aviv");
         setSeekBar(root);
 
         hideSearchSectionAndShowTopMenu();
@@ -199,8 +203,6 @@ public class EventsFragment extends Fragment
         }
 
         setListeners(root);
-
-        return root;
     }
 
     private void setListeners(View root) {
@@ -238,14 +240,35 @@ public class EventsFragment extends Fragment
     }
 
 
-    private void setCityTextView() {
+    private void setCityTextView(String city) {
         cityText.setOnClickListener(view -> openCitiesAutoComplete());
-        cityText.setText(HtmlCompat.fromHtml("<u><b>Tel Aviv</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+        cityText.setText(HtmlCompat.fromHtml
+                ("<u><b>"+ city +"</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == NEW_EVENT_CODE) {
+            if (resultCode == RESULT_OK) {
+                getRecentData();
+            }
+        } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                setCityTextView(place.getName());
+                // range = 60 km
+                // city = ...
+                // getEvents()
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void openCitiesAutoComplete() {
         GoogleAPI googleAPI = new GoogleAPI();
-        googleAPI.Places(getActivity(), getContext(), AutocompleteActivityMode.OVERLAY);
+        Intent intent = googleAPI.Places(getContext(), AutocompleteActivityMode.OVERLAY);
+        startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
     }
 
     private void setSeekBar(View root) {
@@ -303,7 +326,7 @@ public class EventsFragment extends Fragment
     }
 
     private void updateSearchText() {
-        int range = seekBar.getProgress();
+        range = seekBar.getProgress();
         String str = "Finds events within " + range + " km of";
         rangeText.setText(str);
     }

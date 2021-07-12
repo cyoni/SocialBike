@@ -117,7 +117,8 @@ public class AddNewEventActivity extends AppCompatActivity {
 
     private void openLocationWindow() {
         GoogleAPI googleAPI = new GoogleAPI();
-        googleAPI.Places(this, this, AutocompleteActivityMode.FULLSCREEN);
+        Intent intent = googleAPI.Places(this, AutocompleteActivityMode.FULLSCREEN);
+        startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
     }
 
     private void getCoordinates() {
