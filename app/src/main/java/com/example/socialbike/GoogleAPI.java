@@ -14,9 +14,5 @@ import java.util.List;
 
 public class GoogleAPI {
 
-    public Intent Places(Context context, AutocompleteActivityMode autocompleteActivityMode) {
-        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
-        return new Autocomplete.IntentBuilder(autocompleteActivityMode, fields).setTypeFilter(TypeFilter.CITIES)
-                .build(context);
-    }
+
 }

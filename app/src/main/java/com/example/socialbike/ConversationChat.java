@@ -1,13 +1,6 @@
-package com.example.socialbike.chat;
+package com.example.socialbike;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,28 +9,34 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.socialbike.MainActivity;
-import com.example.socialbike.R;
-import com.example.socialbike.RecyclerViewAdapter;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.socialbike.chat.ChatMessage;
+import com.example.socialbike.databinding.ActivityConversationChatBinding;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ChatConversationFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener {
-
+public class ConversationChat extends AppCompatActivity implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate  {
     //private static ChatConversationFragment fragment;
     private EditText messageBox;
     private RecyclerView recyclerView;
-    private final ArrayList<ChatMessage> container;
+    private final ArrayList<ChatMessage> historyMessages;
     private RecyclerViewAdapter recyclerViewAdapter;
+    private String userId;
 
 
-    public ChatConversationFragment() {
-        container = new ArrayList<>();
+    public ConversationChat() {
+        historyMessages = new ArrayList<>();
     }
 
 
     private void initAdapter() {
-        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_chat, container);
+        recyclerViewAdapter = new RecyclerViewAdapter(this, R.layout.item_chat, historyMessages);
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerViewAdapter.setClassReference(this);
     }
@@ -53,50 +52,45 @@ public class ChatConversationFragment extends Fragment implements RecyclerViewAd
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
-        MainActivity.chatManager.chatConversationFragment = this;
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ActivityConversationChatBinding binding = ActivityConversationChatBinding.inflate(getLayoutInflater());
+        setContentView(R.layout.fragment_chat_conversation);
+        setSupportActionBar(binding.toolbar);
 
-        View root = inflater.inflate(R.layout.fragment_chat_conversation, container, false);
-        Button sendMsgButton = root.findViewById(R.id.send);
-        Button backButton = root.findViewById(R.id.back);
-        messageBox = root.findViewById(R.id.messageBox);
-        recyclerView = root.findViewById(R.id.recyclerview);
+        userId = getIntent().getStringExtra("userId");
+
+
+        MainActivity.chatManager.currentConversationChat = this;
+
+        Button sendMsgButton = findViewById(R.id.send);
+
+        messageBox = findViewById(R.id.messageBox);
+        recyclerView = findViewById(R.id.recyclerview);
         initAdapter();
-
-
-        ///MainActivity.chatManager.chatLobbyFragment = null;
-
-
-        backButton.setOnClickListener(view -> {
-            NavController nav = Navigation.findNavController(container);
-            nav.navigate(R.id.action_chatConversationFragment_to_chatFragment);
-        });
 
 
         sendMsgButton.setOnClickListener(view -> {
             String message =  messageBox.getText().toString();
-            MainActivity.chatManager.sendMessage("123213", message);
+            MainActivity.chatManager.sendMessage(userId, message);
             messageBox.setText("");
         });
 
-        return root;
     }
+
 
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        ChatMessage currentItemToBind = container.get(position);
+        ChatMessage currentItemToBind = historyMessages.get(position);
         holder.msgStyle.setText(currentItemToBind.getMessage());
         if (currentItemToBind.isIncomingMessage())
             holder.msgStyle.setBackgroundResource(R.drawable.chat_incoming_msg);
         else {
             holder.msgStyle.setBackgroundResource(R.drawable.chat_outgoing_msg);
             setMessageBoxToTheRight(holder.msgStyle);
-         //   holder.msgStyle.setPadding(0, 4, 20, 0);
+               holder.msgStyle.setPadding(0, 4, 20, 0);
 
         }
     }
@@ -113,8 +107,15 @@ public class ChatConversationFragment extends Fragment implements RecyclerViewAd
 
     }
 
-    public void addMessage(ChatMessage chatMessage) {
-        container.add(chatMessage);
-        recyclerViewAdapter.notifyItemInserted(container.size() - 1);
+
+    public void addNewMessage(ChatMessage chatMessage){
+        System.out.println("conversationChat got new msg! : " + chatMessage.getMessage());
+        historyMessages.add(chatMessage);
+        recyclerViewAdapter.notifyItemInserted(historyMessages.size() - 1);
+    }
+
+    @Override
+    public void onFinishedTakingNewMessages() {
+
     }
 }

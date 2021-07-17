@@ -5,54 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="5dp"
     tools:context=".EventsFragment">
 
-    <RelativeLayout
-        android:id="@+id/searchSection"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp">
 
-        <TextView
-            android:id="@+id/rangeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Finds events within XX KM of" />
-
-        <TextView
-            android:id="@+id/city"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_toEndOf="@id/rangeText"
-            android:text="Tel Aviv"
-            android:textColor="@color/blue"
-
-            />
-
-
-        <SeekBar
-            android:id="@+id/seekBar"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_below="@id/rangeText" />
-
-        <Button
-            android:id="@+id/set_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/seekBar"
-            android:text="Set" />
-
-        <Button
-            android:id="@+id/cancel_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/set_button"
-            android:text="Cancel" />
-
-
-    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/topMenu"
@@ -64,8 +20,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
             android:layout_toStartOf="@id/sort_button"
             android:text="Add New Event" />
 
@@ -75,22 +29,50 @@
             android:layout_width="170dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="10dp"
             android:text="Treading" />
 
 
-        <Button
-            android:id="@+id/search_places"
+        <RelativeLayout
+            android:id="@+id/searchSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/add_new_event_button"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:text="Edit search" />
+            android:layout_below="@id/sort_button"
+            >
+
+            <TextView
+                android:id="@+id/rangeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Finds events within XX KM of" />
+
+            <TextView
+                android:id="@+id/city"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_toEndOf="@id/rangeText"
+                android:text="Tel Aviv"
+                android:textColor="@color/blue"
+
+                />
+
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_below="@id/rangeText" />
+
+
+
+        </RelativeLayout>
+
 
 
     </RelativeLayout>
+
+
+
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -98,6 +80,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/no_events_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="40sp"
+        android:layout_marginTop="50dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        android:text="No events were found in this area. Try to adjust your search." />
+
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"

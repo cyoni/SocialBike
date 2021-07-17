@@ -13,6 +13,7 @@ import com.example.socialbike.R;
 public class ContainerForChat extends Fragment {
 
     static ContainerForChat chat;
+    private View root;
 
     public static ContainerForChat getInstance(){
         if (chat == null){
@@ -28,7 +29,9 @@ public class ContainerForChat extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.chat, container, false);
+        if (root == null)
+            root = inflater.inflate(R.layout.chat, container, false);
+        return root;
     }
 
 

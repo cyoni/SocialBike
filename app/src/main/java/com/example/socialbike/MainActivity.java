@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     public static FirebaseAuth mAuth;
     public static DatabaseReference mDatabase;
     public static FirebaseFunctions mFunctions;
-    private BottomNavigationView bottomNavigationView;
     public static ChatManager chatManager;
     public static GeoApiContext geoApiContext;
 
@@ -66,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        System.out.println("$$$$$$$$$$");
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -113,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void startListeningBottomMenu() {
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override

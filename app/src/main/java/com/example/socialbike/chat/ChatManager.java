@@ -3,6 +3,7 @@ package com.example.socialbike.chat;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.socialbike.ConversationChat;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.ConnectedUser;
 import com.google.firebase.database.ChildEventListener;
@@ -15,9 +16,11 @@ import java.util.Map;
 
 public class ChatManager {
 
-    public ChatConversationFragment chatConversationFragment;
+    public ConversationChat currentConversationChat;
     public ChatLobbyFragment chatLobbyFragment;
     boolean isChatEnabled = true;
+    protected HashMap<String, ConversationChat> screens = new HashMap<>();
+
 
     public ChatManager() {}
 
@@ -36,7 +39,7 @@ public class ChatManager {
                         String messageId = snapshot.getKey();
                         System.out.println("New message: " + postSnapshot.child("message").getValue());
                         System.out.println("Message key: " + postSnapshot.getKey());
-                        passMessageToRelevantClass(messageId, senderPublicKey, sendersName, message, true);
+                        handleNewMessage(messageId, senderPublicKey, sendersName, message, true);
                         //removeMessage(message); TODO
                     }
                 }
@@ -71,7 +74,7 @@ public class ChatManager {
         return container.stream().filter(x -> x.senderPublicKey.equals(ConnectedUser.getPublicKey())).findAny().orElse(null);
     }
 
-    private void passMessageToRelevantClass(String messageId, String senderPublicKey, String sendersName, String message, boolean isIncomingMessage) {
+    private void handleNewMessage(String messageId, String senderPublicKey, String sendersName, String message, boolean isIncomingMessage) {
         if (chatLobbyFragment != null) {
             ArrayList<ChatPreviewUser> usersList = chatLobbyFragment.getUsersList();
             if (isUserOnTopOfTheList(senderPublicKey, usersList)) {
@@ -84,11 +87,15 @@ public class ChatManager {
             }
         }
 
-        // if (conversation is open){
-        //  if (conv.displayWindow().getUser.equals(senderId){
-        //    cov.displayWindow().addMessage(message)
-        //  }
-        // }
+
+        if (MainActivity.chatManager.currentConversationChat != null){
+            ChatMessage chatMessage = new ChatMessage(messageId, senderPublicKey, sendersName, message, isIncomingMessage);
+            MainActivity.chatManager.currentConversationChat.addNewMessage(chatMessage);
+            System.out.println("passed msg");
+        }
+        else{
+            System.out.println("currentConversationChat is null");
+        }
     }
 
     private boolean isUserOnTopOfTheList(String senderPublicKey, ArrayList<ChatPreviewUser> usersList) {
@@ -128,23 +135,21 @@ public class ChatManager {
         return -1;
     }
 
-    private boolean chatLobbyFragmentDisplayed() {
-        return chatLobbyFragment != null;
-    }
 
-    private boolean chatConversationFragmentDisplayed() {
-        return chatConversationFragment != null;
+    private boolean isConversationActivityOpened() {
+        return currentConversationChat != null;
     }
 
 
     public void sendMessage(String receiver, String message) {
+
         Map<String, Object> data = new HashMap<>();
         data.put("receiver", "-MYVCkWexSO_jumnbr0l");
         data.put("publicKey", ConnectedUser.getPublicKey());
         data.put("message", message);
 
         System.out.println("sending private msg to " + receiver + "...");
-        passMessageToRelevantClass("123456", ConnectedUser.getPublicKey(), ConnectedUser.getName(), message, false);
+        handleNewMessage("123456", ConnectedUser.getPublicKey(), ConnectedUser.getName(), message, false);
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")

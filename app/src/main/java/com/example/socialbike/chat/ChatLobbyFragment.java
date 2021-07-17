@@ -1,5 +1,6 @@
 package com.example.socialbike.chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.ConnectedUser;
+import com.example.socialbike.ConversationChat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class ChatLobbyFragment extends Fragment
     private NavController nav;
     private final HashMap<String, List<ChatPreviewUser>>
             incomingMessages = new HashMap<>(); // TO REMOVE
+    private View root;
 
 
     public static ChatLobbyFragment getInstance() {
@@ -61,36 +64,37 @@ public class ChatLobbyFragment extends Fragment
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_chat, container, false);
-        recyclerView = root.findViewById(R.id.recyclerview);
-        initAdapter();
 
-        this.container.add(new ChatPreviewUser("22", "444444", "John", "Hi"));
-        this.container.add(new ChatPreviewUser("1245", ConnectedUser.getPublicKey(), "Yoni", "Shalom Everybody"));
-        this.container.add(new ChatPreviewUser("123", "4343", "Yoram", "Let's ride tonight"));
+        if (root == null) {
+            root = inflater.inflate(R.layout.fragment_chat, container, false);
+            recyclerView = root.findViewById(R.id.recyclerview);
+            initAdapter();
 
+            this.container.add(new ChatPreviewUser("22", "444444", "John", "Hi"));
+            this.container.add(new ChatPreviewUser("1245", ConnectedUser.getPublicKey(), "Yoni", "Shalom Everybody"));
+            this.container.add(new ChatPreviewUser("123", "4343", "Yoram", "Let's ride tonight"));
 
-        // Button send = root.findViewById(R.id.send);
-        //messageBox = root.findViewById(R.id.messageBox);
+            recyclerViewAdapter.setClassReference(this); // reference this class to the adaptor
+            nav = Navigation.findNavController(container);
 
-        recyclerViewAdapter.setClassReference(this); // reference this class to the adaptor
-        nav = Navigation.findNavController(container);
+            MainActivity.chatManager.currentConversationChat = null;
 
-        MainActivity.chatManager.chatConversationFragment = null;
-        if (incomingMessages.get("-MYVCkWexSO_jumnbr0l") != null)
-            System.out.println("ChatLobbyFragment: " + incomingMessages.get("-MYVCkWexSO_jumnbr0l").size() + " items in incomingMessages list");
+        }
         return root;
     }
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.layout.setOnClickListener(view -> navigateToConversationFragment(holder));
+        holder.layout.setOnClickListener(view -> openConversationActivity(position));
         holder.name.setText(container.get(position).getName());
         holder.message_preview.setText(container.get(position).getMessagePreview());
     }
 
-    private void navigateToConversationFragment(RecyclerViewAdapter.ViewHolder holder) {
-        nav.navigate(R.id.action_chatFragment_to_chatConversationFragment);
+    private void openConversationActivity(int position) {
+        Intent intent = new Intent(getContext(), ConversationChat.class);
+        String userId = container.get(position).getPublicKey();
+        intent.putExtra("userId", userId);
+        startActivity(intent);
     }
 
     @Override

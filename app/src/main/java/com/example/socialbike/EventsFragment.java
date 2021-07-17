@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -29,7 +28,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
@@ -45,17 +46,16 @@ public class EventsFragment extends Fragment
     protected final ArrayList<Event> container = new ArrayList<>();
     private RecyclerViewAdapter recyclerViewAdapter;
     private Updater updater;
-    private boolean loadMore = true;
     private ProgressBar progressBar;
     private final String MOST_RECENT_CODE = "MOST_RECENT";
     private final String TRADING_CODE = "TRADING";
     private String dataType = MOST_RECENT_CODE;
-    private RelativeLayout topMenu, searchSection;
     private SeekBar seekBar;
-    private TextView rangeText, cityText;
+    private TextView rangeText, cityText, no_events_text;
     private final EventsCommentsExtension eventsCommentsExtension;
     private int range = 10;
     private Position position;
+    private View root;
 
     public EventsFragment() {
         eventsCommentsExtension = new EventsCommentsExtension(this);
@@ -81,14 +81,16 @@ public class EventsFragment extends Fragment
 
     public void getEvents() {
 
+        showProgressbar();
         System.out.println("getting Events...");
-
+        no_events_text.setVisibility(View.GONE);
         container.clear();
 
         Map<String, Object> data = new HashMap<>();
         data.put("dataType", dataType);
         data.put("range", range);
-        data.put("country", position.getAddress());
+        data.put("country", position.getCountry());
+        data.put("state", position.getState());
         data.put("lat", position.getLatLng().latitude);
         data.put("lng", position.getLatLng().longitude);
 
@@ -117,8 +119,11 @@ public class EventsFragment extends Fragment
         } catch (Exception e) {
             System.out.println("An error was caught in message fetcher: " + e.getMessage());
         }
-        if (data == null)
+        if (data == null || data.length() == 0) {
+            no_events_text.setVisibility(View.VISIBLE);
+            onFinishedTakingNewMessages();
             return;
+        }
 
         if (container.size() > 0 && data.length() > 0) {
             container.clear();
@@ -168,8 +173,10 @@ public class EventsFragment extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_events, container, false);
-        initiateScreen(root);
+        if (root == null) {
+            root = inflater.inflate(R.layout.fragment_events, container, false);
+            initiateScreen(root);
+        }
         return root;
     }
 
@@ -178,41 +185,26 @@ public class EventsFragment extends Fragment
         initAdapter();
         progressBar = root.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
-        searchSection = root.findViewById(R.id.searchSection);
-        topMenu = root.findViewById(R.id.topMenu);
         rangeText = root.findViewById(R.id.rangeText);
         cityText = root.findViewById(R.id.city);
-        Button cancel_button = root.findViewById(R.id.cancel_button);
-        Button set_button = root.findViewById(R.id.set_button);
-        position = new Position(new LatLng(1,1), "te; avv", "Israel");
-
-        cancel_button.setOnClickListener(view -> hideSearchSectionAndShowTopMenu());
-        set_button.setOnClickListener(view -> setEditSearch());
+        no_events_text = root.findViewById(R.id.no_events_text);
+        no_events_text.setVisibility(View.GONE);
+        position = new Position(new LatLng(32.074022, 34.775507), "Tel Aviv", "Israel", "Tel Aviv District");
 
         setCityTextView("Tel Aviv");
         setSeekBar(root);
 
-        hideSearchSectionAndShowTopMenu();
-
         updater = new Updater(this, this.container, recyclerViewAdapter);
-        if (loadMore) {
-            showProgressbar();
-
-            getEvents();
-            loadMore = false;
-        }
-
         setListeners(root);
+
+        showProgressbar();
+        getEvents();
     }
 
     private void setListeners(View root) {
 
         Button addEvent = root.findViewById(R.id.add_new_event_button);
-        Button changeRegion = root.findViewById(R.id.search_places);
 
-        changeRegion.setOnClickListener(view -> {
-            openSearchWindow();
-        });
 
         addEvent.setOnClickListener(view -> {
             Intent intent = new Intent(getContext(), AddNewEventActivity.class);
@@ -223,10 +215,10 @@ public class EventsFragment extends Fragment
         sortButton.setOnClickListener(view -> {
 
             if (sortButton.getText().equals("Treading")) {
-                getRecentData();
+                changeTypeOfSearch(MOST_RECENT_CODE);
                 sortButton.setText("Recent Activity");
             } else {
-                getTradingData();
+                changeTypeOfSearch(TRADING_CODE);
                 sortButton.setText("Treading");
             }
 
@@ -234,31 +226,43 @@ public class EventsFragment extends Fragment
 
     }
 
-    private void setEditSearch() {
-        // TODO
-        hideSearchSectionAndShowTopMenu();
+    private void changeTypeOfSearch(String type) {
+        dataType = type;
+        getEvents();
     }
 
 
     private void setCityTextView(String city) {
         cityText.setOnClickListener(view -> openCitiesAutoComplete());
         cityText.setText(HtmlCompat.fromHtml
-                ("<u><b>"+ city +"</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                ("<u><b>" + city + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == NEW_EVENT_CODE) {
             if (resultCode == RESULT_OK) {
-                getRecentData();
+                changeTypeOfSearch(MOST_RECENT_CODE);
             }
         } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
-                setCityTextView(place.getName());
-                // range = 60 km
-                // city = ...
-                // getEvents()
+
+                String address = place.getAddress();
+                String country, state = null;
+                if (address != null && address.contains(",")) {
+                    String[] countryAndState = address.split(",");
+                    state = countryAndState[0].trim();
+                    country = countryAndState[1].trim();
+                } else if (address != null) {
+                    country = address.trim();
+                } else
+                    country = "DEFAULT";
+
+                position = new Position(place.getLatLng(), place.getName(), country, state);
+                System.out.println(position.toString());
+                setCityTextView(position.getLocationName());
+                getEvents();
             }
             return;
         }
@@ -266,8 +270,9 @@ public class EventsFragment extends Fragment
     }
 
     private void openCitiesAutoComplete() {
-        GoogleAPI googleAPI = new GoogleAPI();
-        Intent intent = googleAPI.Places(getContext(), AutocompleteActivityMode.OVERLAY);
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                .build(getContext());
         startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
     }
 
@@ -280,15 +285,6 @@ public class EventsFragment extends Fragment
         }
     }
 
-    private void hideSearchSectionAndShowTopMenu() {
-        searchSection.setVisibility(View.GONE);
-        topMenu.setVisibility(View.VISIBLE);
-    }
-
-    private void showSearchSectionAndHideTopMenu() {
-        searchSection.setVisibility(View.VISIBLE);
-        topMenu.setVisibility(View.GONE);
-    }
 
     private void showProgressbar() {
         recyclerView.setVisibility(View.INVISIBLE);
@@ -298,22 +294,6 @@ public class EventsFragment extends Fragment
     private void hideProgressbar() {
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
-    }
-
-    private void getRecentData() {
-        showProgressbar();
-        dataType = MOST_RECENT_CODE;
-        getEvents();
-    }
-
-    private void getTradingData() {
-        showProgressbar();
-        dataType = TRADING_CODE;
-        getEvents();
-    }
-
-    private void openSearchWindow() {
-        showSearchSectionAndHideTopMenu();
     }
 
     @Override
@@ -327,7 +307,7 @@ public class EventsFragment extends Fragment
 
     private void updateSearchText() {
         range = seekBar.getProgress();
-        String str = "Finds events within " + range + " km of";
+        String str = "Finds " + container.size() + " events within " + range + " km of";
         rangeText.setText(str);
     }
 
@@ -337,6 +317,7 @@ public class EventsFragment extends Fragment
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
+        getEvents();
     }
 
     @Override
@@ -418,6 +399,7 @@ public class EventsFragment extends Fragment
 
     @Override
     public void onFinishedTakingNewMessages() {
+        updateSearchText();
         hideProgressbar();
     }
 

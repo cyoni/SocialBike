@@ -232,8 +232,23 @@ function compare(a, b) {
     return 0;
   }
 
-  function distanceFromMe(lan_p1, lng_q1, lan_p2, lng_q2){
-    return 0
+      // Converts numeric degrees to radians
+  function toRad(Value) 
+  {
+        return Value * Math.PI / 180;
+  }
+
+  function distanceFromMe(lat1, lon1, lat2, lon2){
+    var R = 6371; // km
+    var dLat = toRad(lat2-lat1);
+    var dLon = toRad(lon2-lon1);
+    lat1 = toRad(lat1);
+    lat2 = toRad(lat2);
+
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return R * c
 }
 
 exports.getEvents = functions.https.onCall(async (request, context) => {
@@ -246,17 +261,19 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     const lat = request.lat
     const lng = request.lng
     const range = request.range
-    const country = request.country
+    const country = request.country || null
+    const state = request.state || null
 
  //   if (!isCountry(country))
    //     return "[false]"
        
-
     return admin.database().ref('events').once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
-            if (raw_data.child('country').val() === country 
-                   && distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range){
+            if ( ((country && raw_data.child('country').val() === country) 
+                   //  || (state && raw_data.child('state').val() === state) 
+                       ) 
+                    && distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range){
                 
             const dataOfEvent = {
                 eventId: raw_data.key,
@@ -273,6 +290,8 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 locationName: raw_data.child('locationName').val(),
                 locationAddress: raw_data.child('locationAddress').val(),
                 commentsNumber: raw_data.child('comments').numChildren(),
+                state: raw_data.child('state').val(),
+                country: raw_data.child('country').val()
             }
             const score = 2*dataOfEvent.numberOfParticipants + dataOfEvent.numOfInterestedMembers
             dataOfEvent['elementScore'] = score
@@ -331,6 +350,8 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
     const locationName = request.locationName
     const locationAddress = request.locationAddress
     const timestamp = Date.now()
+    const state = request.state
+    const country = request.country
 
     var data = {
         userPublicKey: account.publicKey,
@@ -341,7 +362,9 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
         locationAddress: locationAddress,
         eventDetails: eventDetails,
         lat: lat,
-        lng: lng
+        lng: lng,
+        state: state,
+        country: country
     }
 
     const newKey = admin.database().ref('events').push().key
