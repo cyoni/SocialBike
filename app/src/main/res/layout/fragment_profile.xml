@@ -10,136 +10,165 @@
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#673AB7"
-        android:fitsSystemWindows="true"
-        >
+        android:fitsSystemWindows="true">
+
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/materialup.toolbar"
             style="@style/ToolBarWithNavigationBack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#ffffff"
             android:minHeight="?attr/actionBarSize"
-            android:background="#00FFFFFF"
             app:layout_collapseMode="pin"
-            app:layout_scrollFlags="scroll|enterAlwaysCollapsed|snap"
-            >
+            app:layout_scrollFlags="scroll|enterAlwaysCollapsed|snap">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end">
-
-                <Button
-                    android:id="@+id/edit_profile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="fgf"
-                    />
-
-                <Button
-                    android:id="@+id/follow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
-
-                    android:layout_toLeftOf="@id/edit_profile"
-                    android:text="follow"
-                    style="?attr/materialButtonOutlinedStyle"
-                    />
-
-            </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
 
+        <LinearLayout
+            android:id="@+id/profile_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#673AB7"
+            android:gravity="center"
 
-            <LinearLayout
-                android:id="@+id/profile_container"
-                android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            tools:ignore="ExtraText">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profile_image"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center_horizontal"
+                android:elevation="8dp"
+                android:src="@drawable/profile_blank"
+                app:layout_anchor="@id/profile_container"
+                app:layout_anchorGravity="top|center_horizontal" />
+
+            <ImageView
+                android:id="@+id/aaa"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/nickname"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="vertical"
-                android:paddingTop="8dp"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-                tools:ignore="ExtraText">
+                android:text="Yoni"
+                android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:textColor="@color/white"
+                android:textSize="30sp" />
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/profile_image"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:layout_gravity="center_horizontal"
-                    android:elevation="8dp"
-                    android:src="@drawable/profile_blank"
-                    app:layout_anchor="@id/profile_container"
-                    app:layout_anchorGravity="top|center_horizontal"/>
-
-                <ImageView
-                    android:layout_width="1dp"
-                    android:layout_height="1dp"
-                    android:visibility="invisible"
-                    android:id="@+id/aaa"/>
-
-                <TextView
-                    android:id="@+id/nickname"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="Loading"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-                    android:textColor="@color/white"
-                    android:textSize="30sp" />
+            <androidx.cardview.widget.CardView
+                xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="10dp"
+                card_view:cardCornerRadius="3dp"
+                card_view:cardElevation="4dp"
+                android:padding="10dp"
+                card_view:cardUseCompatPadding="true">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/age_gender_country"
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="Following"
+
+                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                            android:textColor="#504E4E"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="5"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                            android:textColor="#504E4E" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginLeft="20dp"
+                            android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="Follows"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                            android:textColor="#504E4E"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="15"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                            android:textColor="#504E4E" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:layout_marginBottom="4dp"
-                        android:layout_marginLeft="10dp"
-                        android:text="Loading"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
-                        android:textColor="@android:color/white" />
+                        android:orientation="horizontal">
 
 
-                    <ImageView
-                        android:id="@+id/image_country_flag"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_marginTop="1dp"
-                        android:layout_marginLeft="1dp"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="5dp" />
+                        <Button
+                            android:id="@+id/butt33n7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Follow"
+                            app:layout_anchor="@+id/appbar"
+                            app:layout_anchorGravity="bottom|center" />
 
+                        <Button
+                            android:id="@+id/butt2on7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="message"
+                            app:layout_anchor="@+id/appbar"
+                            app:layout_anchorGravity="bottom|center" />
+
+
+                    </LinearLayout>
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/status"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="25dp"
-                    android:gravity="center"
-                    android:padding="10dp"
-                    android:text="Loading"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
-                    android:textColor="@android:color/white" />
-            </LinearLayout>
-
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
 
 
     </com.google.android.material.appbar.AppBarLayout>
+
 
     <ListView
         android:id="@+id/ListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

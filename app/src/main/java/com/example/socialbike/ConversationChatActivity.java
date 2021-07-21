@@ -1,9 +1,7 @@
 package com.example.socialbike;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -11,29 +9,21 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.socialbike.chat.ChatMessage;
 import com.example.socialbike.databinding.ActivityConversationChatBinding;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ConversationChat extends AppCompatActivity implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate  {
-    //private static ChatConversationFragment fragment;
+public class ConversationChatActivity extends AppCompatActivity implements RecyclerViewAdapter.ItemClickListener  {
+
     private EditText messageBox;
     private RecyclerView recyclerView;
-    private final ArrayList<ChatMessage> historyMessages;
+    private final ArrayList<ChatMessage> historyMessages = new ArrayList<>();;
     private RecyclerViewAdapter recyclerViewAdapter;
     private String userId;
-
-
-    public ConversationChat() {
-        historyMessages = new ArrayList<>();
-    }
-
 
     private void initAdapter() {
         recyclerViewAdapter = new RecyclerViewAdapter(this, R.layout.item_chat, historyMessages);
@@ -41,26 +31,14 @@ public class ConversationChat extends AppCompatActivity implements RecyclerViewA
         recyclerViewAdapter.setClassReference(this);
     }
 
-
-/*    public static ChatConversationFragment getInstance(){
-        if (fragment == null){
-            fragment = new ChatConversationFragment();
-        }
-        return fragment;
-    }*/
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_conversation_chat);
 
-        ActivityConversationChatBinding binding = ActivityConversationChatBinding.inflate(getLayoutInflater());
-        setContentView(R.layout.fragment_chat_conversation);
-        setSupportActionBar(binding.toolbar);
+        setToolbar();
 
         userId = getIntent().getStringExtra("userId");
-
 
         MainActivity.chatManager.currentConversationChat = this;
 
@@ -79,7 +57,15 @@ public class ConversationChat extends AppCompatActivity implements RecyclerViewA
 
     }
 
+    public String getUserId(){
+        return userId;
+    }
 
+    private void setToolbar() {
+        Toolbar toolbar = findViewById(R.id.flexible_example_toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        toolbar.setTitle(getIntent().getStringExtra("name"));
+    }
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -90,8 +76,6 @@ public class ConversationChat extends AppCompatActivity implements RecyclerViewA
         else {
             holder.msgStyle.setBackgroundResource(R.drawable.chat_outgoing_msg);
             setMessageBoxToTheRight(holder.msgStyle);
-               holder.msgStyle.setPadding(0, 4, 20, 0);
-
         }
     }
 
@@ -107,15 +91,16 @@ public class ConversationChat extends AppCompatActivity implements RecyclerViewA
 
     }
 
-
     public void addNewMessage(ChatMessage chatMessage){
-        System.out.println("conversationChat got new msg! : " + chatMessage.getMessage());
+        System.out.println("conversationChat got new msg: " + chatMessage.getMessage());
         historyMessages.add(chatMessage);
         recyclerViewAdapter.notifyItemInserted(historyMessages.size() - 1);
     }
 
     @Override
-    public void onFinishedTakingNewMessages() {
-
+    public void onBackPressed() {
+        MainActivity.chatManager.currentConversationChat = null;
+        finish();
     }
+
 }

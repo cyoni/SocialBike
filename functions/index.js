@@ -59,8 +59,8 @@ async function setNewNickname(publicKey, newNickname) {
 function getNickname(publicKey) {
     return admin.database().ref('public').child(publicKey).child('profile').child('nickname').once('value').then(res => {
         var user_nickname = res.val();
-        if (user_nickname === null)
-            user_nickname = "No Nickname";
+       // if (user_nickname === null)
+      //      user_nickname = "No Nickname";
         return user_nickname
     })
 }
@@ -386,7 +386,14 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
     const message = request.message
     const timestamp = Date.now()
 
+
     const sendersName = await getNickname(account.publicKey)
+
+    const verifyReciever =  await getNickname(receiverPublicKey)
+
+    if (verifyReciever === null){
+        return "NO_USER"
+    }
 
     const data = {
         receiverPublicKey: receiverPublicKey,
@@ -396,8 +403,15 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
         timestamp: timestamp,
     }
 
-    const messageId = await admin.database().ref('private_msgs').child(receiverPublicKey).push().key
-    admin.database().ref('private_msgs').child(receiverPublicKey).child(messageId).child(senderPublicKey).set(data)
+    const messageId = admin.database().ref('private_msgs')
+                .child(receiverPublicKey)
+                .push().key
+                
+    admin.database().ref('private_msgs')
+            .child(receiverPublicKey)
+            .child(messageId)
+            .child(senderPublicKey)
+            .set(data)
     return "OK"
 })
 
@@ -571,3 +585,29 @@ exports.getPlaces = functions.https.onCall(async (request, context) => {
     })
 })
 
+exports.findUsers = functions.https.onCall(async (request, context) => {
+
+    const name = request.name
+
+    if (name.length <= 2){
+        return "TOO_SHORT"
+    }
+    
+    var array = {}
+    array['users'] = []
+
+    return admin.database().ref('nicknames').once('value').then(snapshot => {
+        snapshot.forEach(raw_data => {
+            if (raw_data.key.includes(name)){
+                array['users'].push(
+                    {
+                        name: raw_data.key,
+                        userId: raw_data.val()
+                    })
+            }
+        })
+        return null
+    }).then(x => {
+        return JSON.stringify(array)
+    })
+})

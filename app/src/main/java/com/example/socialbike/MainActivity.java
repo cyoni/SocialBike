@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.socialbike.chat.ChatManager;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static FirebaseFunctions mFunctions;
     public static ChatManager chatManager;
     public static GeoApiContext geoApiContext;
+    public static BottomNavigationView bottomNavigationView;
 
     public static void toast(Context context, String msg, int isLong) {
         Toast.makeText(context, msg, isLong).show();
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void startListeningBottomMenu() {
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -149,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
     private void changeFragment(Object fragment) {
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
-        transaction.replace(R.id.contentFragment, (Fragment) fragment);
+        transaction.replace (R.id.contentFragment, (Fragment) fragment);
         transaction.commit();
     }
 

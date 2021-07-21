@@ -56,7 +56,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView name, message, date,
                 time, msgStyle, message_preview,
-                  commentText, people_going, locationName;
+                  commentText, people_going, locationName, red_dot;
         public Button mapButton, interested, coming;
         public RelativeLayout layout;
         public ImageButton commentsButton;
@@ -87,6 +87,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             progressBar = itemView.findViewById(R.id.progressBar);
             mapButton = itemView.findViewById(R.id.mapButton);
             locationName = itemView.findViewById(R.id.locationName);
+            red_dot = itemView.findViewById(R.id.red_dot);
 
             time = itemView.findViewById(R.id.time);
             msgStyle = itemView.findViewById(R.id.msgStyle);

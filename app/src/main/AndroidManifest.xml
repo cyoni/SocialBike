@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SocialBike">
         <activity
-            android:name=".ConversationChat"
+            android:name=".ConversationChatActivity"
             android:label="@string/title_activity_conversation_chat"
             android:theme="@style/Theme.SocialBike.NoActionBar"></activity>
         <!--

@@ -16,6 +16,8 @@ import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 
@@ -28,8 +30,8 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private RecyclerViewAdapter recyclerViewAdapter;
     private Updater updater;
     private MessageGetter messageManager;
-    private boolean loadPosts = true;
     private ProgressBar progressBar;
+    private View root;
 
     public static HomeFragment getInstance() {
         if (homeFragment == null)
@@ -43,24 +45,23 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         recyclerViewAdapter.setClassReference(this);
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        floatingButton = root.findViewById(R.id.fab);
-        recyclerView = root.findViewById(R.id.recyclerview);
-        progressBar = root.findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.INVISIBLE);
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (root == null) {
+            root = inflater.inflate(R.layout.fragment_home, container, false);
+            floatingButton = root.findViewById(R.id.fab);
+            recyclerView = root.findViewById(R.id.recyclerview);
+            progressBar = root.findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.INVISIBLE);
 
-        setToolbar(root);
-        activateFloatingButton();
-        initAdapter();
-        if (loadPosts) {
+            setToolbar(root);
+            activateFloatingButton();
+            initAdapter();
 
             progressBar.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.INVISIBLE);
@@ -68,9 +69,10 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
             updater = new Updater(this, this.container, recyclerViewAdapter);
             messageManager = new MessageGetter(updater);
 
-          //  messageManager.getPosts();
-            loadPosts = false;
+            //  messageManager.getPosts();
+
         }
+
         return root;
     }
 
@@ -82,11 +84,11 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     }
 
     private boolean toolbarClickListener(MenuItem item) {
-            if (item.getItemId() == R.id.login) {
-                openLoginActivity();
-                return true;
-            }
-            return false;
+        if (item.getItemId() == R.id.login) {
+            openLoginActivity();
+            return true;
+        }
+        return false;
     }
 
     private void openLoginActivity() {
@@ -95,44 +97,42 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     }
 
     private void activateFloatingButton() {
-                floatingButton.setOnClickListener(view -> openNewPostActivity());
-            }
+        floatingButton.setOnClickListener(view -> openNewPostActivity());
+    }
 
-            private void openNewPostActivity() {
-                Intent intent = new Intent(getContext(), AddPostActivity.class);
-                startActivity(intent);
-            }
+    private void openNewPostActivity() {
+        Intent intent = new Intent(getContext(), AddPostActivity.class);
+        startActivity(intent);
+    }
 
-            @Override
-            public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-                holder.message.setText(container.get(position).getMsg());
-                holder.name.setText(container.get(position).getName());
+    @Override
+    public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
+        holder.message.setText(container.get(position).getMsg());
+        holder.name.setText(container.get(position).getName());
 
-                holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-                holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-            }
+        holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+        holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+    }
 
-            private void commentsButtonClick(Post post) {
-                Intent intent = new Intent(getContext(), PostActivity.class);
-                intent.putExtra("post", post);
-                startActivity(intent);
-            }
+    private void commentsButtonClick(Post post) {
+        Intent intent = new Intent(getContext(), PostActivity.class);
+        intent.putExtra("post", post);
+        startActivity(intent);
+    }
 
-            @Override
-            public void onItemClick(@NonNull View holder, int position) {
+    @Override
+    public void onItemClick(@NonNull View holder, int position) {
 
-            }
+    }
 
+    public void addPost(Post post) {
+        updater.add(post);
+    }
 
-            public void addPost(Post post) {
-                updater.add(post);
-            }
+    @Override
+    public void onFinishedTakingNewMessages() {
+        recyclerView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+    }
 
-            @Override
-            public void onFinishedTakingNewMessages() {
-                recyclerView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-            }
-
-
-        }
+}
