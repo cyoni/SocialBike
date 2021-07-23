@@ -1,6 +1,5 @@
 package com.example.socialbike.chat;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,18 +15,13 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
-import com.example.socialbike.Event;
 import com.example.socialbike.MainActivity;
-import com.example.socialbike.Position;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.ConnectedUser;
-import com.example.socialbike.ConversationChatActivity;
-import com.google.android.gms.maps.model.LatLng;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -44,7 +38,7 @@ public class ChatLobbyFragment extends Fragment
 
     static ChatLobbyFragment chatFragment = null;
     private RecyclerView recyclerView;
-    private final ArrayList<ChatPreviewUser> users = new ArrayList<>();
+    protected final ArrayList<ChatPreviewUser> users = new ArrayList<>();
     private final ArrayList<ChatPreviewUser> reserve = new ArrayList<>();
     public RecyclerViewAdapter recyclerViewAdapter;
     private NavController nav;
@@ -209,21 +203,20 @@ public class ChatLobbyFragment extends Fragment
         holder.name.setText(users.get(position).getName());
         holder.message_preview.setText(users.get(position).getMessagePreview());
         if (users.get(position).isRead()) {
-            holder.red_dot.setVisibility(View.GONE);
+            holder.red_dot.setVisibility(View.INVISIBLE);
         } else
             holder.red_dot.setVisibility(View.VISIBLE);
     }
 
     private void openConversationActivity(int position) {
-        Intent intent = new Intent(context, ConversationChatActivity.class);
+
         String userId = users.get(position).getPublicKey();
         String name = users.get(position).sendersName;
-        intent.putExtra("userId", userId);
-        intent.putExtra("name", name);
-        startActivity(intent);
+        MainActivity.chatManager.openConversationActivity(getContext(), userId, name);
         users.get(position).setRead(true);
         recyclerViewAdapter.notifyItemChanged(position);
     }
+
 
     @Override
     public void onAttach(@NotNull Context context) {

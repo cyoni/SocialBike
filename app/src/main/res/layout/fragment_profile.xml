@@ -15,7 +15,6 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/materialup.toolbar"
-            style="@style/ToolBarWithNavigationBack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#ffffff"
@@ -140,7 +139,7 @@
 
 
                         <Button
-                            android:id="@+id/butt33n7"
+                            android:id="@+id/follow_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Follow"
@@ -148,7 +147,7 @@
                             app:layout_anchorGravity="bottom|center" />
 
                         <Button
-                            android:id="@+id/butt2on7"
+                            android:id="@+id/message_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="message"
@@ -164,9 +163,8 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-
-    <ListView
-        android:id="@+id/ListView"
+    <include
+        layout="@layout/content_user_activity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />

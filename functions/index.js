@@ -392,7 +392,7 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
     const verifyReciever =  await getNickname(receiverPublicKey)
 
     if (verifyReciever === null){
-        return "NO_USER"
+        return "ERR:NO_USER"
     }
 
     const data = {
@@ -406,7 +406,7 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
     const messageId = admin.database().ref('private_msgs')
                 .child(receiverPublicKey)
                 .push().key
-                
+
     admin.database().ref('private_msgs')
             .child(receiverPublicKey)
             .child(messageId)

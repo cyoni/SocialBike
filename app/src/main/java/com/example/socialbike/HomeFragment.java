@@ -78,7 +78,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
 
     private void setToolbar(View root) {
         Toolbar toolbar = root.findViewById(R.id.toolbar);
-        toolbar.setSubtitle("Home");
+        toolbar.setTitle("Home");
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this::toolbarClickListener);
     }
@@ -101,7 +101,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     }
 
     private void openNewPostActivity() {
-        Intent intent = new Intent(getContext(), AddPostActivity.class);
+         Intent intent = new Intent(getContext(), AddPostActivity.class);
         startActivity(intent);
     }
 

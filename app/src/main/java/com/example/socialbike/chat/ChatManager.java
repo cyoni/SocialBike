@@ -1,9 +1,11 @@
 package com.example.socialbike.chat;
 
+import android.content.Context;
+import android.content.Intent;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.socialbike.ConversationChatActivity;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.ConnectedUser;
 import com.google.firebase.database.ChildEventListener;
@@ -80,26 +82,27 @@ public class ChatManager {
     }
 
 
-    private void handleNewMessage(String messageId, String senderPublicKey, String sendersName, String message, boolean isIncomingMessage) {
-        ChatMessage chatMessage = new ChatMessage(messageId, senderPublicKey, sendersName, message, isIncomingMessage);
+    private void handleNewMessage(String messageId, String otherSidePublicKey, String sendersName, String message, boolean isIncomingMessage) {
+        ChatMessage chatMessage = new ChatMessage(messageId, otherSidePublicKey, sendersName, message, isIncomingMessage);
 
         if (chatLobbyFragment != null) {
             ArrayList<ChatPreviewUser> usersList = chatLobbyFragment.getUsers();
-            if (isUserOnTopOfTheList(senderPublicKey, usersList)) {
+            if (isUserOnTopOfTheList(otherSidePublicKey, usersList)) {
                 updateTopElement(message);
-            } else if (doesUserAppearOnTheList(senderPublicKey)) {
-                moveElementOnTopOfTheList(senderPublicKey, message);
+            } else if (doesUserAppearOnTheList(otherSidePublicKey)) {
+                moveElementOnTopOfTheList(otherSidePublicKey, message);
             } else
                 insertNewElement(chatMessage);
-            chatLobbyFragment.getUsers().get(0).setRead(false);
         }
 
-        if (isConversationActivityOpen() && isConversationWith(senderPublicKey)){
+        if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)){
+            chatLobbyFragment.getUsers().get(0).setRead(true);
             MainActivity.chatManager.currentConversationChat.addNewMessage(chatMessage);
-            System.out.println("passed msg");
+            System.out.println("msg passed");
         }
         else{
             System.out.println("currentConversationChat is closed");
+            chatLobbyFragment.getUsers().get(0).setRead(false);
 /*
             int item = bottomNavigationView.getMenu().getItem(2).getItemId();
             BadgeDrawable xx = bottomNavigationView.getOrCreateBadge(item);
@@ -135,7 +138,7 @@ public class ChatManager {
         usersList.add(0, tmp);
 
         chatLobbyFragment.recyclerViewAdapter.notifyItemMoved(0, index);
-        chatLobbyFragment.recyclerViewAdapter.notifyItemRangeChanged(0,usersList.size()-1);
+        chatLobbyFragment.recyclerViewAdapter.notifyItemRangeChanged(0,usersList.size());
     }
 
     private void insertNewElement(ChatMessage chatMessage) {
@@ -164,7 +167,7 @@ public class ChatManager {
         data.put("message", message);
 
         System.out.println("sending private msg to " + receiver + "...");
-        handleNewMessage("123456", ConnectedUser.getPublicKey(), ConnectedUser.getName(), message, false);
+        handleNewMessage("123456", receiver, ConnectedUser.getName(), message, false);
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")
@@ -172,8 +175,23 @@ public class ChatManager {
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);
+                    if (response.contains("ERR"))
+                        handleErrors(response);
                     return "";
                 });
     }
 
+    private void handleErrors(String response) {
+        String error = "Error.";
+        if (response.contains("NO_USER"))
+            error = "Error: Message was not sent. User does not exist.";
+        MainActivity.toast(currentConversationChat.getApplicationContext(), error, 2);
+    }
+
+    public void openConversationActivity(Context context, String userId, String name) {
+        Intent intent = new Intent(context, ConversationChatActivity.class);
+        intent.putExtra("userId", userId);
+        intent.putExtra("name", name);
+        context.startActivity(intent);
+    }
 }

@@ -2,7 +2,6 @@ package com.example.socialbike;
 
 import android.os.Bundle;
 
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -23,6 +22,12 @@ public class AddPostActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adding_post);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+      //  toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
+        toolbar.setTitle("New post");
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         submit = findViewById(R.id.submit);
         textBox = findViewById(R.id.txt_content);
@@ -78,7 +83,6 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
     private void passItemToHome() {
-
         homeFragment.addPost(new Post("77777", ConnectedUser.getPublicKey(), ConnectedUser.getName(), 123412, textBox.getText().toString(), 0));
     }
 

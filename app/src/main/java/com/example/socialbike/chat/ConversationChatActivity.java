@@ -1,4 +1,4 @@
-package com.example.socialbike;
+package com.example.socialbike.chat;
 
 import android.os.Bundle;
 import android.view.View;
@@ -12,12 +12,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.socialbike.MainActivity;
+import com.example.socialbike.R;
+import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.chat.ChatMessage;
 import com.example.socialbike.databinding.ActivityConversationChatBinding;
 
 import java.util.ArrayList;
 
-public class ConversationChatActivity extends AppCompatActivity implements RecyclerViewAdapter.ItemClickListener  {
+public class ConversationChatActivity extends AppCompatActivity implements RecyclerViewAdapter.ItemClickListener {
 
     private EditText messageBox;
     private RecyclerView recyclerView;
