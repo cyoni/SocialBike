@@ -587,7 +587,7 @@ exports.getPlaces = functions.https.onCall(async (request, context) => {
 
 exports.findUsers = functions.https.onCall(async (request, context) => {
 
-    const name = request.name
+    const name = request.name.toLowerCase().trim()
 
     if (name.length <= 2){
         return "TOO_SHORT"
@@ -598,7 +598,7 @@ exports.findUsers = functions.https.onCall(async (request, context) => {
 
     return admin.database().ref('nicknames').once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
-            if (raw_data.key.includes(name)){
+            if (raw_data.key.toLowerCase().includes(name)){
                 array['users'].push(
                     {
                         name: raw_data.key,
@@ -611,3 +611,35 @@ exports.findUsers = functions.https.onCall(async (request, context) => {
         return JSON.stringify(array)
     })
 })
+
+exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').onWrite(
+    async (change) => {
+        const collectionRef = change.after.ref.parent;
+        const countRef = collectionRef.parent.child('likes_count');
+  
+        let increment;
+        if (change.after.exists() && !change.before.exists()) {
+          increment = 1;
+        } else if (!change.after.exists() && change.before.exists()) {
+          increment = -1;
+        } else {
+          return null;
+        }
+  
+        await countRef.transaction((current) => {
+            if ((current || 0) + increment < 0)
+                return 0
+            else
+                return (current || 0) + increment;
+        });
+        functions.logger.log('Counter updated.');
+        return null;
+      });
+  
+  exports.recountlikes = functions.database.ref('global_posts/{postid}/likes_count').onDelete(async (snap) => {
+    const counterRef = snap.ref;
+    const collectionRef = counterRef.parent.child('likes');
+
+    const messagesData = await collectionRef.once('value');
+    return await counterRef.set(messagesData.numChildren());
+  });

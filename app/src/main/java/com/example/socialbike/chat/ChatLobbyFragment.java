@@ -1,7 +1,6 @@
 package com.example.socialbike.chat;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -22,6 +21,8 @@ import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.ConnectedUser;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.functions.HttpsCallableResult;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -30,6 +31,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +42,7 @@ public class ChatLobbyFragment extends Fragment
     private RecyclerView recyclerView;
     protected final ArrayList<ChatPreviewUser> users = new ArrayList<>();
     private final ArrayList<ChatPreviewUser> reserve = new ArrayList<>();
+    private final HashSet<String> prefixWithoutResults = new HashSet<>();
     public RecyclerViewAdapter recyclerViewAdapter;
     private NavController nav;
     private Context context;
@@ -48,7 +51,6 @@ public class ChatLobbyFragment extends Fragment
     private View root;
     private EditText searchUserTextbox;
     ProgressBar progressBar;
-
 
 
     public static ChatLobbyFragment getInstance() {
@@ -96,17 +98,12 @@ public class ChatLobbyFragment extends Fragment
 
                         @Override
                         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                            if (charSequence.toString().isEmpty()){
+                            if (charSequence.toString().isEmpty()) {
                                 users.clear();
                                 users.addAll(reserve);
                                 recyclerViewAdapter.notifyDataSetChanged();
-
-                            }
-                            else if (charSequence.toString().length() > 2){
-                                users.clear();
-                                recyclerViewAdapter.notifyDataSetChanged();
-                                progressBar.setVisibility(View.VISIBLE);
-                                find(charSequence.toString());
+                            } else if (charSequence.toString().length() > 0) {
+                                findUsers(charSequence.toString());
                             }
                         }
 
@@ -136,30 +133,61 @@ public class ChatLobbyFragment extends Fragment
         return root;
     }
 
-    private void find(String user) {
+    private void findUsers(String input) {
+        users.clear();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("name", user);
+        ArrayList<ChatPreviewUser> localUsers = getLocalUsers(input);
+        users.addAll(localUsers);
 
-        System.out.println("sending " + user);
-        MainActivity.mFunctions
-                .getHttpsCallable("findUsers")
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("find user -> response:" + response);
+        if (input.length() > 2 && isPrefixOk(input)) {
+            getUsersFromServer(input).continueWith(task -> {
+                String response = String.valueOf(task.getResult().getData());
+                System.out.println("find user, response:" + response);
+                parseUsers(input, response);
+                return "";
+            });
 
-                    parseUsers(response);
+        }
 
-                    return "";
-                });
+        recyclerViewAdapter.notifyDataSetChanged();
     }
 
-    private void parseUsers(String response) {
+    private boolean isPrefixOk(String input) {
+        for (String current : prefixWithoutResults) {
+            if (prefixWithoutResults.contains(input)
+                    || input.length() >= current.length()
+                    && input.substring(0, current.length()).contains(current)) {
+                System.out.println(input + " is in bad input");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private ArrayList<ChatPreviewUser> getLocalUsers(String user) {
+        ArrayList<ChatPreviewUser> tmp = new ArrayList<>();
+        for (int i = 0; i < reserve.size(); i++) {
+            if (reserve.get(i).sendersName.toLowerCase().contains(user.toLowerCase()))
+                tmp.add(reserve.get(i));
+        }
+        return tmp;
+    }
+
+    private Task<HttpsCallableResult> getUsersFromServer(String user) {
+        progressBar.setVisibility(View.VISIBLE);
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", user);
+        System.out.println("sending " + user);
+        return MainActivity.mFunctions
+                .getHttpsCallable("findUsers")
+                .call(data);
+    }
+
+    private void parseUsers(String input, String response) {
         progressBar.setVisibility(View.GONE);
 
         if (response.isEmpty()) {
-            // show no results
+            // no results
             return;
         }
 
@@ -170,31 +198,41 @@ public class ChatLobbyFragment extends Fragment
 
             data = obj.getJSONArray("users");
 
+
         } catch (Exception e) {
             System.out.println("An error was caught in message fetcher: " + e.getMessage());
         }
 
         ArrayList<ChatPreviewUser> tmp = new ArrayList<>();
 
-        for (int i = 0; i < data.length(); i++) {
 
-            String userId = null;
-            try {
-                userId = data.getJSONObject(i).getString("userId");
-                String name = data.getJSONObject(i).getString("name");
+        if (data.length() == 0) {
+            prefixWithoutResults.add(input);
+            System.out.println(input + " was added to no result list");
+        } else
+            for (int i = 0; i < data.length(); i++) {
+                try {
+                    String userId = data.getJSONObject(i).getString("userId");
+                    String name = data.getJSONObject(i).getString("name");
+                    boolean doesExist = false;
 
-                tmp.add(new ChatPreviewUser("", userId, name,""));
+                    for (ChatPreviewUser currentUser : users) {
+                        if (currentUser.sendersName.equals(name)) {
+                            doesExist = true;
+                            break;
+                        }
+                    }
 
-            } catch (JSONException e) {
-                System.out.println("An error was caught in message fetcher: " + e.getMessage());
+                    if (!doesExist)
+                        tmp.add(new ChatPreviewUser("", userId, name, ""));
+
+                } catch (JSONException e) {
+                    System.out.println("An error was caught in message fetcher: " + e.getMessage());
+                }
             }
-        }
 
-        users.clear();
         users.addAll(tmp);
-        recyclerViewAdapter.notifyItemChanged(0, tmp.size()-1);
         recyclerViewAdapter.notifyDataSetChanged();
-
     }
 
     @Override

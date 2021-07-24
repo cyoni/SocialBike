@@ -15,6 +15,9 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -69,7 +72,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
             updater = new Updater(this, this.container, recyclerViewAdapter);
             messageManager = new MessageGetter(updater);
 
-            //  messageManager.getPosts();
+            messageManager.getPosts();
 
         }
 
@@ -101,7 +104,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     }
 
     private void openNewPostActivity() {
-         Intent intent = new Intent(getContext(), AddPostActivity.class);
+        Intent intent = new Intent(getContext(), AddPostActivity.class);
         startActivity(intent);
     }
 
@@ -109,9 +112,33 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         holder.message.setText(container.get(position).getMsg());
         holder.name.setText(container.get(position).getName());
+        holder.likes.setText(String.valueOf(container.get(position).getLikes()));
 
         holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+        holder.likeButton.setOnClickListener(view -> likeButtonClick(holder, position, container.get(position)));
         holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+    }
+
+    private void likeButtonClick(RecyclerViewAdapter.ViewHolder holder, int position, Post post) {
+        if (container.get(position).getIsLiked()) {
+            holder.likeButton.setImageResource(R.drawable.ic_like);
+            container.get(position).setIsLiked(false);
+            registerLike(post, false);
+            post.decrementLike();
+        } else {
+            holder.likeButton.setImageResource(R.drawable.ic_like_pressed);
+            container.get(position).setIsLiked(true);
+            registerLike(post, true);
+            post.incrementLike();
+        }
+        recyclerViewAdapter.notifyItemChanged(position);
+    }
+
+    private void registerLike(Post post, boolean state) {
+        if (state)
+            MainActivity.mDatabase.child("global_posts").child(post.getPostId()).child("likes").child(ConnectedUser.getPublicKey()).setValue("ok");
+        else
+            MainActivity.mDatabase.child("global_posts").child(post.getPostId()).child("likes").child(ConnectedUser.getPublicKey()).removeValue();
     }
 
     private void commentsButtonClick(Post post) {

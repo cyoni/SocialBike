@@ -1,11 +1,14 @@
 package com.example.socialbike;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -14,6 +17,7 @@ import java.util.Map;
 
 public class AddPostActivity extends AppCompatActivity {
 
+    private final String ADD_POST_CODE = "add_post";
     private TextView textBox;
     Button submit;
     private HomeFragment homeFragment;
@@ -34,7 +38,42 @@ public class AddPostActivity extends AppCompatActivity {
         homeFragment = HomeFragment.getInstance();
 
         submitButtonListener();
+        getSavedText();
 
+        setTextBoxListener();
+    }
+
+    private void setTextBoxListener() {
+        textBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                SharedPreferences.Editor editor = getSharedPreferences(ADD_POST_CODE, MODE_PRIVATE).edit();
+                editor.putString("publicKey", ConnectedUser.getPublicKey());
+                editor.putString("post", editable.toString());
+                editor.apply();
+            }
+        });
+
+    }
+
+    private void getSavedText() {
+        SharedPreferences prefs = getSharedPreferences(ADD_POST_CODE, MODE_PRIVATE);
+        String publicKey = prefs.getString("publicKey", "");//"No name defined" is the default value.
+        String post_text = prefs.getString("post", "");//"No name defined" is the default value.
+
+        if (publicKey.equals(ConnectedUser.getPublicKey())){
+            textBox.setText(post_text);
+        }
     }
 
     private void submitButtonListener() {
