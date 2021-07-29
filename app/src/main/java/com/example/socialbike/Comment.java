@@ -12,7 +12,7 @@ public class Comment extends Post {
     private final ArrayList<String> subComments = new ArrayList<>();
 
     public Comment(String container, String commentHeadId, String commentId, String publicKey, String name, int time, String msg) {
-        super(commentId, publicKey, name, time, msg, 0);
+        super(commentId, publicKey, name, time, msg,0, 0, false);
         this.commentHeadId = commentHeadId;
         this.DatabaseContainer = container;
     }
@@ -24,7 +24,6 @@ public class Comment extends Post {
     public ArrayList<String> getSubComments(){
         return subComments;
     }
-
 
 
     public Task<HttpsCallableResult> sendSubComment(String message){

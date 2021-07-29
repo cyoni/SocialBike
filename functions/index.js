@@ -129,23 +129,37 @@ exports.updateProfile = functions.https.onCall(async (request, context) => {
 
 exports.getPosts = functions.https.onCall(async (request, context) => {
 
+    const account = await verifyUser(context.auth.uid)
+    const userPublicId = account.publicKey
+
     var data = {}
     data['posts'] = []
-    let counter = 0;
+    var count = 0
 
     return admin.database().ref('global_posts').once('value').then(snapshot => {
         snapshot.forEach(raw_post => {
            
-            
-            var dataOfUser = {
+            var dataOfUser = []
+            dataOfUser = ({
                 postId: raw_post.key,
                 publicKey: raw_post.child('user_public_key').val(),
                 name: "",
                 message: raw_post.child('message').val(),
-                timestamp: raw_post.child('timestamp').val()
-            }
-            data.posts[counter++] = dataOfUser
+                timestamp: raw_post.child('timestamp').val(),
+            })
 
+            if (raw_post.child('comments_count').exists()){
+                dataOfUser['comments_count'] = 
+                     raw_post.child('comments_count').val()
+            }
+
+            if (raw_post.child('likes_count').exists()){
+                dataOfUser['likes_count'] = raw_post.child('likes_count').val()
+                dataOfUser['doesUserLikeThePost'] = raw_post.child('likes').child(userPublicId).exists()
+            }
+            
+
+            data['posts'].push(dataOfUser)
         })
         return admin.database().ref('public').once('value')
 
@@ -618,6 +632,11 @@ exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').on
         const countRef = collectionRef.parent.child('likes_count');
   
         let increment;
+
+        if (change.before.exists() && !change.after.exists() && !collectionRef.parent('timestamp').exists()){
+            return;
+        }
+
         if (change.after.exists() && !change.before.exists()) {
           increment = 1;
         } else if (!change.after.exists() && change.before.exists()) {
@@ -628,7 +647,7 @@ exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').on
   
         await countRef.transaction((current) => {
             if ((current || 0) + increment < 0)
-                return 0
+                return (increment > 0) ? 1 : 0
             else
                 return (current || 0) + increment;
         });
@@ -636,6 +655,7 @@ exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').on
         return null;
       });
   
+      /*
   exports.recountlikes = functions.database.ref('global_posts/{postid}/likes_count').onDelete(async (snap) => {
     const counterRef = snap.ref;
     const collectionRef = counterRef.parent.child('likes');
@@ -643,3 +663,5 @@ exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').on
     const messagesData = await collectionRef.once('value');
     return await counterRef.set(messagesData.numChildren());
   });
+  */
+ 

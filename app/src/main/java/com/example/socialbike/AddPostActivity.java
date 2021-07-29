@@ -57,13 +57,17 @@ public class AddPostActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                SharedPreferences.Editor editor = getSharedPreferences(ADD_POST_CODE, MODE_PRIVATE).edit();
-                editor.putString("publicKey", ConnectedUser.getPublicKey());
-                editor.putString("post", editable.toString());
-                editor.apply();
+                saveText(editable.toString());
             }
         });
 
+    }
+
+    private void saveText(String text) {
+        SharedPreferences.Editor editor = getSharedPreferences(ADD_POST_CODE, MODE_PRIVATE).edit();
+        editor.putString("publicKey", ConnectedUser.getPublicKey());
+        editor.putString("post", text);
+        editor.apply();
     }
 
     private void getSavedText() {
@@ -93,7 +97,8 @@ public class AddPostActivity extends AppCompatActivity {
 
         //progressbar.setVisibility(View.VISIBLE);
         final String message = textBox.getText().toString();
-        submit.setText("Posting");
+        submit.setText("PUBLISHING...");
+        submit.setEnabled(false);
         Map<String, Object> data = new HashMap<>();
         data.put("message", message);
         MainActivity.mFunctions
@@ -105,13 +110,15 @@ public class AddPostActivity extends AppCompatActivity {
                     System.out.println("response:" + postIdFromServer);
 
                     if (!postIdFromServer.equals("FAIL") && !postIdFromServer.isEmpty()) {
-
-                        passItemToHome();
+                        saveText("");
+                        passItemHome();
                         showSuccessMsg();
                         finish();
 
                     } else {
                        // notifyUser_error();
+                        submit.setText("PUBLISHING");
+                        submit.setEnabled(true);
                     }
                     return "";
                 });
@@ -121,8 +128,9 @@ public class AddPostActivity extends AppCompatActivity {
         MainActivity.toast(this, "Success!", 0);
     }
 
-    private void passItemToHome() {
-        homeFragment.addPost(new Post("77777", ConnectedUser.getPublicKey(), ConnectedUser.getName(), 123412, textBox.getText().toString(), 0));
+    private void passItemHome() {
+        homeFragment.addPost(new Post("77777", ConnectedUser.getPublicKey(), ConnectedUser.getName(), 123412, textBox.getText().toString(), 0, 0, false));
+        homeFragment.updater.update(0);
     }
 
     private boolean isMessageValid() {

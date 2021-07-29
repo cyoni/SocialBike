@@ -6,67 +6,32 @@ import android.os.Parcelable;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.functions.HttpsCallableResult;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Post implements Parcelable {
+public class Post implements Serializable {
 
     private final String postId, publicKey, name, msg;
-    private boolean isLiked = false;
-    private final int time, commentsNumber;
+    private boolean isLiked = false, doesUserLikeThePost = false;
+    private final int time, comments_count;
     public static String POSTS_CONTAINER_CODE = "global_posts";
     public String DatabaseContainer;
     protected final ArrayList<Comment> commentsContainer = new ArrayList<>();
-    private int likes = 0;
+    private int likes_count;
 
-    public Post(String postId, String publicKey, String name, int time, String msg, int commentsNumber) {
+    public Post(String postId, String publicKey, String name, int time, String msg, int likes, int comments, boolean doesUserLikeThePost) {
         this.postId = postId;
         this.publicKey = publicKey;
         this.name = name;
         this.time = time;
         this.msg = msg;
-        this.commentsNumber = commentsNumber;
+        this.likes_count = likes;
+        this.comments_count = comments;
+        System.out.println(doesUserLikeThePost +"^&&&");
+        this.isLiked = doesUserLikeThePost;
     }
-
-    protected Post(Parcel in) {
-        postId = in.readString();
-        publicKey = in.readString();
-        name = in.readString();
-        msg = in.readString();
-        time = in.readInt();
-        likes = in.readInt();
-        commentsNumber = in.readInt();
-        isLiked = in.readBoolean();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(postId);
-        dest.writeString(publicKey);
-        dest.writeString(name);
-        dest.writeString(msg);
-        dest.writeInt(time);
-        dest.writeInt(likes);
-        dest.writeBoolean(isLiked);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<Post> CREATOR = new Creator<Post>() {
-        @Override
-        public Post createFromParcel(Parcel in) {
-            return new Post(in);
-        }
-
-        @Override
-        public Post[] newArray(int size) {
-            return new Post[size];
-        }
-    };
 
     public String getPostId() {
         return postId;
@@ -88,12 +53,12 @@ public class Post implements Parcelable {
         return time;
     }
 
-    public int getCommentsNumber() {
-        return commentsNumber;
+    public int getComments_count() {
+        return comments_count;
     }
 
     public boolean hasComments() {
-        return commentsNumber > 0;
+        return comments_count > 0;
     }
 
     public void addComment(Comment comment) {
@@ -120,13 +85,13 @@ public class Post implements Parcelable {
 
 
     public void incrementLike() {
-        this.likes++;
+        this.likes_count++;
     }
     public void decrementLike() {
-        this.likes--;
+        this.likes_count--;
     }
 
-    public int getLikes() {
-        return likes;
+    public int getLikesCount() {
+        return likes_count;
     }
 }

@@ -6,7 +6,7 @@
 
 
     <ImageButton
-        android:id="@+id/trash_button"
+        android:id="@+id/followButton"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginStart="10dp"

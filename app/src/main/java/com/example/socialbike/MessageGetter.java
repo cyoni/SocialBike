@@ -1,5 +1,7 @@
 package com.example.socialbike;
 
+import android.view.View;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,7 +28,8 @@ public class MessageGetter {
 
             for (int i = 0; i < messages_array.length(); i++) {
                 int likes = 0, comments = 0;
-                boolean doILike = false, isAuthor = false, has_profile_img = false;
+                boolean isAuthor = false, has_profile_img = false;
+                boolean doesUserLikeThePost = false;
 
                 String user_public_key = messages_array.getJSONObject(i).getString("publicKey");
                 String messages = messages_array.getJSONObject(i).getString("message");
@@ -40,8 +43,8 @@ public class MessageGetter {
                 if (messages_array.getJSONObject(i).has("comments_count")) {
                     comments = Integer.parseInt(messages_array.getJSONObject(i).getString("comments_count"));
                 }
-                if (messages_array.getJSONObject(i).has("doILike")) {
-                    doILike = messages_array.getJSONObject(i).getBoolean("doILike");
+                if (messages_array.getJSONObject(i).has("doesUserLikeThePost")) {
+                    doesUserLikeThePost = (messages_array.getJSONObject(i).getBoolean("doesUserLikeThePost"));
                 }
                 if (messages_array.getJSONObject(i).has("isauthor")) {
                     isAuthor = messages_array.getJSONObject(i).getBoolean("isauthor");
@@ -50,7 +53,8 @@ public class MessageGetter {
                     has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
                 }
 
-                Post post = new Post(postId, user_public_key, nickname, 8888, messages, 0);
+                Post post = new Post(postId, user_public_key,
+                        nickname,8888, messages, likes, comments, doesUserLikeThePost);
                 updater.add(post);
 
                 System.out.println("msg " + i + " " + messages);
@@ -65,6 +69,8 @@ public class MessageGetter {
 
     public void getPosts(){
         System.out.println("getting posts...");
+
+
         MainActivity.mFunctions
                 .getHttpsCallable("getPosts")
                 .call(null)

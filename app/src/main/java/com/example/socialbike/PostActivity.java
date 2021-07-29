@@ -230,8 +230,7 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void getPost() {
-        Bundle data = getIntent().getExtras();
-        post = data.getParcelable("post");
+        post = (Post) getIntent().getSerializableExtra("post");
         post.DatabaseContainer = POSTS_CONTAINER_CODE;
     }
 

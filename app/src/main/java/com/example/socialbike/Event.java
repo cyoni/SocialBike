@@ -20,7 +20,7 @@ public class Event extends Post{
                  String amountOfInterestedPeople, int numberOfParticipants,
                  Position position, String message, int commentsNumber) {
 
-        super(eventId, userPublicKey, name, 1245, message, commentsNumber);
+        super(eventId, userPublicKey, name, 1245, message,0, commentsNumber, false);
 
         this.DatabaseContainer = EVENTS_CONTAINER_CODE;
         this.eventId = eventId;

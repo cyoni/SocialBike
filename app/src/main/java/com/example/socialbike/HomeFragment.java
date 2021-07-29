@@ -7,17 +7,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -31,10 +30,11 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private final ArrayList<Post> container = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
-    private Updater updater;
+    protected Updater updater;
     private MessageGetter messageManager;
     private ProgressBar progressBar;
     private View root;
+    private SwipeRefreshLayout swipeLayout;
 
     public static HomeFragment getInstance() {
         if (homeFragment == null)
@@ -60,23 +60,43 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
             floatingButton = root.findViewById(R.id.fab);
             recyclerView = root.findViewById(R.id.recyclerview);
             progressBar = root.findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.INVISIBLE);
+            swipeLayout = root.findViewById(R.id.swipe_refresh);
 
+            setSwipeLayout();
             setToolbar(root);
             activateFloatingButton();
             initAdapter();
 
-            progressBar.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.INVISIBLE);
 
             updater = new Updater(this, this.container, recyclerViewAdapter);
             messageManager = new MessageGetter(updater);
 
-            messageManager.getPosts();
+            progressBar.setVisibility(View.VISIBLE);
+
+            getPosts();
+
 
         }
 
         return root;
+    }
+
+    private void getPosts() {
+        container.clear();
+        recyclerView.setVisibility(View.INVISIBLE);
+        messageManager.getPosts();
+    }
+
+    private void setSwipeLayout() {
+        swipeLayout.setOnRefreshListener(this::getPosts);
+
+        // Scheme colors for animation
+        swipeLayout.setColorSchemeColors(
+                getResources().getColor(android.R.color.holo_blue_bright),
+                getResources().getColor(android.R.color.holo_green_light),
+                getResources().getColor(android.R.color.holo_orange_light),
+                getResources().getColor(android.R.color.holo_red_light)
+        );
     }
 
     private void setToolbar(View root) {
@@ -110,35 +130,23 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
+        Post current = container.get(position);
         holder.message.setText(container.get(position).getMsg());
         holder.name.setText(container.get(position).getName());
-        holder.likes.setText(String.valueOf(container.get(position).getLikes()));
+        holder.likes.setText(String.valueOf(container.get(position).getLikesCount()));
+
+        PostButtons postButtons = new PostButtons();
+
+        System.out.println(current.getIsLiked() + "$$$$");
+
+        if (current.getIsLiked()) {
+            postButtons.changeLikeButton(holder, true);
+        }
 
         holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-        holder.likeButton.setOnClickListener(view -> likeButtonClick(holder, position, container.get(position)));
+        holder.likeButton.setOnClickListener(view -> postButtons.likeButtonClick(container, holder, position));
         holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-    }
-
-    private void likeButtonClick(RecyclerViewAdapter.ViewHolder holder, int position, Post post) {
-        if (container.get(position).getIsLiked()) {
-            holder.likeButton.setImageResource(R.drawable.ic_like);
-            container.get(position).setIsLiked(false);
-            registerLike(post, false);
-            post.decrementLike();
-        } else {
-            holder.likeButton.setImageResource(R.drawable.ic_like_pressed);
-            container.get(position).setIsLiked(true);
-            registerLike(post, true);
-            post.incrementLike();
-        }
-        recyclerViewAdapter.notifyItemChanged(position);
-    }
-
-    private void registerLike(Post post, boolean state) {
-        if (state)
-            MainActivity.mDatabase.child("global_posts").child(post.getPostId()).child("likes").child(ConnectedUser.getPublicKey()).setValue("ok");
-        else
-            MainActivity.mDatabase.child("global_posts").child(post.getPostId()).child("likes").child(ConnectedUser.getPublicKey()).removeValue();
+        holder.followButton.setOnClickListener(view -> postButtons.followUser(container, holder, position));
     }
 
     private void commentsButtonClick(Post post) {
@@ -160,6 +168,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     public void onFinishedTakingNewMessages() {
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
+        swipeLayout.setRefreshing(false);
     }
 
 }

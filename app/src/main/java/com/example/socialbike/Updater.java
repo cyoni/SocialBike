@@ -20,13 +20,18 @@ public class Updater {
     }
 
     public void add(Object item){
-        container.add(item);
+        container.add(0, item);
         update();
     }
 
     public void update(){
         recyclerViewAdapter.notifyItemInserted(container.size() - 1);
     }
+
+    public void update(int index){
+        recyclerViewAdapter.notifyItemInserted(index);
+    }
+
 
     public interface IUpdate {
         void onFinishedTakingNewMessages();
