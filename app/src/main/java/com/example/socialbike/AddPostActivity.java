@@ -41,6 +41,9 @@ public class AddPostActivity extends AppCompatActivity {
         getSavedText();
 
         setTextBoxListener();
+
+        Utils.showKeyboard(this);
+        textBox.requestFocus();
     }
 
     private void setTextBoxListener() {
@@ -138,4 +141,9 @@ public class AddPostActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public void onBackPressed(){
+        Utils.hideKeyboard(this);
+        finish();
+    }
 }

@@ -28,6 +28,7 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="170dp"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:layout_alignParentEnd="true"
             android:text="Treading" />
 

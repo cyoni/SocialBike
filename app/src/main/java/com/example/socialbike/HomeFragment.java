@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
     private static HomeFragment homeFragment = null;
-    private FloatingActionButton floatingButton;
+    private ExtendedFloatingActionButton floatingButton;
     private final ArrayList<Post> container = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
@@ -67,7 +68,20 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
             activateFloatingButton();
             initAdapter();
 
+            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    if (dy > 0) {
+                     //   if (floatingButton.isExtended())
+                     //       floatingButton.setExtended(false);
+                    } else if (dy < 0) {
+                    //    if (!floatingButton.isExtended())
+
+                     //       floatingButton.setExtended(true);
+                    }
+                }
+            });
             updater = new Updater(this, this.container, recyclerViewAdapter);
             messageManager = new MessageGetter(updater);
 
@@ -75,11 +89,12 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
 
             getPosts();
 
-
         }
 
         return root;
     }
+
+
 
     private void getPosts() {
         container.clear();
@@ -139,9 +154,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
 
         System.out.println(current.getIsLiked() + "$$$$");
 
-        if (current.getIsLiked()) {
-            postButtons.changeLikeButton(holder, true);
-        }
+        postButtons.changeLikeButton(holder, current.getIsLiked());
 
         holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
         holder.likeButton.setOnClickListener(view -> postButtons.likeButtonClick(container, holder, position));
