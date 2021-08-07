@@ -70,8 +70,8 @@ public class MessageGetter {
     public void getPosts(){
         System.out.println("getting posts...");
 
-
-        MainActivity.mFunctions
+        parseMessages("{\"posts\":[{\"postId\":\"77777\",\"publicKey\":null,\"name\":null,\"message\":null,\"timestamp\":null,\"likes_count\":1,\"doesUserLikeThePost\":false},{\"postId\":\"-MZ3E-YJvZ2Hu_Gjww1m\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"HELLO\",\"timestamp\":1619273713159,\"likes_count\":0,\"doesUserLikeThePost\":false},{\"postId\":\"-MZ3EQWQZKF9P-LtPrsp\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"Ccc\",\"timestamp\":1619273824422,\"likes_count\":0,\"doesUserLikeThePost\":false},{\"postId\":\"-MdmsTw-fo1qCOc2AubY\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"עכאיחכככ\",\"timestamp\":1625425047024,\"likes_count\":1,\"doesUserLikeThePost\":false},{\"postId\":\"-MdmsWZ_z7RpGyoJWQ0H\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"Eg\",\"timestamp\":1625425058086,\"likes_count\":1,\"doesUserLikeThePost\":false},{\"postId\":\"-MeRCOAy5tbZthY4Qg0K\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"Cccc\",\"timestamp\":1626118394452},{\"postId\":\"-MfJTL86E9m8o0F4TdgA\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"Ggnn c\\nHh\\n\\nHh\",\"timestamp\":1627062362515},{\"postId\":\"-MfP81zn8VwvcG9VZIBZ\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"Fffh\\nFf\\nSsjgr\\n\\nFff\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nBbb\\n\\n\\nKk\",\"timestamp\":1627157442348,\"likes_count\":1,\"doesUserLikeThePost\":true},{\"postId\":\"-MfP90-zZ-qXk0D47cBr\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"Fffh\\nFf\\nSsjgr\\n\\nFff\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nBbb\\n\\n\\nKk\",\"timestamp\":1627157696409,\"likes_count\":4,\"doesUserLikeThePost\":true},{\"postId\":\"-MflWeng7w8QQKP1gBzP\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"Hello\",\"timestamp\":1627549772870,\"likes_count\":4,\"doesUserLikeThePost\":true},{\"postId\":\"-MgVz6HC-n2Qikb7gvjz\",\"publicKey\":\"-MYVCkWexSO_jumnbr0l\",\"name\":\"yoni :)\",\"message\":\"iiyy\",\"timestamp\":1628346020822}]}");
+       /* MainActivity.mFunctions
                 .getHttpsCallable("getPosts")
                 .call(null)
                 .continueWith(task -> {
@@ -83,7 +83,7 @@ public class MessageGetter {
                         parseMessages(response);
                     }
                     return "";
-                });
+                });*/
     }
 
 }

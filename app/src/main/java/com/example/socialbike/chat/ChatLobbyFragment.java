@@ -44,7 +44,6 @@ public class ChatLobbyFragment extends Fragment
     private final ArrayList<ChatPreviewUser> reserve = new ArrayList<>();
     private final HashSet<String> prefixWithoutResults = new HashSet<>();
     public RecyclerViewAdapter recyclerViewAdapter;
-    private NavController nav;
     private Context context;
     private final HashMap<String, List<ChatPreviewUser>>
             incomingMessages = new HashMap<>(); // TO REMOVE
@@ -122,7 +121,7 @@ public class ChatLobbyFragment extends Fragment
             this.users.add(new ChatPreviewUser("123", "4343", "Yoram", "Let's ride tonight"));
 
             recyclerViewAdapter.setClassReference(this); // reference this class to the adaptor
-            nav = Navigation.findNavController(container);
+
 
             MainActivity.chatManager.currentConversationChat = null;
 

@@ -42,23 +42,14 @@
         android:text="This is my comment"
         android:textSize="15sp" />
 
-    <Button
-        android:id="@+id/likeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <include
         android:layout_below="@id/message"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="10dp"
-        android:text="Like" />
-
-    <Button
-        android:id="@+id/commentButton"
-        android:layout_width="wrap_content"
+        layout="@layout/comment_buttons"
         android:layout_height="wrap_content"
-        android:layout_below="@id/message"
-        android:layout_toLeftOf="@id/likeButton"
-        android:layout_marginRight="10dp"
-        android:text="Comment" />
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="25dp"/>
 
 </RelativeLayout>
+
+
 </LinearLayout>

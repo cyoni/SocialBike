@@ -66,12 +66,14 @@ public class PostActivity extends AppCompatActivity
         commentsCounter = findViewById(R.id.commentsCounter);
         progressBar = findViewById(R.id.progressBar);
 
-        progressBar.setVisibility(View.VISIBLE);
-
         getPost();
         setToolBarTitle();
         printPost();
-        getComments();
+
+        if (post.getCommentsCount() > 0) {
+            progressBar.setVisibility(View.VISIBLE);
+            getComments();
+        }
 
         sendComment.setOnClickListener(view -> submitComment());
 
@@ -176,19 +178,18 @@ public class PostActivity extends AppCompatActivity
 
     private void submitComment() {
 
-        String comment = newComment.getText().toString().trim();
+        String comment = newComment.getText().toString();
 
-        if (comment.isEmpty())
+        if (comment.isEmpty() || sendComment.getText().equals("Sending"))
             return;
 
-        sendComment.setEnabled(false);
-
+        sendComment.setText("Sending");
+        Utils.hideKeyboard(this);
         Map<String, Object> data = new HashMap<>();
         data.put("comment", comment);
         data.put("postId", post.getPostId());
         data.put("replyTo", "");
         data.put("container", "global_posts");
-
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendComment")
@@ -196,7 +197,7 @@ public class PostActivity extends AppCompatActivity
                 .continueWith(task -> {
                     String postIdFromServer = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + postIdFromServer);
-
+                    sendComment.setText("Send");
                     commentsContainer.add(0, new Comment(
                             POSTS_CONTAINER_CODE,
                             post.getPostId(),
@@ -239,7 +240,7 @@ public class PostActivity extends AppCompatActivity
         Post post = commentsContainer.get(position);
         holder.message.setText(post.getMsg());
         holder.name.setText(post.getName());
-        holder.commentButton.setOnClickListener(view -> addNewComment(holder, position));
+        holder.replyButton.setOnClickListener(view -> addNewComment(holder, position));
         holder.newCommentSection.setVisibility(View.GONE);
         handleSubComments(holder, position);
     }
@@ -263,25 +264,27 @@ public class PostActivity extends AppCompatActivity
 
     private void showOrHideNewCommentSection(RecyclerViewAdapter.ViewHolder holder) {
         if (holder.newCommentSection.getVisibility() == View.VISIBLE) {
-            holder.newCommentSection.setVisibility(View.GONE);
             Utils.hideKeyboard(this);
+            holder.newCommentSection.setVisibility(View.GONE);
         } else {
             holder.newCommentSection.setVisibility(View.VISIBLE);
             holder.commentText.requestFocus();
-            //Utils.showKeyboard(this);
+            Utils.showKeyboard(this);
         }
     }
 
     private void sendSubComment(RecyclerViewAdapter.ViewHolder holder, int position) {
-        String comment = holder.commentText.getText().toString().trim();
+        String comment = holder.commentText.getText().toString();
 
-        if (comment.isEmpty())
+        if (comment.isEmpty() || holder.postCommentButton.getText().equals("Sending"))
             return;
-
+        Utils.hideKeyboard(this);
+        holder.postCommentButton.setText("Sending");
         commentsContainer.get(position).sendSubComment(comment).continueWith(task -> {
 
             String postIdFromServer = String.valueOf(task.getResult().getData());
             System.out.println("response: " + postIdFromServer);
+            holder.postCommentButton.setText("Send");
 
             commentsContainer.get(position).addSubComment(comment);
             addSubCommentToLayout(holder.commentText.getText().toString(), holder);
@@ -289,11 +292,10 @@ public class PostActivity extends AppCompatActivity
             holder.commentText.setText("");
 
             showOrHideNewCommentSection(holder);
-            Utils.hideKeyboard(this);
             System.out.println("Done.");
 
             return null;
-        });;
+        });
     }
 
     private void addSubCommentToLayout(String message, RecyclerViewAdapter.ViewHolder holder) {
@@ -306,7 +308,7 @@ public class PostActivity extends AppCompatActivity
         LinearLayout commentLayout = holder.commentLayout;
         LinearLayout relativeLayout = (LinearLayout) View.inflate(this, R.layout.item_sub_comment, null);
 
-        relativeLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder));
+        relativeLayout.findViewById(R.id.replyButton).setOnClickListener(view -> quoteMember(holder));
         TextView commentText = relativeLayout.findViewById(R.id.message);
         commentText.setText(message);
 
@@ -317,6 +319,7 @@ public class PostActivity extends AppCompatActivity
         showOrHideNewCommentSection(holder);
         String str = "@Yoni ";
         holder.commentText.setText(str);
+        holder.commentText.requestFocus();
     }
 
     @Override

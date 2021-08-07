@@ -14,16 +14,13 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
+import com.example.socialbike.chat.ChatLobbyFragment;
 import com.example.socialbike.chat.ChatManager;
-import com.example.socialbike.chat.ContainerForChat;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -127,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                         changeFragment(EventsFragment.getInstance());
                         break;
                     case R.id.chat:
-                        changeFragment(ContainerForChat.getInstance());
+                        changeFragment(ChatLobbyFragment.getInstance());
                         break;
                     case R.id.profile:
                         changeFragment(ProfileFragment.getInstance());

@@ -75,7 +75,7 @@
 
         <include
             android:layout_width="wrap_content"
-            android:layout_height="43dp"
+            android:layout_height="wrap_content"
             android:layout_below="@id/message"
             layout="@layout/post_buttons"/>
 

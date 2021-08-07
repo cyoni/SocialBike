@@ -185,7 +185,7 @@ public class ChatManager {
         String error = "Error.";
         if (response.contains("NO_USER"))
             error = "Error: Message was not sent. User does not exist.";
-        MainActivity.toast(currentConversationChat.getApplicationContext(), error, 2);
+        MainActivity.toast(currentConversationChat.getApplicationContext(), error, 1);
     }
 
     public void openConversationActivity(Context context, String userId, String name) {

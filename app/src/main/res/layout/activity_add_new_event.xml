@@ -53,6 +53,7 @@
 
             <Button
                 android:id="@+id/dateButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
@@ -79,6 +80,7 @@
 
             <Button
                 android:id="@+id/timeButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
@@ -126,12 +128,14 @@
 
             <Button
                 android:id="@+id/locationAutoCompleteButton"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Look up places" />
 
             <Button
                 android:id="@+id/mapButton"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"

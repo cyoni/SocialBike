@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
+import com.example.socialbike.Utils;
 import com.example.socialbike.chat.ChatMessage;
 import com.example.socialbike.databinding.ActivityConversationChatBinding;
 
@@ -38,26 +39,33 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation_chat);
-
         setToolbar();
-
         userId = getIntent().getStringExtra("userId");
-
         MainActivity.chatManager.currentConversationChat = this;
-
-        Button sendMsgButton = findViewById(R.id.send);
-
+        sendMessageListener();
         messageBox = findViewById(R.id.messageBox);
         recyclerView = findViewById(R.id.recyclerview);
         initAdapter();
 
+    }
+
+    private void sendMessageListener() {
+        Button sendMsgButton = findViewById(R.id.send);
 
         sendMsgButton.setOnClickListener(view -> {
             String message =  messageBox.getText().toString();
+            if (message.trim().isEmpty())
+                return;
             MainActivity.chatManager.sendMessage(userId, message);
             messageBox.setText("");
         });
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Utils.showKeyboard(this);
+        messageBox.requestFocus();
     }
 
     public String getUserId(){
@@ -102,6 +110,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
 
     @Override
     public void onBackPressed() {
+        Utils.hideKeyboard(this);
         MainActivity.chatManager.currentConversationChat = null;
         finish();
     }

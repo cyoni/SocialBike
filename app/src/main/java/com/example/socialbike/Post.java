@@ -53,7 +53,7 @@ public class Post implements Serializable {
         return time;
     }
 
-    public int getComments_count() {
+    public int getCommentsCount() {
         return comments_count;
     }
 

@@ -26,12 +26,15 @@
             android:id="@+id/cancelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
             android:text="Cancel" />
 
         <Button
             android:id="@+id/applyButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
             android:text="Set" />
     </LinearLayout>
 

@@ -4,13 +4,58 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
+    <TextView
+        android:id="@+id/likes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:padding="2dp"
+        android:text="4" />
+
+    <TextView
+        android:id="@+id/likes_word"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5sp"
+        android:layout_toRightOf="@id/likes"
+        android:padding="2dp"
+        android:text="Likes" />
+
+
+
+    <TextView
+        android:id="@+id/comments"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/likes_word"
+        android:padding="2dp"
+        android:text="0" />
+
+    <TextView
+        android:id="@+id/comments_word"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:layout_toRightOf="@id/comments"
+        android:padding="2dp"
+        android:text="Comments" />
+
+
+
 
     <ImageButton
         android:id="@+id/followButton"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_below="@id/likes"
         android:layout_toEndOf="@+id/share_button"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
@@ -21,42 +66,23 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_below="@id/likes"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
         app:srcCompat="@drawable/ic_share" />
 
-    <TextView
-        android:id="@+id/comments"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="5sp"
-        android:layout_toLeftOf="@id/commentsButton"
-        android:padding="5dp"
-        android:text="0" />
 
     <ImageButton
         android:id="@+id/commentsButton"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_toStartOf="@id/likes"
+        android:layout_below="@id/likes"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@id/likeButton"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
         app:srcCompat="@drawable/ic_comment" />
 
-    <TextView
-        android:id="@+id/likes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="5sp"
-        android:layout_toStartOf="@+id/likeButton"
-        android:padding="5dp"
-        android:text="0" />
 
     <ImageButton
         android:id="@+id/likeButton"
@@ -64,7 +90,8 @@
         android:layout_height="20dp"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="10dp"
+        android:layout_below="@id/likes"
+        android:layout_marginBottom="5dp"
         android:layout_marginEnd="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
