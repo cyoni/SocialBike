@@ -148,16 +148,13 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         Post current = container.get(position);
         holder.message.setText(container.get(position).getMsg());
         holder.name.setText(container.get(position).getName());
-        holder.likes.setText(String.valueOf(container.get(position).getLikesCount()));
+        //holder.likes.setText(String.valueOf(container.get(position).getLikesCount()));
 
-        PostButtons postButtons = new PostButtons();
+        PostButtons postButtons = new PostButtons(holder, position, container.get(position));
 
-        System.out.println(current.getIsLiked() + "$$$$");
 
-        postButtons.changeLikeButton(holder, current.getIsLiked());
-
-        holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-        holder.likeButton.setOnClickListener(view -> postButtons.likeButtonClick(container, holder, position));
+  //      holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+ //       holder.likeButton.setOnClickListener(view -> postButtons.likeButtonClick(container.get(position), holder, position));
         holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
         holder.followButton.setOnClickListener(view -> postButtons.followUser(container, holder, position));
     }

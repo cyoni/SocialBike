@@ -654,6 +654,35 @@ exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').on
         functions.logger.log('Counter updated.');
         return null;
       });
+
+exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comments/{commentId}').onWrite(
+    async (change) => {
+            const collectionRef = change.after.ref.parent;
+            const countRef = collectionRef.parent.child('comments_count');
+      
+            let increment;
+    
+            if (change.before.exists() && !change.after.exists() && !collectionRef.parent('timestamp').exists()){
+                return;
+            }
+    
+            if (change.after.exists() && !change.before.exists()) {
+              increment = 1;
+            } else if (!change.after.exists() && change.before.exists()) {
+              increment = -1;
+            } else {
+              return null;
+            }
+      
+            await countRef.transaction((current) => {
+                if ((current || 0) + increment < 0)
+                    return (increment > 0) ? 1 : 0
+                else
+                    return (current || 0) + increment;
+            });
+            functions.logger.log('Counter updated.');
+            return null;
+          });
   
       /*
   exports.recountlikes = functions.database.ref('global_posts/{postid}/likes_count').onDelete(async (snap) => {

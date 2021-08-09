@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -56,7 +55,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView name, message, date,
                 time, msgStyle, message_preview,
-                  commentText, people_going, locationName, red_dot, likes,
+                comments, people_going, locationName, red_dot, likes, comments_count,
                 replyButton;
         public Button mapButton, interested, coming;
         public RelativeLayout layout;
@@ -76,10 +75,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             layout = itemView.findViewById(R.id.layout);
             commentsButton = itemView.findViewById(R.id.commentsButton);
             commentButton = itemView.findViewById(R.id.commentButton);
+            comments_count = itemView.findViewById(R.id.comments);
             likeButton = itemView.findViewById(R.id.likeButton);
             likes = itemView.findViewById(R.id.likes);
             postCommentButton = itemView.findViewById(R.id.postCommentButton);
-            commentText = itemView.findViewById(R.id.headCommentText);
+            comments = itemView.findViewById(R.id.headCommentText);
             newCommentSection = itemView.findViewById(R.id.newCommentSection);
             commentLayout = itemView.findViewById(R.id.commentLayout);
             interested = itemView.findViewById(R.id.interested);
@@ -108,7 +108,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         public void fresh() {
-            commentText = itemView.findViewById(R.id.headCommentText);
+            comments = itemView.findViewById(R.id.headCommentText);
         }
     }
 

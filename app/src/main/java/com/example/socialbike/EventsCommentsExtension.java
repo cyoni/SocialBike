@@ -134,7 +134,7 @@ public class EventsCommentsExtension {
     private void sendHeadComment(RecyclerViewAdapter.ViewHolder holder, int position) {
 
         holder.postCommentButton.setText("SENDING...");
-        String comment = holder.commentText.getText().toString();
+        String comment = holder.comments.getText().toString();
 
         if (comment.isEmpty())
             return;
@@ -158,7 +158,7 @@ public class EventsCommentsExtension {
 
                     addCommentToLayout(R.layout.item_comment, newComment, holder, position);
 
-                    holder.commentText.setText("");
+                    holder.comments.setText("");
                     holder.postCommentButton.setText("Send");
                     System.out.println("Done.");
 

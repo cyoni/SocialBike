@@ -29,7 +29,6 @@ public class Post implements Serializable {
         this.msg = msg;
         this.likes_count = likes;
         this.comments_count = comments;
-        System.out.println(doesUserLikeThePost +"^&&&");
         this.isLiked = doesUserLikeThePost;
     }
 
@@ -87,6 +86,7 @@ public class Post implements Serializable {
     public void incrementLike() {
         this.likes_count++;
     }
+
     public void decrementLike() {
         this.likes_count--;
     }

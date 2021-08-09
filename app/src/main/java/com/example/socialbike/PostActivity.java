@@ -67,16 +67,27 @@ public class PostActivity extends AppCompatActivity
         progressBar = findViewById(R.id.progressBar);
 
         getPost();
+        loadInit();
+
+
+        new PostButtons(this, post);
+
         setToolBarTitle();
         printPost();
 
+        sendComment.setOnClickListener(view -> submitComment());
+    }
+
+    private void loadInit() {
         if (post.getCommentsCount() > 0) {
+            commentsCounter.setText("Loading...");
             progressBar.setVisibility(View.VISIBLE);
             getComments();
         }
-
-        sendComment.setOnClickListener(view -> submitComment());
-
+        else{
+            commentsCounter.setText("0 comments");
+            progressBar.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void showRecyclerviewAndHideProgressBar() {
@@ -133,7 +144,6 @@ public class PostActivity extends AppCompatActivity
                 String commentId = messages_array.getJSONObject(i).getString("postId");
 
                 JSONArray subCommentsArray = messages_array.getJSONObject(i).getJSONArray("subComments");
-
 
                 if (messages_array.getJSONObject(i).has("likes_count")) {
                     likes = Integer.parseInt(messages_array.getJSONObject(i).getString("likes_count"));
@@ -216,7 +226,6 @@ public class PostActivity extends AppCompatActivity
                 });
     }
 
-
     private void setToolBarTitle() {
         CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.title);
         collapsingToolbarLayout.setTitle(post.getName() + " says");
@@ -241,6 +250,13 @@ public class PostActivity extends AppCompatActivity
         holder.message.setText(post.getMsg());
         holder.name.setText(post.getName());
         holder.replyButton.setOnClickListener(view -> addNewComment(holder, position));
+
+
+     //   postButtons.changeLikeButton(holder, post.getIsLiked());
+
+       // holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+
+
         holder.newCommentSection.setVisibility(View.GONE);
         handleSubComments(holder, position);
     }
@@ -268,13 +284,13 @@ public class PostActivity extends AppCompatActivity
             holder.newCommentSection.setVisibility(View.GONE);
         } else {
             holder.newCommentSection.setVisibility(View.VISIBLE);
-            holder.commentText.requestFocus();
+            holder.comments.requestFocus();
             Utils.showKeyboard(this);
         }
     }
 
     private void sendSubComment(RecyclerViewAdapter.ViewHolder holder, int position) {
-        String comment = holder.commentText.getText().toString();
+        String comment = holder.comments.getText().toString();
 
         if (comment.isEmpty() || holder.postCommentButton.getText().equals("Sending"))
             return;
@@ -287,9 +303,9 @@ public class PostActivity extends AppCompatActivity
             holder.postCommentButton.setText("Send");
 
             commentsContainer.get(position).addSubComment(comment);
-            addSubCommentToLayout(holder.commentText.getText().toString(), holder);
+            addSubCommentToLayout(holder.comments.getText().toString(), holder);
 
-            holder.commentText.setText("");
+            holder.comments.setText("");
 
             showOrHideNewCommentSection(holder);
             System.out.println("Done.");
@@ -317,9 +333,9 @@ public class PostActivity extends AppCompatActivity
 
     private void quoteMember(RecyclerViewAdapter.ViewHolder holder) {
         showOrHideNewCommentSection(holder);
-        String str = "@Yoni ";
-        holder.commentText.setText(str);
-        holder.commentText.requestFocus();
+        String str = "@TOOD ";
+        holder.comments.setText(str);
+        holder.comments.requestFocus();
     }
 
     @Override
