@@ -18,7 +18,6 @@ exports.addUserToDB = functions.auth.user().onCreate((event) => {
 
 
 function verifyUser(userPrivateKey) {
-    ``
     const account = (async (resolve, reject) => {
         const snapshot = await admin.database().ref('users').child(userPrivateKey).once('value');
         if (snapshot.exists() && snapshot.child('accountActivated').val() === true) {
@@ -129,12 +128,15 @@ exports.updateProfile = functions.https.onCall(async (request, context) => {
 
 exports.getPosts = functions.https.onCall(async (request, context) => {
 
-    const account = await verifyUser(context.auth.uid)
-    const userPublicId = account.publicKey
-
+    var userPublicId;
+    
+    if (Object.prototype.hasOwnProperty.call(context, "auth")) {
+        const account = await verifyUser(context.auth.uid)
+        userPublicId = account.publicKey
+    }
+    
     var data = {}
     data['posts'] = []
-    var count = 0
 
     return admin.database().ref('global_posts').once('value').then(snapshot => {
         snapshot.forEach(raw_post => {
@@ -191,7 +193,7 @@ exports.getComments = functions.https.onCall(async (request, context) => {
 
         snapshot.forEach(raw_post => {
             var commentData = {
-                postId: raw_post.key,
+                commentId: raw_post.key,
                 publicKey: raw_post.child('senderPublicKey').val(),
                 name: "",
                 message: raw_post.child('comment').val(),
@@ -206,7 +208,7 @@ exports.getComments = functions.https.onCall(async (request, context) => {
                 raw_post.child('subComments').forEach(subComment => {
 
                     var subCommentToInsert = {
-                        commentId: subComment.key,
+                        subCommentId: subComment.key,
                         senderPublicKey: subComment.child('senderPublicKey').val(),
                         name: "TODO",
                         comment: subComment.child('comment').val(),
@@ -633,7 +635,9 @@ exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').on
   
         let increment;
 
-        if (change.before.exists() && !change.after.exists() && !collectionRef.parent('timestamp').exists()){
+        const a = await admin.database().ref(collectionRef.parent.child('timestamp')).once('value')
+
+        if (change.before.exists() && !change.after.exists() && !a.exists()){
             return;
         }
 
@@ -654,6 +658,68 @@ exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').on
         functions.logger.log('Counter updated.');
         return null;
       });
+
+exports.likeComment = functions.database.ref('global_posts/{postId}/comments/{commentId}/likes/{userId}').onWrite(
+        async (change) => {
+            const collectionRef = change.after.ref.parent;
+            const countRef = collectionRef.parent.child('likes_count');
+      
+            let increment;
+    
+            const a = await admin.database().ref(collectionRef.parent.child('timestamp')).once('value')
+    
+            if (change.before.exists() && !change.after.exists() && !a.exists()){
+                return;
+            }
+    
+            if (change.after.exists() && !change.before.exists()) {
+              increment = 1;
+            } else if (!change.after.exists() && change.before.exists()) {
+              increment = -1;
+            } else {
+              return null;
+            }
+      
+            await countRef.transaction((current) => {
+                if ((current || 0) + increment < 0)
+                    return (increment > 0) ? 1 : 0
+                else
+                    return (current || 0) + increment;
+            });
+            functions.logger.log('Counter updated.');
+            return null;
+          });
+
+exports.likeSubComment = functions.database.ref('global_posts/{postId}/comments/{commentId}/subComments/likes/{userId}').onWrite(
+            async (change) => {
+                const collectionRef = change.after.ref.parent;
+                const countRef = collectionRef.parent.child('likes_count');
+          
+                let increment;
+        
+                const a = await admin.database().ref(collectionRef.parent.child('timestamp')).once('value')
+        
+                if (change.before.exists() && !change.after.exists() && !a.exists()){
+                    return;
+                }
+        
+                if (change.after.exists() && !change.before.exists()) {
+                  increment = 1;
+                } else if (!change.after.exists() && change.before.exists()) {
+                  increment = -1;
+                } else {
+                  return null;
+                }
+          
+                await countRef.transaction((current) => {
+                    if ((current || 0) + increment < 0)
+                        return (increment > 0) ? 1 : 0
+                    else
+                        return (current || 0) + increment;
+                });
+                functions.logger.log('Counter updated.');
+                return null;
+              });
 
 exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comments/{commentId}').onWrite(
     async (change) => {

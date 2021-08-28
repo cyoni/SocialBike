@@ -1,10 +1,29 @@
 package com.example.socialbike;
 
-public class SubComment extends Comment {
+import java.util.ArrayList;
 
-    public SubComment(String container, String headPost, String postId, String publicKey, String name, int time, String msg) {
-        super(container, headPost, postId, publicKey, name, time, msg);
+public class SubComment extends Comment {
+    String subCommentId;
+
+    public SubComment(String container,
+                      String postId,
+                      String headCommentId,
+                      String subCommentId,
+                      String publicKey,
+                      String name,
+                      long time,
+                      String msg) {
+        super(container, headCommentId, postId, publicKey, name, time, msg);
+        this.subCommentId = subCommentId;
     }
 
+    public String getSubCommentId(){
+        return subCommentId;
+    }
+
+    @Override
+    public ArrayList<SubComment> getSubComments(){
+        return null;
+    }
 
 }

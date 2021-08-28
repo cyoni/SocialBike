@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -38,7 +39,6 @@ public class PostActivity extends AppCompatActivity
     private TextView postMsg;
     private EditText newComment;
     private Button sendComment;
-    private TextView commentsCounter;
     private ProgressBar progressBar;
 
     private void initAdapter() {
@@ -63,7 +63,6 @@ public class PostActivity extends AppCompatActivity
 
         updater = new Updater(this, this.commentsContainer, recyclerViewAdapter);
         messageManager = new MessageGetter(updater);
-        commentsCounter = findViewById(R.id.commentsCounter);
         progressBar = findViewById(R.id.progressBar);
 
         getPost();
@@ -80,12 +79,9 @@ public class PostActivity extends AppCompatActivity
 
     private void loadInit() {
         if (post.getCommentsCount() > 0) {
-            commentsCounter.setText("Loading...");
             progressBar.setVisibility(View.VISIBLE);
             getComments();
-        }
-        else{
-            commentsCounter.setText("0 comments");
+        } else {
             progressBar.setVisibility(View.INVISIBLE);
         }
     }
@@ -93,13 +89,6 @@ public class PostActivity extends AppCompatActivity
     private void showRecyclerviewAndHideProgressBar() {
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.INVISIBLE);
-    }
-
-    private void updateCommentsCounter() {
-        String text;
-        text = commentsContainer.size() + " ";
-        text += (commentsContainer.size() == 1) ? "Comment" : "Comments";
-        commentsCounter.setText(text);
     }
 
     private void getComments() {
@@ -112,7 +101,6 @@ public class PostActivity extends AppCompatActivity
                     if (!response.isEmpty()) {
                         showRecyclerviewAndHideProgressBar();
                         parseMessages(response);
-                        updateCommentsCounter();
                     }
 
                     return "";
@@ -141,7 +129,7 @@ public class PostActivity extends AppCompatActivity
                 String message = messages_array.getJSONObject(i).getString("message");
                 String name = messages_array.getJSONObject(i).getString("name");
                 String time = messages_array.getJSONObject(i).getString("timestamp");
-                String commentId = messages_array.getJSONObject(i).getString("postId");
+                String commentId = messages_array.getJSONObject(i).getString("commentId");
 
                 JSONArray subCommentsArray = messages_array.getJSONObject(i).getJSONArray("subComments");
 
@@ -166,14 +154,22 @@ public class PostActivity extends AppCompatActivity
                 for (int j = 0; j < subCommentsArray.length(); j++) {
                     String subCommentMessage = subCommentsArray.getJSONObject(j).getString("comment");
                     String subCommentName = subCommentsArray.getJSONObject(j).getString("name");
-                    String subCommentId = subCommentsArray.getJSONObject(j).getString("name");
+                    String subCommentId = subCommentsArray.getJSONObject(j).getString("subCommentId");
                     String subCommentSenderPublicKey = subCommentsArray.getJSONObject(j).getString("senderPublicKey");
                     int subCommentTimestamp = subCommentsArray.getJSONObject(j).getInt("timestamp");
 
-                    System.out.println("Got subComment: " + subCommentsArray.getJSONObject(j).getString("commentId"));
-                  //  SubComment subComment = new SubComment(subCommentId, subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
+                    SubComment subComment = new SubComment(
+                            POSTS_CONTAINER_CODE,
+                            post.getPostId(),
+                            commentId,
+                            subCommentId,
+                            subCommentSenderPublicKey,
+                            subCommentName,
+                            subCommentTimestamp,
+                            subCommentMessage
+                    );
 
-                    comment.addSubComment(subCommentMessage);
+                    comment.addSubComment(subComment);
                 }
 
                 updater.add(comment);
@@ -219,7 +215,6 @@ public class PostActivity extends AppCompatActivity
                     recyclerViewAdapter.notifyItemInserted(0);
                     newComment.setText("");
                     sendComment.setEnabled(true);
-                    updateCommentsCounter();
                     Utils.hideKeyboard(this);
 
                     return null;
@@ -228,7 +223,7 @@ public class PostActivity extends AppCompatActivity
 
     private void setToolBarTitle() {
         CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.title);
-        collapsingToolbarLayout.setTitle(post.getName() + " says");
+        collapsingToolbarLayout.setTitle(post.getName());
   /*      if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(post.getName() + " says");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -250,15 +245,21 @@ public class PostActivity extends AppCompatActivity
         holder.message.setText(post.getMsg());
         holder.name.setText(post.getName());
         holder.replyButton.setOnClickListener(view -> addNewComment(holder, position));
-
-
-     //   postButtons.changeLikeButton(holder, post.getIsLiked());
-
-       // holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-
-
+        holder.likeTextButton.setOnClickListener(view -> likeComment(holder, position));
         holder.newCommentSection.setVisibility(View.GONE);
         handleSubComments(holder, position);
+    }
+
+
+    private void likeComment(RecyclerViewAdapter.ViewHolder holder, int position) {
+        Comment comment = commentsContainer.get(position);
+        if (comment.getIsLiked()) {
+            holder.likeTextButton.setTextColor(getResources().getColor(R.color.default_black));
+            comment.registerLike(false);
+        } else {
+            holder.likeTextButton.setTextColor(getResources().getColor(R.color.black));
+            comment.registerLike(true);
+        }
     }
 
     private void handleSubComments(RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -266,7 +267,7 @@ public class PostActivity extends AppCompatActivity
             readSubComments(holder, commentsContainer.get(position).getSubComments());
     }
 
-    private void readSubComments(RecyclerViewAdapter.ViewHolder holder, ArrayList<String> subComments) {
+    private void readSubComments(RecyclerViewAdapter.ViewHolder holder, ArrayList<SubComment> subComments) {
         for (int i = 0; i < subComments.size(); i++) {
             System.out.println("sub comment: " + subComments.get(i));
             addSubCommentToLayout(subComments.get(i), holder);
@@ -290,20 +291,30 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void sendSubComment(RecyclerViewAdapter.ViewHolder holder, int position) {
-        String comment = holder.comments.getText().toString();
+        String comment_txt = holder.comments.getText().toString();
 
-        if (comment.isEmpty() || holder.postCommentButton.getText().equals("Sending"))
+        if (comment_txt.isEmpty() || holder.postCommentButton.getText().equals("Sending"))
             return;
         Utils.hideKeyboard(this);
         holder.postCommentButton.setText("Sending");
-        commentsContainer.get(position).sendSubComment(comment).continueWith(task -> {
+        Comment comment = commentsContainer.get(position);
+        commentsContainer.get(position).sendSubComment(comment_txt).continueWith(task -> {
 
-            String postIdFromServer = String.valueOf(task.getResult().getData());
-            System.out.println("response: " + postIdFromServer);
+            String subCommentIdFromServer = String.valueOf(task.getResult().getData());
+            System.out.println("response: " + subCommentIdFromServer);
             holder.postCommentButton.setText("Send");
 
-            commentsContainer.get(position).addSubComment(comment);
-            addSubCommentToLayout(holder.comments.getText().toString(), holder);
+            SubComment subComment = new SubComment(POSTS_CONTAINER_CODE,
+                    comment.getPostId(),
+                    comment.getCommentId(),
+                    subCommentIdFromServer,
+                    ConnectedUser.getPublicKey(),
+                    ConnectedUser.getName(),
+                    0,
+                    comment_txt);
+
+            commentsContainer.get(position).addSubComment(subComment);
+            addSubCommentToLayout(subComment, holder);
 
             holder.comments.setText("");
 
@@ -314,7 +325,7 @@ public class PostActivity extends AppCompatActivity
         });
     }
 
-    private void addSubCommentToLayout(String message, RecyclerViewAdapter.ViewHolder holder) {
+    private void addSubCommentToLayout(SubComment subComment, RecyclerViewAdapter.ViewHolder holder) {
         RelativeLayout layout = new RelativeLayout(this);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -325,8 +336,10 @@ public class PostActivity extends AppCompatActivity
         LinearLayout relativeLayout = (LinearLayout) View.inflate(this, R.layout.item_sub_comment, null);
 
         relativeLayout.findViewById(R.id.replyButton).setOnClickListener(view -> quoteMember(holder));
+        //relativeLayout.findViewById(R.id.LikeButton).setOnClickListener(view -> LikeSubComment(holder));
+
         TextView commentText = relativeLayout.findViewById(R.id.message);
-        commentText.setText(message);
+        commentText.setText(subComment.getMsg());
 
         commentLayout.addView(relativeLayout);
     }

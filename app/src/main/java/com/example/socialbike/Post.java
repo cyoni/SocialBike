@@ -15,13 +15,22 @@ public class Post implements Serializable {
 
     private final String postId, publicKey, name, msg;
     private boolean isLiked = false, doesUserLikeThePost = false;
-    private final int time, comments_count;
+    private final long time;
+    private final int comments_count;
     public static String POSTS_CONTAINER_CODE = "global_posts";
-    public String DatabaseContainer;
+    public String DatabaseContainer = "";
     protected final ArrayList<Comment> commentsContainer = new ArrayList<>();
     private int likes_count;
 
-    public Post(String postId, String publicKey, String name, int time, String msg, int likes, int comments, boolean doesUserLikeThePost) {
+    public Post(String postId,
+                String publicKey,
+                String name,
+                long time,
+                String msg,
+                int likes,
+                int comments,
+                boolean doesUserLikeThePost) {
+
         this.postId = postId;
         this.publicKey = publicKey;
         this.name = name;
@@ -48,7 +57,7 @@ public class Post implements Serializable {
         return msg;
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 

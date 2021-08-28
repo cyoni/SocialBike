@@ -116,7 +116,7 @@ public class AddPostActivity extends AppCompatActivity {
                         saveText("");
                         passItemHome();
                         showSuccessMsg();
-                        finish();
+                        onBackPressed();
 
                     } else {
                        // notifyUser_error();
@@ -137,7 +137,8 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
     private boolean isMessageValid() {
-        //String message = content.getText().toString().trim();
+        if (textBox.getText().toString().trim().isEmpty())
+            return false;
         return true;
     }
 

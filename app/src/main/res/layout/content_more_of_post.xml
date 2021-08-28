@@ -40,24 +40,11 @@
             android:layout_gravity="bottom" />
 
 
-
-
-    <TextView
-        android:id="@+id/commentsCounter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/post_buttons"
-        android:layout_marginStart="5dp"
-        android:text="Loading"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-
     <EditText
         android:id="@+id/newComment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/commentsCounter"
+        android:layout_below="@id/post_buttons"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
         android:layout_toStartOf="@id/sendComment"
@@ -69,7 +56,7 @@
         android:id="@+id/sendComment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/commentsCounter"
+        android:layout_below="@id/post_buttons"
         android:layout_alignParentEnd="true"
         android:layout_marginRight="5dp"
         android:text="Send" />
