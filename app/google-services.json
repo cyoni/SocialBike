@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "580675992268",
+    "project_id": "socialbike-a5d9c",
+    "storage_bucket": "socialbike-a5d9c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:580675992268:android:d5be7c3b3abad3e12f6069",
+        "android_client_info": {
+          "package_name": "com.example.socialbike"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "580675992268-pnt0iui72bmjg0jkqgk0boha359uh4m5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSYs0QjhVSeWGfYW8cQTIzXtj7cALrrc8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "580675992268-pnt0iui72bmjg0jkqgk0boha359uh4m5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
