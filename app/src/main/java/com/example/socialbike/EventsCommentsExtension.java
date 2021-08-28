@@ -115,7 +115,7 @@ public class EventsCommentsExtension {
 
                     //System.out.println("Got subComment: " + subCommentsArray.getJSONObject(j).getString("commentId"));
                     System.out.println("got subcomment: " + subCommentMessage);
-                    SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, commentId, subCommentId, subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
+                    SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, commentId, subCommentId, "33", subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
                     addSUBCommentToLayout(layout, subComment, holder, position);
                     //comment.addSubComment(subCommentMessage);
                 }
@@ -178,7 +178,7 @@ public class EventsCommentsExtension {
             String response = String.valueOf(task.getResult().getData());
             System.out.println("res: " + response);
 
-            SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, comment.getPostId(), response, ConnectedUser.getPublicKey(), ConnectedUser.getName(), 12345, commentStr);
+            SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, comment.getPostId(), "ff", response, ConnectedUser.getPublicKey(), ConnectedUser.getName(), 12345, commentStr);
             addSUBCommentToLayout(linearLayout, subComment, holder, position);
             viewComment.setText("");
             commentButton.setText("Send");

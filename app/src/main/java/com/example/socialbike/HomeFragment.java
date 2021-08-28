@@ -95,7 +95,6 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     }
 
 
-
     private void getPosts() {
         container.clear();
         recyclerView.setVisibility(View.INVISIBLE);
@@ -150,20 +149,15 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         holder.name.setText(container.get(position).getName());
         //holder.likes.setText(String.valueOf(container.get(position).getLikesCount()));
 
-        PostButtons postButtons = new PostButtons(holder, position, container.get(position));
+        PostButtons postButtons = new PostButtons(getActivity(), holder, container.get(position));
 
 
   //      holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
  //       holder.likeButton.setOnClickListener(view -> postButtons.likeButtonClick(container.get(position), holder, position));
-        holder.message.setOnClickListener(view -> commentsButtonClick(container.get(position)));
+        holder.message.setOnClickListener(view -> postButtons.commentsButtonClick());
         holder.followButton.setOnClickListener(view -> postButtons.followUser(container, holder, position));
     }
 
-    private void commentsButtonClick(Post post) {
-        Intent intent = new Intent(getContext(), PostActivity.class);
-        intent.putExtra("post", post);
-        startActivity(intent);
-    }
 
     @Override
     public void onItemClick(@NonNull View holder, int position) {
