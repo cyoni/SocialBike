@@ -26,7 +26,10 @@ public class SubComment extends Comment {
         return null;
     }
 
-    public void setam(){
-        // setam comment
-    }
+    //
+    //
+    //
+
+    //
+    to do that here.
 }
