@@ -27,6 +27,6 @@ public class SubComment extends Comment {
     }
 
     public void setam(){
-        
+        // setam comment
     }
 }
