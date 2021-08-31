@@ -22,7 +22,7 @@
             app:expandedTitleMarginBottom="94dp"
             app:expandedTitleTextAppearance="@style/CollapsingTextAppearance.Inverse"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:title="yoni says">
+            app:title="Name">
 
             <ImageView
                 android:layout_width="fill_parent"

@@ -94,15 +94,12 @@ public class PostActivity extends AppCompatActivity
     private void getComments() {
         post.getComments()
                 .continueWith(task -> {
-
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);
-
                     if (!response.isEmpty()) {
                         showRecyclerviewAndHideProgressBar();
                         parseMessages(response);
                     }
-
                     return "";
                 });
     }
@@ -186,7 +183,6 @@ public class PostActivity extends AppCompatActivity
     private void submitComment() {
 
         String comment = newComment.getText().toString();
-
         if (comment.isEmpty() || sendComment.getText().equals("Sending"))
             return;
 
@@ -224,8 +220,8 @@ public class PostActivity extends AppCompatActivity
 
     private void setToolBarTitle() {
         CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.title);
-        collapsingToolbarLayout.setTitle(post.getName() + " says");
-  /*      if (getSupportActionBar() != null) {
+        collapsingToolbarLayout.setTitle(post.getName());
+        /*      if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(post.getName() + " says");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }*/
