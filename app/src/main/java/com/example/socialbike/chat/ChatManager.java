@@ -14,6 +14,7 @@ import com.google.firebase.database.DatabaseError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ChatManager {
@@ -94,6 +95,9 @@ public class ChatManager {
             } else
                 insertNewElement(chatMessage);
         }
+
+        // add new msg to chat history
+        HashMap<String, List<String>> chatHistory;
 
         if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)){
             chatLobbyFragment.getUsers().get(0).setRead(true);

@@ -26,10 +26,4 @@ public class SubComment extends Comment {
         return null;
     }
 
-    //
-    //
-    //
-
-    //
-    to do that here.
 }
