@@ -63,10 +63,7 @@ public class MainActivity extends AppCompatActivity {
         initiatePlaces();
 
         database = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "appDatabase").build();
-
-
-
+                AppDatabase.class, "appDatabase").allowMainThreadQueries().build();
 
        // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }

@@ -1,7 +1,7 @@
 package com.example.socialbike.chat;
 
-public class ChatPreviewUser extends ChatMessage {
-
+public class ChatPreviewUser   {
+/*
     private boolean isRead = false;
 
     public ChatPreviewUser(String messageId, String publicKey, String name, String messagePreview){
@@ -30,5 +30,5 @@ public class ChatPreviewUser extends ChatMessage {
 
     public void setRead(boolean isRead){
         this.isRead = isRead;
-    }
+    }*/
 }

@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -16,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import com.example.socialbike.Date;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
@@ -32,6 +35,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ChatLobbyFragment extends Fragment
         implements RecyclerViewAdapter.ItemClickListener {
@@ -74,7 +79,7 @@ public class ChatLobbyFragment extends Fragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater,
+    public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -85,73 +90,105 @@ public class ChatLobbyFragment extends Fragment
             progressBar = root.findViewById(R.id.progressBar);
             userDao = MainActivity.database.chatMemberDao();
 
-            loadUsers();
 
-            searchUserTextbox.addTextChangedListener(
-                    new TextWatcher() {
-
-                        @Override
-                        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                        }
-
-                        @Override
-                        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                            if (charSequence.toString().isEmpty()) {
-                                users.clear();
-                                users.addAll(reserve);
-                                recyclerViewAdapter.notifyDataSetChanged();
-                            } else if (charSequence.toString().length() > 0) {
-                                findUsers(charSequence.toString());
-                            }
-                        }
-
-                        @Override
-                        public void afterTextChanged(Editable editable) {
-
-                        }
-                    }
-            );
-
+            initSearchMembersTextBox();
             initAdapter();
-            //  context = getActivity();
-
             recyclerViewAdapter.setClassReference(this); // reference this class to the adaptor
 
-
             MainActivity.chatManager.currentConversationChat = null;
-
             // get user list
             reserve.addAll(users);
+
+            loadUsersFromLocalDB();
 
         }
         return root;
     }
 
-    private void loadUsers() {
+    private void initSearchMembersTextBox() {
+        searchUserTextbox.addTextChangedListener(
+                new TextWatcher() {
 
-        ChatMember person1 = new ChatMember("12345", "yoni");
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                        if (charSequence.toString().isEmpty())
+                            return;
 
 
-        AsyncTask.execute(() -> {
-            // Insert Data
-        //    userDao.insert(person1);
+                        if (charSequence.toString().equals("ref")) {
+                            users.clear();
+                            loadUsersFromLocalDB();
+                            recyclerViewAdapter.notifyDataSetChanged();
+                            searchUserTextbox.setText("");
+                        }
 
-            List<ChatMember> chatMembers = userDao.getAllMembers();
+                        String name, message="";
+                        if (charSequence.toString().contains("*")) {
+                            String text;
+                            text = charSequence.toString().substring(0, charSequence.toString().length() -1);
+                            String[] array = text.split(":");
+                            name = array[0];
+                            message = array[1];
 
-            for (ChatMember member : chatMembers){
-                users.add(new ChatMember("2234663", member.publicKey, member.name, member.previewMsg));
-                System.out.println("got: " + member.name);
-            }
 
-        });
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("senderPublicKey", name);
+                            map.put("receiverPublicKey", "-MYVCkWexSO_jumnbr0l");
+                            map.put("message", message);
+                            map.put("sendersName", name);
+                            map.put("timestamp", Date.getTimeInMiliSecs());
 
-/*         userDao.getAllMembers().observe(getViewLifecycleOwner(), chatMembers -> {
-             for (ChatMember member : chatMembers) {
+                            MainActivity.mDatabase.child("private_msgs").
+                                    child("-MYVCkWexSO_jumnbr0l").
+                                    child("msgId").
+                                    child("testSenderKey").
+                                    setValue(map);
+                            System.out.println("SENT " + message + "; " + name);
+                            searchUserTextbox.setText(text.substring(0, text.length()-message.length()));
+                        }
 
-             }
-         });*/
+/*                        if (charSequence.toString().isEmpty()) {
+                            users.clear();
+                            users.addAll(reserve);
+                            recyclerViewAdapter.notifyDataSetChanged();
+                        } else if (charSequence.toString().length() > 0) {
+                            findUsers(charSequence.toString());
+                        }*/
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+
+                    }
+                }
+        );
     }
+
+    public void setIsRead(ChatMember chatMember, boolean isRead) {
+        chatMember.isRead = isRead;
+        userDao.update(chatMember);
+    }
+
+    private void loadUsersFromLocalDB() { // TODO Work on another thread
+        List<ChatMember> members = userDao.getAllMembers();
+        for (ChatMember member : members) {
+            users.add(new ChatMember(member.publicKey, member.name, member.previewMsg, member.time, member.isRead));
+            System.out.println("got: " + member.name + ", " + member.isRead);
+        }
+        recyclerViewAdapter.notifyItemRangeChanged(0, members.size() - 1);
+    }
+
+/*    private void loadUsers() {
+        userDao.getAllMembers().observe(getViewLifecycleOwner(), members -> {
+            users.addAll(members);
+            recyclerViewAdapter.notifyDataSetChanged();
+        });
+    }*/
 
     private void findUsers(String input) {
         users.clear();
@@ -166,7 +203,6 @@ public class ChatLobbyFragment extends Fragment
                 parseUsers(input, response);
                 return "";
             });
-
         }
 
         recyclerViewAdapter.notifyDataSetChanged();
@@ -234,6 +270,7 @@ public class ChatLobbyFragment extends Fragment
                 try {
                     String userId = data.getJSONObject(i).getString("userId");
                     String name = data.getJSONObject(i).getString("name");
+                    //String time = data.getJSONObject(i).getString("name");
                     boolean doesExist = false;
 
                     for (ChatMember currentUser : users) {
@@ -244,7 +281,7 @@ public class ChatLobbyFragment extends Fragment
                     }
 
                     if (!doesExist)
-                        tmp.add(new ChatMember("", userId, name, ""));
+                        tmp.add(new ChatMember(userId, name, "", 0, false));
 
                 } catch (JSONException e) {
                     System.out.println("An error was caught in message fetcher: " + e.getMessage());
@@ -260,6 +297,7 @@ public class ChatLobbyFragment extends Fragment
         holder.layout.setOnClickListener(view -> openConversationActivity(position));
         holder.name.setText(users.get(position).name);
         holder.message_preview.setText(users.get(position).previewMsg);
+        System.out.println(users.get(position).name + ":" + users.get(position).isRead);
         if (users.get(position).isRead) {
             holder.red_dot.setVisibility(View.INVISIBLE);
         } else
@@ -267,13 +305,13 @@ public class ChatLobbyFragment extends Fragment
     }
 
     private void openConversationActivity(int position) {
-        String userId = users.get(position).publicKey;
-        String name = users.get(position).name;
+        ChatMember chatMember = users.get(position);
+        String userId = chatMember.publicKey;
+        String name = chatMember.name;
         MainActivity.chatManager.openConversationActivity(getContext(), userId, name);
-        users.get(position).isRead = true;
+        setIsRead(chatMember, true);
         recyclerViewAdapter.notifyItemChanged(position);
     }
-
 
     @Override
     public void onAttach(@NotNull Context context) {
@@ -286,16 +324,23 @@ public class ChatLobbyFragment extends Fragment
         // nav.navigate(R.id.action_chatFragment_to_chatConversationFragment);
     }
 
-    public void updateLobbyList(ChatMessage chatMessage) {
-        System.out.println("CHAT: a new message from " + chatMessage.getSendersName() + ": " + chatMessage.getMessage());
+    public void insert(ChatMember chatMember) {
+        AsyncTask.execute(() -> {
+            userDao.insert(chatMember);
+        });
     }
 
-    public void addNewIncomeMessage(String senderPublicKey, ChatMember chatMember) {
-        if (incomingMessages.get(senderPublicKey) == null) {
+
+/*    public void updateLobbyList(ChatMessage chatMessage) {
+        System.out.println("CHAT: a new message from " + chatMessage.getSendersName() + ": " + chatMessage.getMessage());
+    }*/
+
+    /*    public void addNewIncomeMessage(String senderPublicKey, ChatMember chatMember) {
+     *//*   if (incomingMessages.get(senderPublicKey) == null) {
             incomingMessages.put(senderPublicKey, new ArrayList<>());
         }
         incomingMessages.get(senderPublicKey).add(chatMember);
-        System.out.println("New message by " + senderPublicKey + " was recorded successfully");
-    }
+        System.out.println("New message by " + senderPublicKey + " was recorded successfully");*//*
+    }*/
 
 }
