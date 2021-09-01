@@ -6,6 +6,7 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.socialbike.Date;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.ConnectedUser;
 import com.google.firebase.database.ChildEventListener;
@@ -36,11 +37,12 @@ public class ChatManager {
                     for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                         String senderPublicKey = String.valueOf(postSnapshot.child("senderPublicKey").getValue());
                         String message = String.valueOf(postSnapshot.child("message").getValue());
-                        String sendersName = String.valueOf(postSnapshot.child("sendersName").toString());
+                        String sendersName = String.valueOf(postSnapshot.child("sendersName").getValue());
+                        long timestamp = Long.parseLong(String.valueOf(postSnapshot.child("timestamp").getValue()));
                         String messageId = snapshot.getKey();
                         System.out.println("New message: " + postSnapshot.child("message").getValue());
                         System.out.println("Message key: " + postSnapshot.getKey());
-                        handleNewMessage(messageId, senderPublicKey, sendersName, message, true);
+                        handleNewMessage(messageId, senderPublicKey, sendersName, message, true, timestamp);
                         removeMessage(messageId);
                     }
                 }
@@ -73,40 +75,41 @@ public class ChatManager {
     }
 
     public boolean doesUserAppearOnTheList(String userPublicKey) {
-        ArrayList<ChatPreviewUser> container = chatLobbyFragment.getUsers();
-        return container.stream().anyMatch(x -> x.senderPublicKey.equals(userPublicKey));
-    }
-
-    public ChatPreviewUser getUserFromList() {
-        ArrayList<ChatPreviewUser> container = chatLobbyFragment.getUsers();
-        return container.stream().filter(x -> x.senderPublicKey.equals(ConnectedUser.getPublicKey())).findAny().orElse(null);
+        ArrayList<ChatMember> container = chatLobbyFragment.users;
+        return container.stream().anyMatch(x -> x.publicKey.equals(userPublicKey));
     }
 
 
-    private void handleNewMessage(String messageId, String otherSidePublicKey, String sendersName, String message, boolean isIncomingMessage) {
-        ChatMessage chatMessage = new ChatMessage(messageId, otherSidePublicKey, sendersName, message, isIncomingMessage);
+/*    public ChatPreviewUser getUserFromList() {
+        ArrayList<ChatMember> container = chatLobbyFragment.users;
+        return container.stream().filter(x -> x.publicKey.equals(ConnectedUser.getPublicKey())).findAny().orElse(null);
+    }*/
+
+
+    private void handleNewMessage(String messageId, String otherSidePublicKey, String sendersName, String message, boolean isIncomingMessage, long time) {
+        ChatMessage chatMessage = new ChatMessage(messageId, otherSidePublicKey, sendersName, message, isIncomingMessage, time);
 
         if (chatLobbyFragment != null) {
-            ArrayList<ChatPreviewUser> usersList = chatLobbyFragment.getUsers();
+            ArrayList<ChatMember> usersList = chatLobbyFragment.users;
             if (isUserOnTopOfTheList(otherSidePublicKey, usersList)) {
                 updateTopElement(message);
             } else if (doesUserAppearOnTheList(otherSidePublicKey)) {
-                moveElementOnTopOfTheList(otherSidePublicKey, message);
+                moveElementOnTopOfTheList(otherSidePublicKey, message, time);
             } else
                 insertNewElement(chatMessage);
+            chatLobbyFragment.users.get(0).time = time;
         }
 
         // add new msg to chat history
         HashMap<String, List<String>> chatHistory;
 
-        if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)){
-            chatLobbyFragment.getUsers().get(0).setRead(true);
+        if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)) {
+            chatLobbyFragment.setIsRead(chatLobbyFragment.users.get(0), true);
             MainActivity.chatManager.currentConversationChat.addNewMessage(chatMessage);
             System.out.println("msg passed");
-        }
-        else{
+        } else {
             System.out.println("currentConversationChat is closed");
-            chatLobbyFragment.getUsers().get(0).setRead(false);
+            chatLobbyFragment.setIsRead(chatLobbyFragment.users.get(0), false);
 /*
             int item = bottomNavigationView.getMenu().getItem(2).getItemId();
             BadgeDrawable xx = bottomNavigationView.getOrCreateBadge(item);
@@ -120,44 +123,51 @@ public class ChatManager {
     }
 
     private boolean isConversationActivityOpen() {
-        return  MainActivity.chatManager.currentConversationChat != null;
+        return MainActivity.chatManager.currentConversationChat != null;
     }
 
-    private boolean isUserOnTopOfTheList(String senderPublicKey, ArrayList<ChatPreviewUser> usersList) {
+    private boolean isUserOnTopOfTheList(String senderPublicKey,
+                                         ArrayList<ChatMember> usersList) {
         return doesUserAppearOnTheList(senderPublicKey) &&
-                usersList.get(0).getPublicKey().equals(senderPublicKey);
+                usersList.get(0).publicKey.equals(senderPublicKey);
+    }
+
+    private void updateMessage(int index, String message) {
+        chatLobbyFragment.users.get(index).previewMsg = message;
     }
 
     private void updateTopElement(String message) {
-        chatLobbyFragment.getUsers().get(0).setMessage(message);
+        updateMessage(0, message);
         chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
     }
 
-    private void moveElementOnTopOfTheList(String senderPublicKey, String message) {
-        ArrayList<ChatPreviewUser> usersList = chatLobbyFragment.getUsers();
+    private void moveElementOnTopOfTheList(String senderPublicKey, String message, long time) {
+        ArrayList<ChatMember> usersList = chatLobbyFragment.users;
         int index = getIndexOfUserOnTheList(senderPublicKey);
-        usersList.get(index).setMessage(message);
-        ChatPreviewUser tmp = usersList.get(index);
+        updateMessage(index, message);
+        ChatMember tmp = usersList.get(index);
         usersList.remove(index);
         usersList.add(0, tmp);
-
         chatLobbyFragment.recyclerViewAdapter.notifyItemMoved(0, index);
-        chatLobbyFragment.recyclerViewAdapter.notifyItemRangeChanged(0,usersList.size());
+        chatLobbyFragment.recyclerViewAdapter
+                .notifyItemRangeChanged(0, usersList.size());
     }
 
     private void insertNewElement(ChatMessage chatMessage) {
-        ChatPreviewUser chatMsgPreview = new ChatPreviewUser(chatMessage.messageId,
-                        chatMessage.getSenderPublicKey(),
-                        chatMessage.getSendersName(),
-                        chatMessage.getMessage());
-        chatLobbyFragment.getUsers().add(0, chatMsgPreview);
+        ChatMember chatMember = new ChatMember(
+                chatMessage.getSenderPublicKey(),
+                chatMessage.getSendersName(),
+                chatMessage.getMessage(), chatMessage.getTime(),
+                false);
+        chatLobbyFragment.insert(chatMember);
+        chatLobbyFragment.users.add(0, chatMember);
         chatLobbyFragment.recyclerViewAdapter.notifyItemInserted(0);
         System.out.println("A new element was inserted on the chat list.");
     }
 
     private int getIndexOfUserOnTheList(String senderPublicKey) {
-        for (int i = 0; i < chatLobbyFragment.getUsers().size(); i++) {
-            if (chatLobbyFragment.getUsers().get(i).getPublicKey().equals(senderPublicKey))
+        for (int i = 0; i < chatLobbyFragment.users.size(); i++) {
+            if (chatLobbyFragment.users.get(i).publicKey.equals(senderPublicKey))
                 return i;
         }
         return -1;
@@ -171,7 +181,7 @@ public class ChatManager {
         data.put("message", message);
 
         System.out.println("sending private msg to " + receiver + "...");
-        handleNewMessage("123456", receiver, ConnectedUser.getName(), message, false);
+        handleNewMessage("123456", receiver, ConnectedUser.getName(), message, false, Date.getTimeInMiliSecs());
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")
