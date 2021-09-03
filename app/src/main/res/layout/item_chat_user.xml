@@ -16,7 +16,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:elevation="3dp"
         android:src="@drawable/profile_blank"
         tools:layout_editor_absoluteX="16dp"
@@ -46,11 +46,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="-20dp"
+        android:layout_centerInParent="true"
         android:layout_marginEnd="10dp"
-        android:textSize="50sp"
-        android:visibility="invisible"
-        android:textColor="#E10D0D"
-        android:text="."
-/>
+        android:background="@drawable/badge"
+        android:gravity="center"
+        android:minWidth="20dp"
+        android:text="30"
+        android:textColor="#FFF"
+        android:textSize="12sp"
+        android:textStyle="bold" />
 </RelativeLayout>
