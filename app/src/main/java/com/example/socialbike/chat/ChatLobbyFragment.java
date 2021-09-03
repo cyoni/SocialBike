@@ -1,5 +1,6 @@
 package com.example.socialbike.chat;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -8,8 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -17,12 +16,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.socialbike.Date;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
 import com.google.firebase.functions.HttpsCallableResult;
 
 import org.jetbrains.annotations.NotNull;
@@ -35,23 +37,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ChatLobbyFragment extends Fragment
         implements RecyclerViewAdapter.ItemClickListener {
 
     static ChatLobbyFragment chatFragment = null;
     private RecyclerView recyclerView;
-    protected final ArrayList<ChatMember> users = new ArrayList<>();
-    private final ArrayList<ChatMember> reserve = new ArrayList<>();
+    protected final ArrayList<PreviewChatMessage> users = new ArrayList<>();
+    private final ArrayList<PreviewChatMessage> reserve = new ArrayList<>();
     private final HashSet<String> prefixWithoutResults = new HashSet<>();
     public RecyclerViewAdapter recyclerViewAdapter;
     private Context context;
     private View root;
     private EditText searchUserTextbox;
     ProgressBar progressBar;
-    private ChatMemberDao userDao;
 
 
     public static ChatLobbyFragment getInstance() {
@@ -88,7 +87,6 @@ public class ChatLobbyFragment extends Fragment
             recyclerView = root.findViewById(R.id.recyclerview);
             searchUserTextbox = root.findViewById(R.id.search_box);
             progressBar = root.findViewById(R.id.progressBar);
-            userDao = MainActivity.database.chatMemberDao();
 
 
             initSearchMembersTextBox();
@@ -128,13 +126,12 @@ public class ChatLobbyFragment extends Fragment
                         }
 
                         String name, message="";
-                        if (charSequence.toString().contains("*")) {
+                        if (charSequence.toString().contains("*") && charSequence.toString().contains(":")) {
                             String text;
                             text = charSequence.toString().substring(0, charSequence.toString().length() -1);
                             String[] array = text.split(":");
                             name = array[0];
                             message = array[1];
-
 
                             Map<String, Object> map = new HashMap<>();
                             map.put("senderPublicKey", name);
@@ -149,7 +146,7 @@ public class ChatLobbyFragment extends Fragment
                                     child("testSenderKey").
                                     setValue(map);
                             System.out.println("SENT " + message + "; " + name);
-                            searchUserTextbox.setText(text.substring(0, text.length()-message.length()));
+                            searchUserTextbox.setText(name);
                         }
 
 /*                        if (charSequence.toString().isEmpty()) {
@@ -169,16 +166,12 @@ public class ChatLobbyFragment extends Fragment
         );
     }
 
-    public void setIsRead(ChatMember chatMember, boolean isRead) {
-        chatMember.isRead = isRead;
-        userDao.update(chatMember);
-    }
 
     private void loadUsersFromLocalDB() { // TODO Work on another thread
-        List<ChatMember> members = userDao.getAllMembers();
-        for (ChatMember member : members) {
-            users.add(new ChatMember(member.publicKey, member.name, member.previewMsg, member.time, member.isRead));
-            System.out.println("got: " + member.name + ", " + member.isRead);
+        List<PreviewChatMessage> members = MainActivity.chatManager.memberDao.getAllMembers();
+        for (PreviewChatMessage member : members) {
+            users.add(new PreviewChatMessage(member.publicKey, member.name, member.previewMsg, member.time, member.unreadMessages));
+            System.out.println("got: " + member.name + ", " + member.unreadMessages);
         }
         recyclerViewAdapter.notifyItemRangeChanged(0, members.size() - 1);
     }
@@ -193,7 +186,7 @@ public class ChatLobbyFragment extends Fragment
     private void findUsers(String input) {
         users.clear();
 
-        ArrayList<ChatMember> localUsers = getLocalUsers(input);
+        ArrayList<PreviewChatMessage> localUsers = getLocalUsers(input);
         users.addAll(localUsers);
 
         if (input.length() > 2 && isPrefixOk(input)) {
@@ -220,8 +213,8 @@ public class ChatLobbyFragment extends Fragment
         return true;
     }
 
-    private ArrayList<ChatMember> getLocalUsers(String user) {
-        ArrayList<ChatMember> tmp = new ArrayList<>();
+    private ArrayList<PreviewChatMessage> getLocalUsers(String user) {
+        ArrayList<PreviewChatMessage> tmp = new ArrayList<>();
         for (int i = 0; i < reserve.size(); i++) {
             if (reserve.get(i).publicKey.toLowerCase().contains(user.toLowerCase()))
                 tmp.add(reserve.get(i));
@@ -259,7 +252,7 @@ public class ChatLobbyFragment extends Fragment
             System.out.println("An error was caught in message fetcher: " + e.getMessage());
         }
 
-        ArrayList<ChatMember> tmp = new ArrayList<>();
+        ArrayList<PreviewChatMessage> tmp = new ArrayList<>();
 
 
         if (data.length() == 0) {
@@ -273,7 +266,7 @@ public class ChatLobbyFragment extends Fragment
                     //String time = data.getJSONObject(i).getString("name");
                     boolean doesExist = false;
 
-                    for (ChatMember currentUser : users) {
+                    for (PreviewChatMessage currentUser : users) {
                         if (currentUser.name.equals(name)) {
                             doesExist = true;
                             break;
@@ -281,7 +274,7 @@ public class ChatLobbyFragment extends Fragment
                     }
 
                     if (!doesExist)
-                        tmp.add(new ChatMember(userId, name, "", 0, false));
+                        tmp.add(new PreviewChatMessage(userId, name, "", 0, 0));
 
                 } catch (JSONException e) {
                     System.out.println("An error was caught in message fetcher: " + e.getMessage());
@@ -295,21 +288,37 @@ public class ChatLobbyFragment extends Fragment
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         holder.layout.setOnClickListener(view -> openConversationActivity(position));
-        holder.name.setText(users.get(position).name);
-        holder.message_preview.setText(users.get(position).previewMsg);
-        System.out.println(users.get(position).name + ":" + users.get(position).isRead);
-        if (users.get(position).isRead) {
+        PreviewChatMessage current = users.get(position);
+        holder.name.setText(current.name);
+        holder.message_preview.setText(current.previewMsg);
+        System.out.println(current.name + ", unread msgs: " + users.get(position).unreadMessages);
+        if (current.unreadMessages == 0) {
             holder.red_dot.setVisibility(View.INVISIBLE);
-        } else
+            //hide badge
+        } else {
             holder.red_dot.setVisibility(View.VISIBLE);
+            holder.red_dot.setText(String.valueOf(current.unreadMessages));
+        }
     }
 
+/*    @SuppressLint("UnsafeOptInUsageError")
+    private void showBadge(TextView anchor) {
+        Context context = getContext();
+     //   if (context != null) {
+            BadgeDrawable badgeDrawable = BadgeDrawable.create(context);
+            badgeDrawable.setVisible(true);
+            badgeDrawable.setNumber(8);
+            BadgeUtils.attachBadgeDrawable(badgeDrawable, anchor);
+     //   }
+    }*/
+
     private void openConversationActivity(int position) {
-        ChatMember chatMember = users.get(position);
+        PreviewChatMessage chatMember = users.get(position);
         String userId = chatMember.publicKey;
         String name = chatMember.name;
+        chatMember.unreadMessages = 0;
         MainActivity.chatManager.openConversationActivity(getContext(), userId, name);
-        setIsRead(chatMember, true);
+        MainActivity.chatManager.memberDao.resetUnreadMessages(userId);
         recyclerViewAdapter.notifyItemChanged(position);
     }
 
@@ -324,9 +333,9 @@ public class ChatLobbyFragment extends Fragment
         // nav.navigate(R.id.action_chatFragment_to_chatConversationFragment);
     }
 
-    public void insert(ChatMember chatMember) {
+    public void insert(PreviewChatMessage chatMember) {
         AsyncTask.execute(() -> {
-            userDao.insert(chatMember);
+            MainActivity.chatManager.memberDao.insert(chatMember);
         });
     }
 

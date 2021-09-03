@@ -6,4 +6,8 @@ public class Date {
         java.util.Date date = new java.util.Date();
         return date.getTime();
     }
+
+    public static String convertMiliToTime(long mili){
+        return "@@";
+    }
 }

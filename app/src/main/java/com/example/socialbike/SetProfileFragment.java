@@ -69,9 +69,11 @@ public class SetProfileFragment extends Fragment {
                     public String then(@NonNull Task<HttpsCallableResult> task) {
                         String answer = task.getResult().getData().toString();
                         System.out.println("Response from Server: " + answer);
+                        MainActivity.startChat();
 
-                        if (answer.equals("OK"))
-                                getActivity().finish();
+                        if (answer.equals("OK")) {
+                            getActivity().finish();
+                        }
                             else
                                 MainActivity.toast(getContext(), "error", 1);
                         doneButton.setEnabled(true);

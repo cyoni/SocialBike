@@ -19,7 +19,7 @@ import android.widget.Toast;
 
 import com.example.socialbike.chat.ChatLobbyFragment;
 import com.example.socialbike.chat.ChatManager;
-import com.example.socialbike.chat.ChatMember;
+import com.example.socialbike.chat.history.Member;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.libraries.places.api.Places;
@@ -58,12 +58,17 @@ public class MainActivity extends AppCompatActivity {
         loadUser();
         startListeningBottomMenu();
         changeFragment(HomeFragment.getInstance());
+
+        database = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "appDatabase").allowMainThreadQueries().build();
+
         if (isUserConnected())
             startChat();
         initiatePlaces();
 
-        database = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "appDatabase").allowMainThreadQueries().build();
+
+
+        Member.setup();
 
        // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
@@ -84,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
     }
 
-    private void startChat() {
+    public static void startChat() {
         chatManager.listenForNewMessages();
     }
 
