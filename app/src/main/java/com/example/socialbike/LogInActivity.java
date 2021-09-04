@@ -149,12 +149,12 @@ public class LogInActivity extends AppCompatActivity {
         MainActivity.mDatabase.child("public").child(ConnectedUser.getPublicKey()).child("profile").child("nickname").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
+                if (!   dataSnapshot.exists()) {
                     String nickname = (String) dataSnapshot.getValue();
                     ConnectedUser.setNickname(nickname);
                     saveNicknameOnDevice(nickname);
                     closeActivity();
-                    MainActivity.toast(getApplicationContext(), "Hi " + nickname, 0);
+                    MainActivity.toast(getApplicationContext(), "Hi " + nickname, false);
                 } else {
                     openSetNicknameActivity();
                     finish();

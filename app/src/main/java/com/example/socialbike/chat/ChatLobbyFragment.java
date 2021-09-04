@@ -80,7 +80,7 @@ public class ChatLobbyFragment extends Fragment
                              Bundle savedInstanceState) {
 
         if (root == null) {
-            root = inflater.inflate(R.layout.fragment_chat, container, false);
+            root = inflater.inflate(R.layout.fragment_chat_lobby, container, false);
             recyclerView = root.findViewById(R.id.recyclerview);
             searchUserTextbox = root.findViewById(R.id.search_box);
             progressBar = root.findViewById(R.id.progressBar);

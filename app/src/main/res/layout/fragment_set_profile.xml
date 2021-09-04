@@ -1,10 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SetProfileFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".SetProfileFragment"
+    android:padding="5dp">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/flexible.example.appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            style="@style/ToolBarWithNavigationBack"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            android:theme="@style/BlackBackButtonToolbar"
+            app:layout_collapseMode="pin" >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+                <ImageButton
+                    android:id="@+id/skip_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="centerInside"
+                    android:layout_marginEnd="10dp"
+                    app:srcCompat="@drawable/ic_baseline_clear_24" />
+            </RelativeLayout>
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,11 +48,12 @@
         android:orientation="vertical"
         tools:context=".WelcomeActivity">
 
+
         <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="60dp"
+            android:gravity="center"
             android:text="Set Your Profile"
             android:textSize="35dp" />
 
@@ -29,12 +66,10 @@
 
         <EditText
             android:id="@+id/country"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName"
-            tools:layout_editor_absoluteX="35dp"
-            tools:layout_editor_absoluteY="201dp" />
+            android:inputType="textPersonName" />
 
 
         <TextView
@@ -45,14 +80,10 @@
 
         <EditText
             android:id="@+id/city"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName"
-            tools:layout_editor_absoluteX="35dp"
-            tools:layout_editor_absoluteY="201dp" />
-
-
+            android:inputType="textPersonName" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -62,12 +93,10 @@
 
         <EditText
             android:id="@+id/gender"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName"
-            tools:layout_editor_absoluteX="35dp"
-            tools:layout_editor_absoluteY="201dp" />
+            android:inputType="textPersonName" />
 
 
         <TextView
@@ -78,44 +107,20 @@
 
         <EditText
             android:id="@+id/age"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName"
-            tools:layout_editor_absoluteX="35dp"
-            tools:layout_editor_absoluteY="201dp" />
+            android:inputType="textPersonName" />
 
         <Button
             android:id="@+id/done_button"
             android:layout_width="match_parent"
             android:layout_height="73dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="50dp"
             android:text="Done" />
 
-        <Button
-            android:id="@+id/skip_button"
-            android:layout_width="match_parent"
-            android:layout_height="73dp"
-            android:text="Skip" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Set Your Profile"
-        android:textSize="35dp" />
-
-    <EditText
-        android:id="@+id/editTextTextPersonName2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        tools:layout_editor_absoluteX="35dp"
-        tools:layout_editor_absoluteY="201dp" />
 
 </FrameLayout>

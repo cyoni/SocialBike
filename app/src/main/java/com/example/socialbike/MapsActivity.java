@@ -96,7 +96,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void set() {
         if (position == null)
-            MainActivity.toast(this, "Please choose a place on the map.", 1);
+            MainActivity.toast(this, "Please choose a place on the map.", true);
         else {
             if (!wasPlacesUsed) {
                 set_button.setText("Setting...");

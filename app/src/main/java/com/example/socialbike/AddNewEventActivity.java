@@ -193,7 +193,7 @@ public class AddNewEventActivity extends AppCompatActivity {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("add new event -> response:" + response);
 
-                    MainActivity.toast(getApplicationContext(), "Your event is live.", 1);
+                    MainActivity.toast(getApplicationContext(), "Your event is live.", true);
                     Intent intent = new Intent();
                     intent.putExtra("status", "newEvent");
                     setResult(RESULT_OK, intent);

@@ -40,8 +40,9 @@ public class MainActivity extends AppCompatActivity {
     public static BottomNavigationView bottomNavigationView;
     public static AppDatabase database;
 
-    public static void toast(Context context, String msg, int isLong) {
-        Toast.makeText(context, msg, isLong).show();
+    public static void toast(Context context, String msg, boolean isLong) {
+        int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
+        Toast.makeText(context, msg, displayLongMessage).show();
     }
 
     public MainActivity(){

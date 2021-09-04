@@ -62,8 +62,13 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
             if (message.trim().isEmpty())
                 return;
             MainActivity.chatManager.sendMessage(userId, message);
+            scrollToBottom();
             messageBox.setText("");
         });
+    }
+
+    private void scrollToBottom() {
+        recyclerView.scrollToPosition(messages.size() - 1);
     }
 
     @Override
@@ -71,6 +76,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
         super.onResume();
         Utils.showKeyboard(this);
         messageBox.requestFocus();
+        scrollToBottom();
     }
 
     public String getUserId() {
@@ -107,18 +113,14 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
 
     }
 
-    public void addNewMessage(ChatMessage chatMessage) {
-        System.out.println("conversationChat got new msg: " + chatMessage.getMessage());
-       // messages.add(chatMessage);
-        recyclerViewAdapter.notifyItemInserted(messages.size() - 1);
-    }
 
-    public void getChatHistory() {
+    public void getChatHistory() {  // TO IMPROVE
         historyDao.getHistoryOfMember(userId).observe(this, history -> {
             for (int i = messageCount; i < history.size(); i++) {
                 messages.add(history.get(i));
             }
             recyclerViewAdapter.notifyItemRangeChanged(messageCount, history.size());
+            scrollToBottom();
             messageCount = history.size();
         });
     }
