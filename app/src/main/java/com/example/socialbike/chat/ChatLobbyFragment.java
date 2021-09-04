@@ -286,8 +286,8 @@ public class ChatLobbyFragment extends Fragment
         PreviewChatMessage current = users.get(position);
         holder.name.setText(current.name);
         holder.message_preview.setText(current.previewMsg);
-        holder.time.setText(String.valueOf(current.time));
-        System.out.println(current.name + ", unread msgs: " + users.get(position).unreadMessages);
+        holder.time.setText(Date.convertMiliToTime(current.time));
+        System.out.println(current.name + ", unread msgs: " + users.get(position).unreadMessages + ", time: " + current.time );
         if (current.unreadMessages == 0) {
             holder.red_dot.setVisibility(View.INVISIBLE);
         } else {
