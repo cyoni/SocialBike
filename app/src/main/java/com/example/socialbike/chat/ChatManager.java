@@ -93,22 +93,22 @@ public class ChatManager {
         return container.stream().filter(x -> x.publicKey.equals(ConnectedUser.getPublicKey())).findAny().orElse(null);
     }*/
 
-
+    // TOFIX design fix
     private void handleNewMessage(String messageId, String otherSidePublicKey, String sendersName, String message, boolean isIncomingMessage, long time) {
-        ChatMessage chatMessage = new ChatMessage(messageId, otherSidePublicKey, sendersName, message, isIncomingMessage, time);
+        // messageId - from server
+        PreviewChatMessage chatMessage = new PreviewChatMessage(otherSidePublicKey, sendersName, message, time, isIncomingMessage);
 
         if (chatLobbyFragment != null) {
             ArrayList<PreviewChatMessage> usersList = chatLobbyFragment.users;
             if (isUserOnTopOfTheList(otherSidePublicKey, usersList)) {
-                updateTopElement(message);
+                updateTopElement(chatMessage);
             } else if (doesUserAppearOnTheList(otherSidePublicKey)) {
-                moveElementOnTopOfTheList(otherSidePublicKey, message, time);
+                moveElementOnTopOfTheList(chatMessage);
             } else
                 insertNewElement(chatMessage);
-            chatLobbyFragment.users.get(0).time = time; // ??
 
             if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)) {
-                memberDao.resetUnreadMessages(chatMessage.senderPublicKey);
+                memberDao.resetUnreadMessages(chatMessage.publicKey);
                 usersList.get(0).unreadMessages = 0;
                 chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
             }
@@ -132,14 +132,14 @@ public class ChatManager {
         }*/
     }
 
-    private void recordMessageInHistory(ChatMessage chatMessage) {
+    private void recordMessageInHistory(PreviewChatMessage chatMessage) {
         History history = new History(
-                chatMessage.getSenderPublicKey(),
-                chatMessage.getMessage(),
-                chatMessage.getTime(),
-                chatMessage.isIncomingMessage());
+                chatMessage.publicKey,
+                chatMessage.previewMsg,
+                chatMessage.time,
+                chatMessage.isIncomingMessage);
         historyDao.insert(history);
-        System.out.println("Message was recorded in db successfully. " + chatMessage.getMessage());
+        System.out.println("Message was recorded in db successfully. "+ chatMessage.previewMsg);
     }
 
     private boolean isConversationWith(String userId) {
@@ -156,42 +156,38 @@ public class ChatManager {
                 usersList.get(0).publicKey.equals(senderPublicKey);
     }
 
-    private void updatePreviewMessage(int index, String message) {
-        chatLobbyFragment.users.get(index).previewMsg = message;
+    private void updatePreviewMessage(PreviewChatMessage chatMessage) {
+        PreviewChatMessage tmp = chatLobbyFragment.users.get(0);
+        incrementUnreadMessages(tmp);
+        int unreadMsgs = tmp.unreadMessages + 1;
+        chatMessage.setUnreadMsgs(unreadMsgs);
+        chatLobbyFragment.users.set(0, chatMessage);
     }
 
-    private void updateTopElement(String message) {
-        updatePreviewMessage(0, message);
-        incrementUnreadMessages(chatLobbyFragment.users.get(0));
-        chatLobbyFragment.users.get(0).unreadMessages += 1;
+    private void updateTopElement(PreviewChatMessage chatMessage) {
+        updatePreviewMessage(chatMessage);
         chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
     }
 
-    private void moveElementOnTopOfTheList(String senderPublicKey, String message, long time) {
+    private void moveElementOnTopOfTheList(PreviewChatMessage chatMessage) {
         ArrayList<PreviewChatMessage> usersList = chatLobbyFragment.users;
-        int index = getIndexOfUserOnTheList(senderPublicKey);
-        updatePreviewMessage(index, message);
+        int index = getIndexOfUserOnTheList(chatMessage.publicKey);
         PreviewChatMessage tmp = usersList.get(index);
         usersList.remove(index);
         usersList.add(0, tmp);
+        updatePreviewMessage(chatMessage);
         chatLobbyFragment.recyclerViewAdapter.notifyItemMoved(0, index);
-        incrementUnreadMessages(usersList.get(0));
-        usersList.get(0).unreadMessages += 1;
         chatLobbyFragment.recyclerViewAdapter
                 .notifyItemRangeChanged(0, usersList.size());
     }
 
-    private void insertNewElement(ChatMessage chatMessage) {
+    private void insertNewElement(PreviewChatMessage chatMessage) {
         ArrayList<PreviewChatMessage> users = chatLobbyFragment.users;
-        PreviewChatMessage chatMember = new PreviewChatMessage(
-                chatMessage.getSenderPublicKey(),
-                chatMessage.getSendersName(),
-                chatMessage.getMessage(), chatMessage.getTime(),
-                1);
-        chatLobbyFragment.insert(chatMember);
-        users.add(0, chatMember);
+        chatMessage.unreadMessages = 1;
+        chatLobbyFragment.insert(chatMessage);
+        users.add(0, chatMessage);
         chatLobbyFragment.recyclerViewAdapter.notifyItemInserted(0);
-        chatLobbyFragment.recyclerViewAdapter.notifyItemRangeChanged(0, users.size() );
+        chatLobbyFragment.recyclerViewAdapter.notifyItemRangeChanged(0, users.size());
 
         System.out.println("A new element was inserted on the chat list.");
     }
