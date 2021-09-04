@@ -10,9 +10,9 @@ import androidx.room.PrimaryKey;
 public class History {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public int messageId;
 
-    public String publicKey; // publicKey(partner); partnersName=Dan; "hello"; isIncoming=True; time
+    public String publicKey;
 
     @ColumnInfo
     public String message;
@@ -25,10 +25,10 @@ public class History {
 
     public String name;
 
-    public History(@NonNull String publicKey,
-                      String message,
-                      long time,
-                      boolean isIncoming) {
+    public History(String publicKey,
+                   String message,
+                   long time,
+                   boolean isIncoming) {
         this.publicKey = publicKey;
         this.message = message;
         this.time = time;

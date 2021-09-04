@@ -1,6 +1,5 @@
 package com.example.socialbike.chat;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,15 +15,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
+import com.example.socialbike.ConnectedUser;
 import com.example.socialbike.Date;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.badge.BadgeDrawable;
-import com.google.android.material.badge.BadgeUtils;
 import com.google.firebase.functions.HttpsCallableResult;
 
 import org.jetbrains.annotations.NotNull;
@@ -97,7 +94,8 @@ public class ChatLobbyFragment extends Fragment
             // get user list
             reserve.addAll(users);
 
-            loadUsersFromLocalDB();
+            if (ConnectedUser.getName() != null)
+                loadUsersFromLocalDB();
 
         }
         return root;
@@ -125,10 +123,10 @@ public class ChatLobbyFragment extends Fragment
                             searchUserTextbox.setText("");
                         }
 
-                        String name, message="";
+                        String name, message = "";
                         if (charSequence.toString().contains("*") && charSequence.toString().contains(":")) {
                             String text;
-                            text = charSequence.toString().substring(0, charSequence.toString().length() -1);
+                            text = charSequence.toString().substring(0, charSequence.toString().length() - 1);
                             String[] array = text.split(":");
                             name = array[0];
                             message = array[1];
@@ -142,7 +140,7 @@ public class ChatLobbyFragment extends Fragment
 
                             MainActivity.mDatabase.child("private_msgs").
                                     child("-MYVCkWexSO_jumnbr0l").
-                                    child("msgId").
+                                    child("fakeMsgId_" + Date.getTimeInMiliSecs()).
                                     child("testSenderKey").
                                     setValue(map);
                             System.out.println("SENT " + message + "; " + name);
@@ -168,12 +166,9 @@ public class ChatLobbyFragment extends Fragment
 
 
     private void loadUsersFromLocalDB() { // TODO Work on another thread
-        List<PreviewChatMessage> members = MainActivity.chatManager.memberDao.getAllMembers();
-        for (PreviewChatMessage member : members) {
-            users.add(new PreviewChatMessage(member.publicKey, member.name, member.previewMsg, member.time, member.unreadMessages));
-            System.out.println("got: " + member.name + ", " + member.unreadMessages);
-        }
-        recyclerViewAdapter.notifyItemRangeChanged(0, members.size() - 1);
+        List<PreviewChatMessage> chatMessages = MainActivity.chatManager.memberDao.getAllMembers();
+        users.addAll(chatMessages);
+        recyclerViewAdapter.notifyItemRangeChanged(0, chatMessages.size());
     }
 
 /*    private void loadUsers() {
@@ -273,8 +268,8 @@ public class ChatLobbyFragment extends Fragment
                         }
                     }
 
-                    if (!doesExist)
-                        tmp.add(new PreviewChatMessage(userId, name, "", 0, 0));
+                    ///    if (!doesExist)
+                    //        tmp.add(new PreviewChatMessage(userId, name, "", 0, 0, isIncomingMessage));
 
                 } catch (JSONException e) {
                     System.out.println("An error was caught in message fetcher: " + e.getMessage());
@@ -291,10 +286,10 @@ public class ChatLobbyFragment extends Fragment
         PreviewChatMessage current = users.get(position);
         holder.name.setText(current.name);
         holder.message_preview.setText(current.previewMsg);
+        holder.time.setText(String.valueOf(current.time));
         System.out.println(current.name + ", unread msgs: " + users.get(position).unreadMessages);
         if (current.unreadMessages == 0) {
             holder.red_dot.setVisibility(View.INVISIBLE);
-            //hide badge
         } else {
             holder.red_dot.setVisibility(View.VISIBLE);
             holder.red_dot.setText(String.valueOf(current.unreadMessages));

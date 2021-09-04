@@ -24,15 +24,25 @@ public class PreviewChatMessage {
     @ColumnInfo
     public int unreadMessages;
 
-    public PreviewChatMessage(@NonNull String publicKey,
+    @ColumnInfo
+    public boolean isIncomingMessage;
+
+
+    public PreviewChatMessage(
+                              @NonNull String publicKey,
                               String name,
                               String previewMsg,
-                              long time, int unreadMessages) {
+                              long time,
+                              boolean isIncomingMessage) {
         this.publicKey = publicKey;
         this.name = name;
         this.previewMsg = previewMsg;
         this.time = time;
-        this.unreadMessages = unreadMessages;
+        this.isIncomingMessage = isIncomingMessage;
+    }
+
+    public void setUnreadMsgs(int unreadMsgs) {
+        this.unreadMessages = unreadMsgs;
     }
 }
 
