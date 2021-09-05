@@ -6,8 +6,11 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.socialbike.Date;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.ConnectedUser;
+import com.example.socialbike.chat.history.History;
+import com.example.socialbike.chat.history.HistoryDao;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,12 +23,14 @@ public class ChatManager {
 
     public ConversationChatActivity currentConversationChat;
     public ChatLobbyFragment chatLobbyFragment;
-    boolean isChatEnabled = true;
-    protected HashMap<String, ConversationChatActivity> screens = new HashMap<>(); // useless
+    private HistoryDao historyDao;
+    public PreviewChatMessageDao memberDao;
 
 
     public void listenForNewMessages() {
-        System.out.println("Chat has started");
+        System.out.println("Chat Manager has started");
+        initDatabases();
+
         MainActivity.mDatabase.child("private_msgs").child(ConnectedUser.getPublicKey()).addChildEventListener(new ChildEventListener() {
 
             @Override
@@ -35,11 +40,12 @@ public class ChatManager {
                     for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                         String senderPublicKey = String.valueOf(postSnapshot.child("senderPublicKey").getValue());
                         String message = String.valueOf(postSnapshot.child("message").getValue());
-                        String sendersName = String.valueOf(postSnapshot.child("sendersName").toString());
+                        String sendersName = String.valueOf(postSnapshot.child("sendersName").getValue());
+                        long timestamp = Long.parseLong(String.valueOf(postSnapshot.child("timestamp").getValue()));
                         String messageId = snapshot.getKey();
                         System.out.println("New message: " + postSnapshot.child("message").getValue());
                         System.out.println("Message key: " + postSnapshot.getKey());
-                        handleNewMessage(messageId, senderPublicKey, sendersName, message, true);
+                        handleNewMessage(messageId, senderPublicKey, sendersName, message, true, timestamp);
                         removeMessage(messageId);
                     }
                 }
@@ -64,6 +70,11 @@ public class ChatManager {
         });
     }
 
+    private void initDatabases() {
+        historyDao = MainActivity.database.historyDao();
+        memberDao = MainActivity.database.chatMemberDao();
+    }
+
     private void removeMessage(String messageId) {
         MainActivity.mDatabase
                 .child("private_msgs")
@@ -72,43 +83,63 @@ public class ChatManager {
     }
 
     public boolean doesUserAppearOnTheList(String userPublicKey) {
-        ArrayList<ChatPreviewUser> container = chatLobbyFragment.getUsers();
-        return container.stream().anyMatch(x -> x.senderPublicKey.equals(userPublicKey));
-    }
-
-    public ChatPreviewUser getUserFromList() {
-        ArrayList<ChatPreviewUser> container = chatLobbyFragment.getUsers();
-        return container.stream().filter(x -> x.senderPublicKey.equals(ConnectedUser.getPublicKey())).findAny().orElse(null);
+        ArrayList<PreviewChatMessage> container = chatLobbyFragment.users;
+        return container.stream().anyMatch(x -> x.publicKey.equals(userPublicKey));
     }
 
 
-    private void handleNewMessage(String messageId, String otherSidePublicKey, String sendersName, String message, boolean isIncomingMessage) {
-        ChatMessage chatMessage = new ChatMessage(messageId, otherSidePublicKey, sendersName, message, isIncomingMessage);
+/*    public ChatPreviewUser getUserFromList() {
+        ArrayList<ChatMember> container = chatLobbyFragment.users;
+        return container.stream().filter(x -> x.publicKey.equals(ConnectedUser.getPublicKey())).findAny().orElse(null);
+    }*/
+
+    // TOFIX design fix
+    private void handleNewMessage(String messageId, String otherSidePublicKey, String sendersName, String message, boolean isIncomingMessage, long time) {
+        // messageId - from server
+        PreviewChatMessage chatMessage = new PreviewChatMessage(otherSidePublicKey, sendersName, message, time, isIncomingMessage);
 
         if (chatLobbyFragment != null) {
-            ArrayList<ChatPreviewUser> usersList = chatLobbyFragment.getUsers();
+            ArrayList<PreviewChatMessage> usersList = chatLobbyFragment.users;
             if (isUserOnTopOfTheList(otherSidePublicKey, usersList)) {
-                updateTopElement(message);
+                updateTopElement(chatMessage);
             } else if (doesUserAppearOnTheList(otherSidePublicKey)) {
-                moveElementOnTopOfTheList(otherSidePublicKey, message);
+                moveElementOnTopOfTheList(chatMessage);
             } else
                 insertNewElement(chatMessage);
+
+            if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)) {
+                memberDao.resetUnreadMessages(chatMessage.publicKey);
+                usersList.get(0).unreadMessages = 0;
+                chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
+            }
         }
 
-        if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)){
-            chatLobbyFragment.getUsers().get(0).setRead(true);
-            MainActivity.chatManager.currentConversationChat.addNewMessage(chatMessage);
+        // add new msg to chat history
+        recordMessageInHistory(chatMessage);
+
+/*        if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)) {
+
+
+            //   MainActivity.chatManager.currentConversationChat.addNewMessage(chatMessage);
             System.out.println("msg passed");
-        }
-        else{
+        } else {
             System.out.println("currentConversationChat is closed");
-            chatLobbyFragment.getUsers().get(0).setRead(false);
-/*
+*//*
             int item = bottomNavigationView.getMenu().getItem(2).getItemId();
             BadgeDrawable xx = bottomNavigationView.getOrCreateBadge(item);
-            xx.setNumber(3);*/
+            xx.setNumber(3);*//*
 
-        }
+        }*/
+    }
+
+    private void recordMessageInHistory(PreviewChatMessage chatMessage) {
+        History history = new History(
+                chatMessage.publicKey,
+                chatMessage.previewMsg,
+                chatMessage.time,
+                chatMessage.isIncomingMessage);
+        historyDao.insert(history);
+        System.out.println("Message was recorded in db successfully. "+ chatMessage.previewMsg);
     }
 
     private boolean isConversationWith(String userId) {
@@ -116,44 +147,54 @@ public class ChatManager {
     }
 
     private boolean isConversationActivityOpen() {
-        return  MainActivity.chatManager.currentConversationChat != null;
+        return MainActivity.chatManager.currentConversationChat != null;
     }
 
-    private boolean isUserOnTopOfTheList(String senderPublicKey, ArrayList<ChatPreviewUser> usersList) {
+    private boolean isUserOnTopOfTheList(String senderPublicKey,
+                                         ArrayList<PreviewChatMessage> usersList) {
         return doesUserAppearOnTheList(senderPublicKey) &&
-                usersList.get(0).getPublicKey().equals(senderPublicKey);
+                usersList.get(0).publicKey.equals(senderPublicKey);
     }
 
-    private void updateTopElement(String message) {
-        chatLobbyFragment.getUsers().get(0).setMessage(message);
+    private void updatePreviewMessage(PreviewChatMessage chatMessage) {
+        PreviewChatMessage tmp = chatLobbyFragment.users.get(0);
+        incrementUnreadMessages(tmp);
+        int unreadMsgs = tmp.unreadMessages + 1;
+        chatMessage.setUnreadMsgs(unreadMsgs);
+        chatLobbyFragment.users.set(0, chatMessage);
+    }
+
+    private void updateTopElement(PreviewChatMessage chatMessage) {
+        updatePreviewMessage(chatMessage);
         chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
     }
 
-    private void moveElementOnTopOfTheList(String senderPublicKey, String message) {
-        ArrayList<ChatPreviewUser> usersList = chatLobbyFragment.getUsers();
-        int index = getIndexOfUserOnTheList(senderPublicKey);
-        usersList.get(index).setMessage(message);
-        ChatPreviewUser tmp = usersList.get(index);
+    private void moveElementOnTopOfTheList(PreviewChatMessage chatMessage) {
+        ArrayList<PreviewChatMessage> usersList = chatLobbyFragment.users;
+        int index = getIndexOfUserOnTheList(chatMessage.publicKey);
+        PreviewChatMessage tmp = usersList.get(index);
         usersList.remove(index);
         usersList.add(0, tmp);
-
+        updatePreviewMessage(chatMessage);
         chatLobbyFragment.recyclerViewAdapter.notifyItemMoved(0, index);
-        chatLobbyFragment.recyclerViewAdapter.notifyItemRangeChanged(0,usersList.size());
+        chatLobbyFragment.recyclerViewAdapter
+                .notifyItemRangeChanged(0, usersList.size());
     }
 
-    private void insertNewElement(ChatMessage chatMessage) {
-        ChatPreviewUser chatMsgPreview = new ChatPreviewUser(chatMessage.messageId,
-                        chatMessage.getSenderPublicKey(),
-                        chatMessage.getSendersName(),
-                        chatMessage.getMessage());
-        chatLobbyFragment.getUsers().add(0, chatMsgPreview);
+    private void insertNewElement(PreviewChatMessage chatMessage) {
+        ArrayList<PreviewChatMessage> users = chatLobbyFragment.users;
+        chatMessage.unreadMessages = 1;
+        chatLobbyFragment.insert(chatMessage);
+        users.add(0, chatMessage);
         chatLobbyFragment.recyclerViewAdapter.notifyItemInserted(0);
+        chatLobbyFragment.recyclerViewAdapter.notifyItemRangeChanged(0, users.size());
+
         System.out.println("A new element was inserted on the chat list.");
     }
 
     private int getIndexOfUserOnTheList(String senderPublicKey) {
-        for (int i = 0; i < chatLobbyFragment.getUsers().size(); i++) {
-            if (chatLobbyFragment.getUsers().get(i).getPublicKey().equals(senderPublicKey))
+        for (int i = 0; i < chatLobbyFragment.users.size(); i++) {
+            if (chatLobbyFragment.users.get(i).publicKey.equals(senderPublicKey))
                 return i;
         }
         return -1;
@@ -167,7 +208,7 @@ public class ChatManager {
         data.put("message", message);
 
         System.out.println("sending private msg to " + receiver + "...");
-        handleNewMessage("123456", receiver, ConnectedUser.getName(), message, false);
+        handleNewMessage("123456", receiver, ConnectedUser.getName(), message, false, Date.getTimeInMiliSecs());
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")
@@ -185,7 +226,7 @@ public class ChatManager {
         String error = "Error.";
         if (response.contains("NO_USER"))
             error = "Error: Message was not sent. User does not exist.";
-        MainActivity.toast(currentConversationChat.getApplicationContext(), error, 1);
+        MainActivity.toast(currentConversationChat.getApplicationContext(), error, true);
     }
 
     public void openConversationActivity(Context context, String userId, String name) {
@@ -194,4 +235,9 @@ public class ChatManager {
         intent.putExtra("name", name);
         context.startActivity(intent);
     }
+
+    public void incrementUnreadMessages(PreviewChatMessage chatMember) {
+        memberDao.incrementUnreadMessages(chatMember.publicKey);
+    }
+
 }

@@ -49,7 +49,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void follow() {
-        MainActivity.toast(getContext(), "You are not following XXX.", 1);
+        MainActivity.toast(getContext(), "You are not following XXX.", true);
     }
 
     private void openMessageActivity() {

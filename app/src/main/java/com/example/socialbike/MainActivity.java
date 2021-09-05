@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.room.Room;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import com.example.socialbike.chat.ChatLobbyFragment;
 import com.example.socialbike.chat.ChatManager;
+import com.example.socialbike.chat.history.Member;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.libraries.places.api.Places;
@@ -36,9 +38,11 @@ public class MainActivity extends AppCompatActivity {
     public static ChatManager chatManager;
     public static GeoApiContext geoApiContext;
     public static BottomNavigationView bottomNavigationView;
+    public static AppDatabase database;
 
-    public static void toast(Context context, String msg, int isLong) {
-        Toast.makeText(context, msg, isLong).show();
+    public static void toast(Context context, String msg, boolean isLong) {
+        int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
+        Toast.makeText(context, msg, displayLongMessage).show();
     }
 
     public MainActivity(){
@@ -55,8 +59,17 @@ public class MainActivity extends AppCompatActivity {
         loadUser();
         startListeningBottomMenu();
         changeFragment(HomeFragment.getInstance());
-        startChat();
+
+        database = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "appDatabase").allowMainThreadQueries().build();
+
+        if (isUserConnected())
+            startChat();
         initiatePlaces();
+
+
+
+        Member.setup();
 
        // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
@@ -77,12 +90,12 @@ public class MainActivity extends AppCompatActivity {
                 .build();
     }
 
-    private void startChat() {
+    public static void startChat() {
         chatManager.listenForNewMessages();
     }
 
     private void loadUser() {
-        if (checkIfUserConnected()){
+        if (isUserConnected()){
             ConnectedUser.setPublicKey(MyPreferences.getUserPublicKey(this));
             ConnectedUser.setNickname(MyPreferences.getNicknameFromDevice(this));
         }
@@ -103,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean checkIfUserConnected(){
+    private boolean isUserConnected(){
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         return account != null;
     }

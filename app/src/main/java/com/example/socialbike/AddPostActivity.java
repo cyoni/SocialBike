@@ -92,7 +92,7 @@ public class AddPostActivity extends AppCompatActivity {
             submitPost();
         }
         else{
-            MainActivity.toast(this,"Post has some problems", 1);
+            MainActivity.toast(this,"Post has some problems", true);
         }
     }
 
@@ -128,7 +128,7 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
     private void showSuccessMsg() {
-        MainActivity.toast(this, "Success!", 0);
+        MainActivity.toast(this, "Success!", false);
     }
 
     private void passItemHome() {

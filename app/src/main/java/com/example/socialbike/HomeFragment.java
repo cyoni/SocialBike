@@ -54,8 +54,10 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         super.onCreate(savedInstanceState);
     }
 
+
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_home, container, false);
             floatingButton = root.findViewById(R.id.fab);
@@ -98,7 +100,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private void getPosts() {
         container.clear();
         recyclerView.setVisibility(View.INVISIBLE);
-        messageManager.getPosts();
+     //   messageManager.getPosts();
     }
 
     private void setSwipeLayout() {
