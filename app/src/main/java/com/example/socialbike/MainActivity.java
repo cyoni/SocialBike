@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.socialbike.chat.ChatLobbyFragment;
 import com.example.socialbike.chat.ChatManager;
 import com.example.socialbike.chat.history.Member;
+import com.example.socialbike.groups.GroupContainer;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.libraries.places.api.Places;
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         setFirebase();
         loadUser();
         startListeningBottomMenu();
-        changeFragment(HomeFragment.getInstance());
+        changeFragment(EventsFragment.getInstance());
 
         database = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "appDatabase").allowMainThreadQueries().build();
@@ -125,36 +126,33 @@ public class MainActivity extends AppCompatActivity {
     private void startListeningBottomMenu() {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
 
-                switch (item.getItemId()){
-                    case R.id.home:
-                        changeFragment(HomeFragment.getInstance());
-                        break;
-                    case R.id.events:
-                        changeFragment(EventsFragment.getInstance());
-                        break;
-                    case R.id.chat:
-                        changeFragment(ChatLobbyFragment.getInstance());
-                        break;
-                    case R.id.profile:
-                        changeFragment(ProfileFragment.getInstance());
-                        break;
-                }
-
-             /*   if (item.getItemId() == R.id.home){
-                    changeFragment(HomeFragment.getInstance());
-                }  else if (item.getItemId() == R.id.events)
+            switch (item.getItemId()){
+                case R.id.events:
                     changeFragment(EventsFragment.getInstance());
-                else if (item.getItemId() == R.id.chat)
-                    changeFragment(ContainerForChat.getInstance());
-                else if (item.getItemId() == R.id.profile)
-                    changeFragment(ProfileFragment.getInstance());*/
-
-                return true;
+                    break;
+                case R.id.groups:
+                    changeFragment(GroupContainer.getInstance());
+                    break;
+                case R.id.chat:
+                    changeFragment(ChatLobbyFragment.getInstance());
+                    break;
+                case R.id.profile:
+                    changeFragment(ProfileFragment.getInstance());
+                    break;
             }
+
+         /*   if (item.getItemId() == R.id.home){
+                changeFragment(HomeFragment.getInstance());
+            }  else if (item.getItemId() == R.id.events)
+                changeFragment(EventsFragment.getInstance());
+            else if (item.getItemId() == R.id.chat)
+                changeFragment(ContainerForChat.getInstance());
+            else if (item.getItemId() == R.id.profile)
+                changeFragment(ProfileFragment.getInstance());*/
+
+            return true;
         });
     }
 

@@ -100,7 +100,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private void getPosts() {
         container.clear();
         recyclerView.setVisibility(View.INVISIBLE);
-     //   messageManager.getPosts();
+        messageManager.getPosts();
     }
 
     private void setSwipeLayout() {

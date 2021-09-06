@@ -14,9 +14,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SocialBike">
         <activity
+            android:name=".groups.CreateGroupActivity"
+            android:exported="true"
+            android:label="@string/title_activity_create_group"
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
+        <activity
             android:name=".chat.ConversationChatActivity"
             android:label="@string/title_activity_conversation_chat"
-            android:theme="@style/Theme.SocialBike.NoActionBar"></activity>
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

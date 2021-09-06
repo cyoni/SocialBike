@@ -72,12 +72,11 @@
             android:layout_alignParentStart="true" />
 
 
-
         <include
+            layout="@layout/post_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/message"
-            layout="@layout/post_buttons"/>
+            android:layout_below="@id/message" />
 
 
 

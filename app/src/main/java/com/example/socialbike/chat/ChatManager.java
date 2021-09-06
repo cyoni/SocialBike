@@ -46,7 +46,7 @@ public class ChatManager {
                         System.out.println("New message: " + postSnapshot.child("message").getValue());
                         System.out.println("Message key: " + postSnapshot.getKey());
                         handleNewMessage(messageId, senderPublicKey, sendersName, message, true, timestamp);
-                        removeMessage(messageId);
+                        removeMessageFromServer(messageId);
                     }
                 }
             }
@@ -75,7 +75,7 @@ public class ChatManager {
         memberDao = MainActivity.database.chatMemberDao();
     }
 
-    private void removeMessage(String messageId) {
+    private void removeMessageFromServer(String messageId) {
         MainActivity.mDatabase
                 .child("private_msgs")
                 .child(ConnectedUser.getPublicKey())

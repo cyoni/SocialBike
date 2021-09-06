@@ -683,8 +683,93 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
             functions.logger.log('Counter updated.');
             return null;
           });
-  
-      /*
+
+
+          exports.CreateGroup = functions.https.onCall(async (request, context) => {
+
+            const privateKey = context.auth.uid;
+            const account = await verifyUser(privateKey);
+            const title = request.title
+            const description = request.description
+
+            const data = {
+                publicKey: account.publicKey,
+                title: title,
+                description: description
+            }
+
+            if (account === null)
+                return "[AUTH_FAILED]";
+        
+            await admin.database().ref('groups').push(data)
+                return "OK"
+        
+        })
+
+
+        exports.GetMyGroups = functions.https.onCall(async (request, context) => {
+
+            const account = await verifyUser(context.auth.uid)
+        
+            var data = {}
+            data['groups'] = []
+            var groups = []
+        
+            return admin.database().ref('public').child(account.publicKey).child('connected_groups').once('value').then(snapshot => {
+                snapshot.forEach(raw_post => {
+                    var group = ({
+                        groupId: raw_post.key,
+                    })
+                    groups.push(group)
+             })
+             return admin.database().ref('groups').once('value')
+            }).then(snapshot => {
+                snapshot.forEach(raw_post => {
+                    if (groups.includes(raw_post.key)){
+                        data['groups'].push({
+                            groupId: raw_post.key,
+                            title: raw_post.child('title').val(),
+                            description: raw_post.child('description').val()
+                        })
+                    }
+                })
+                return null;
+            }).then(x=> {
+                return JSON.stringify(data)
+            })
+        })
+
+
+
+        exports.GetAllGroups = functions.https.onCall(async (request, context) => {       
+            var data = {}
+            data['groups'] = []
+        
+            return admin.database().ref('groups').once('value').then(snapshot => {
+                snapshot.forEach(raw_post => {
+                    var group = []
+                    group = ({
+                        groupId: raw_post.key,
+                        title: raw_post.child('title'),
+                        description: raw_post.child('description')
+                    })
+                    data['groups'].push(group)
+                })
+                return JSON.stringify(data)
+            })
+        })
+
+        exports.JoinGroup = functions.https.onCall(async (request, context) => {       
+            const account = await verifyUser(myPrivateKey);
+            if (account === null)
+                return "AUTH_FAILED"
+
+            var groupId = request.groupId
+
+            await admin.database().ref('public').child(account.publicKey).child('connected_groups').child(groupId).set(true)
+            return "OK"
+        })
+ /*
   exports.recountlikes = functions.database.ref('global_posts/{postid}/likes_count').onDelete(async (snap) => {
     const counterRef = snap.ref;
     const collectionRef = counterRef.parent.child('likes');
