@@ -717,10 +717,7 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
         
             return admin.database().ref('public').child(account.publicKey).child('connected_groups').once('value').then(snapshot => {
                 snapshot.forEach(raw_post => {
-                    var group = ({
-                        groupId: raw_post.key,
-                    })
-                    groups.push(group)
+                    groups.push(raw_post.key)
              })
              return admin.database().ref('groups').once('value')
             }).then(snapshot => {
@@ -760,7 +757,7 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
         })
 
         exports.JoinGroup = functions.https.onCall(async (request, context) => {       
-            const account = await verifyUser(myPrivateKey);
+            const account = await verifyUser(context.auth.uid);
             if (account === null)
                 return "AUTH_FAILED"
 

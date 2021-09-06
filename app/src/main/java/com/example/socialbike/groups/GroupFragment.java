@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +13,6 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.example.socialbike.MainActivity;
-import com.example.socialbike.Post;
-import com.example.socialbike.PostButtons;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.Updater;
@@ -36,6 +35,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
     private final ArrayList<Group> container = new ArrayList<>();
     private ProgressBar progressBar;
     private View root;
+    private SwipeRefreshLayout swipeLayout;
 
     public GroupFragment(boolean isExplore) {
         this.isExplore = isExplore;
@@ -67,7 +67,8 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
         super.onCreate(savedInstanceState);
     }
 
-    private void getMyGroups() {
+    private void getGroups() {
+        container.clear();
         progressBar.setVisibility(View.VISIBLE);
 
         Map<String, Object> data = new HashMap<>();
@@ -151,6 +152,18 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
 
     }
 
+    private void setSwipeLayout() {
+        swipeLayout.setOnRefreshListener(this::getGroups);
+
+        // Scheme colors for animation
+        swipeLayout.setColorSchemeColors(
+                getResources().getColor(android.R.color.holo_blue_bright),
+                getResources().getColor(android.R.color.holo_green_light),
+                getResources().getColor(android.R.color.holo_orange_light),
+                getResources().getColor(android.R.color.holo_red_light)
+        );
+    }
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -159,15 +172,18 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
             root = inflater.inflate(R.layout.fragment_group, container, false);
             recyclerView = root.findViewById(R.id.recyclerview);
             progressBar = root.findViewById(R.id.progressBar);
+            swipeLayout = root.findViewById(R.id.swipe_refresh);
 
+            setSwipeLayout();
             initAdapter();
-            getMyGroups();
+            getGroups();
         }
         return root;
     }
 
     @Override
     public void onFinishedTakingNewMessages() {
+        swipeLayout.setRefreshing(false);
         recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
         progressBar.setVisibility(View.GONE);
     }
