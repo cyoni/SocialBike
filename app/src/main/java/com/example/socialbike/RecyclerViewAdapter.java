@@ -21,7 +21,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ViewHolder viewHolder;
     private List mData; // reference
     private LayoutInflater mInflater;
-    private ItemClickListener msgItemListener;
+    private ItemClickListener classReference;
     private int layout;
 
     // data is passed into the constructor
@@ -42,7 +42,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        msgItemListener.onBinding(holder, position);
+        classReference.onBinding(holder, position);
     }
 
     // total number of rows
@@ -102,12 +102,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             msgStyle = itemView.findViewById(R.id.msgStyle);
             // start_conversation = itemView.findViewById(R.id.start_conversation);
             message_preview = itemView.findViewById(R.id.message_preview);
+
         }
 
         @Override
         public void onClick(View view) {
-            if (msgItemListener != null)
-                msgItemListener.onItemClick(view, getAdapterPosition());
+            if (classReference != null)
+                classReference.onItemClick(view, getAdapterPosition());
         }
 
         public void fresh() {
@@ -122,7 +123,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // allows click events to be caught
     public void setClassReference(Object itemClickListener) {
-        this.msgItemListener = (ItemClickListener) itemClickListener;
+        this.classReference = (ItemClickListener) itemClickListener;
     }
 
     // parent activity will implement this method to respond to click events

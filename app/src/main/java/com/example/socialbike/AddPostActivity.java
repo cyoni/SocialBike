@@ -21,6 +21,7 @@ public class AddPostActivity extends AppCompatActivity {
     private TextView textBox;
     Button submit;
     private HomeFragment homeFragment;
+    private String groupId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +29,9 @@ public class AddPostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_adding_post);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+
+        groupId = getIntent().getStringExtra("groupId");
+
         setSupportActionBar(toolbar);
       //  toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
         toolbar.setTitle("New post");
@@ -98,12 +102,16 @@ public class AddPostActivity extends AppCompatActivity {
 
     private void submitPost() {
 
-        //progressbar.setVisibility(View.VISIBLE);
         final String message = textBox.getText().toString();
+
+        if (submit.getText().toString().equals("PUBLISHING..."))
+            return;
+
         submit.setText("PUBLISHING...");
-        submit.setEnabled(false);
         Map<String, Object> data = new HashMap<>();
         data.put("message", message);
+        data.put("groupId", groupId);
+
         MainActivity.mFunctions
                 .getHttpsCallable("AddNewPost")
                 .call(data)
@@ -113,23 +121,19 @@ public class AddPostActivity extends AppCompatActivity {
                     System.out.println("response:" + postIdFromServer);
 
                     if (!postIdFromServer.equals("FAIL") && !postIdFromServer.isEmpty()) {
+                        submit.setText("SUCCESS");
                         saveText("");
-                        passItemHome();
-                        showSuccessMsg();
+//                        passItemHome();
                         finish();
 
                     } else {
                        // notifyUser_error();
                         submit.setText("PUBLISHING");
-                        submit.setEnabled(true);
                     }
                     return "";
                 });
     }
 
-    private void showSuccessMsg() {
-        MainActivity.toast(this, "Success!", false);
-    }
 
     private void passItemHome() {
         homeFragment.addPost(new Post("77777", ConnectedUser.getPublicKey(), ConnectedUser.getName(), 123412, textBox.getText().toString(), 0, 0, false));

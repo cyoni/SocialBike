@@ -75,6 +75,8 @@ exports.AddNewPost = functions.https.onCall(async (snapshot, context) => {
 
     const myPrivateKey = context.auth.uid;
     const user_message = snapshot.message.trim();
+    const groupId = snapshot.groupId;
+
     const now = Date.now();
 
     if (user_message.length > 5000)
@@ -92,16 +94,15 @@ exports.AddNewPost = functions.https.onCall(async (snapshot, context) => {
         user_public_key: myPublicKey,
     };
 
-    const container = 'global_posts'
-    const post_id = await (admin.database().ref(container).push().key)
-    const set_data = admin.database().ref(container).child(post_id).set(data);
-    //  const set_category = admin.database().ref('user_public').child(myPublicKey).child(where).child(post_id).set(category);
+    const post_id = await (admin.database().ref('groups').child(groupId).child('posts').push().key)
+    const set_data = admin.database().ref('groups').child(groupId).child('posts').child(post_id).set(data);
+
     const ref = admin.database().ref('public').child(myPublicKey).child('profile').child('posts_count');
     const incrementMyPostsCounter = ref.transaction((current) => {
         return (current || 0) + 1;
     });
 
-    await set_data, incrementMyPostsCounter;
+    await set_data, incrementMyPostsCounter
     return post_id;
 
 });
@@ -765,6 +766,44 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
 
             await admin.database().ref('public').child(account.publicKey).child('connected_groups').child(groupId).set(true)
             return "OK"
+        })
+
+        exports.GetGroupPosts = functions.https.onCall(async (request, context) => {
+
+            const account = await verifyUser(context.auth.uid);
+            if (account === null)
+                return "AUTH_FAILED"
+
+            const groupId = request.groupId
+            
+            var data = {}
+            data['posts'] = []
+        
+            return admin.database().ref('groups').child(groupId).child('posts').once('value').then(snapshot => {
+                snapshot.forEach(raw_post => {
+
+                    var dataOfUser = ({
+                        postId: raw_post.key,
+                        publicKey: raw_post.child('user_public_key').val(),
+                        name: "...",
+                        message: raw_post.child('message').val(),
+                        timestamp: raw_post.child('timestamp').val(),
+                    })
+        
+                    if (raw_post.child('comments_count').exists()){
+                        dataOfUser['comments_count'] = 
+                             raw_post.child('comments_count').val()
+                    }
+        
+                    if (raw_post.child('likes_count').exists()){
+                        dataOfUser['likes_count'] = raw_post.child('likes_count').val()
+                        dataOfUser['doesUserLikeThePost'] = raw_post.child('likes').child(userPublicId).exists()
+                    }
+
+                    data['posts'].push(dataOfUser)
+                })
+                return JSON.stringify(data)
+            })
         })
  /*
   exports.recountlikes = functions.database.ref('global_posts/{postid}/likes_count').onDelete(async (snap) => {
