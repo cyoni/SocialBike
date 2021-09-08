@@ -34,7 +34,7 @@ public class Updater {
 
 
     public interface IUpdate {
-        void onFinishedTakingNewMessages();
+        void onFinishedUpdating();
     }
 
 }

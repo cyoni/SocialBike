@@ -166,7 +166,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     }
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
         swipeLayout.setRefreshing(false);

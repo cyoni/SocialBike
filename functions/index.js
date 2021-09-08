@@ -288,7 +288,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     return ref.once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
-            if ( ((country && raw_data.child('country').val() === country) ) 
+            if (groupId !== null || (country && raw_data.child('country').val() === country)  
                     && distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range){
                 
             const dataOfEvent = {

@@ -108,17 +108,23 @@ public class EventsFragment extends Fragment
 
         Button sortButton = root.findViewById(R.id.sort_button);
         sortButton.setOnClickListener(view -> {
+            openLoginActivity();
 
-            if (sortButton.getText().equals("Treading")) {
+          /*  if (sortButton.getText().equals("Treading")) {
                 eventsManager.changeTypeOfSearch(eventsManager.MOST_RECENT_CODE);
                 sortButton.setText("Recent Activity");
             } else {
                 eventsManager.changeTypeOfSearch(eventsManager.TRADING_CODE);
                 sortButton.setText("Treading");
-            }
-            getEvents();
+            }*/
+          //  getEvents();
         });
 
+    }
+
+    private void openLoginActivity() {
+        Intent intent = new Intent(getContext(), LogInActivity.class);
+        startActivity(intent);
     }
 
 
@@ -197,7 +203,7 @@ public class EventsFragment extends Fragment
 
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
         eventsManager.recyclerViewAdapter.notifyItemRangeInserted(0, container.size());
         eventsManager.updateSearchText();
         eventsManager.hideProgressbar();

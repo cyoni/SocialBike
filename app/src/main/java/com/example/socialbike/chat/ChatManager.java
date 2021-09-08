@@ -24,8 +24,7 @@ public class ChatManager {
     public ConversationChatActivity currentConversationChat;
     public ChatLobbyFragment chatLobbyFragment;
     private HistoryDao historyDao;
-    public PreviewChatMessageDao memberDao;
-
+    public PreviewChatMessageDao previewMessage;
 
     public void listenForNewMessages() {
         System.out.println("Chat Manager has started");
@@ -72,7 +71,7 @@ public class ChatManager {
 
     private void initDatabases() {
         historyDao = MainActivity.database.historyDao();
-        memberDao = MainActivity.database.chatMemberDao();
+        previewMessage = MainActivity.database.chatMemberDao();
     }
 
     private void removeMessageFromServer(String messageId) {
@@ -108,7 +107,7 @@ public class ChatManager {
                 insertNewElement(chatMessage);
 
             if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)) {
-                memberDao.resetUnreadMessages(chatMessage.publicKey);
+                previewMessage.resetUnreadMessages(chatMessage.publicKey);
                 usersList.get(0).unreadMessages = 0;
                 chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
             }
@@ -158,10 +157,9 @@ public class ChatManager {
 
     private void updatePreviewMessage(PreviewChatMessage chatMessage) {
         PreviewChatMessage tmp = chatLobbyFragment.users.get(0);
-        incrementUnreadMessages(tmp);
-        int unreadMsgs = tmp.unreadMessages + 1;
-        chatMessage.setUnreadMsgs(unreadMsgs);
+        chatMessage.setUnreadMsgs(tmp.unreadMessages + 1);
         chatLobbyFragment.users.set(0, chatMessage);
+        previewMessage.update(chatMessage);
     }
 
     private void updateTopElement(PreviewChatMessage chatMessage) {
@@ -237,7 +235,7 @@ public class ChatManager {
     }
 
     public void incrementUnreadMessages(PreviewChatMessage chatMember) {
-        memberDao.incrementUnreadMessages(chatMember.publicKey);
+        previewMessage.incrementUnreadMessages(chatMember.publicKey);
     }
 
 }

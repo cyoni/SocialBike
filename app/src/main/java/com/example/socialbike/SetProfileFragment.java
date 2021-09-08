@@ -62,14 +62,12 @@ public class SetProfileFragment extends Fragment {
     }
 
     private void submitForm() {
-        if (doneButton.getText().toString().equals("Please wait"))
-            return;
-        doneButton.setText("Please wait");
         Map<String, Object> data = new HashMap<>();
         data.put("country", country.getText().toString());
         data.put("city", city.getText().toString());
         data.put("gender", gender.getText().toString());
         data.put("age", age.getText().toString());
+        getActivity().finish();
 
         MainActivity.mFunctions
                 .getHttpsCallable("updateProfile")
@@ -78,19 +76,8 @@ public class SetProfileFragment extends Fragment {
                     String answer = task.getResult().getData().toString();
                     System.out.println("Response from Server: " + answer);
                     MainActivity.startChat();
-
-                    if (answer.equals("OK")) {
-                        doneButton.setText("Success");
-                        getActivity().finish();
-                    }
-                        else {
-                        MainActivity.toast(getContext(), "error", true);
-                        doneButton.setText("Done");
-                    }
-
                     return "";
                 });
-
     }
 
 }

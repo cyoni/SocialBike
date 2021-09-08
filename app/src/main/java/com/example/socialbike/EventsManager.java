@@ -29,7 +29,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     String TRADING_CODE = "TRADING";
     Updater.IUpdate update;
     String dataType = MOST_RECENT_CODE;
-    ArrayList<Event> container = new ArrayList<>();
+    public ArrayList<Event> container = new ArrayList<>();
     RecyclerView recyclerView;
     public RecyclerViewAdapter recyclerViewAdapter;
     public ProgressBar progressBar;
@@ -84,7 +84,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         }
         if (data == null || data.length() == 0) {
             // no_events_text.setVisibility(View.VISIBLE);
-            update.onFinishedTakingNewMessages();
+            update.onFinishedUpdating();
             return;
         }
 
@@ -130,7 +130,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
                 System.out.println("An error was caught in message fetcher: " + e.getMessage());
             }
         }
-        update.onFinishedTakingNewMessages();
+        update.onFinishedUpdating();
 
     }
 
@@ -144,7 +144,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         progressBar.setVisibility(View.VISIBLE);
     }
 
-    protected void hideProgressbar() {
+    public void hideProgressbar() {
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
     }

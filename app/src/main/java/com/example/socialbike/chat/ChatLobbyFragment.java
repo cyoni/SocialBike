@@ -116,11 +116,22 @@ public class ChatLobbyFragment extends Fragment
                             return;
 
 
+                        if (charSequence.toString().equals("reset")) {
+                            users.clear();
+                            List<PreviewChatMessage> chatMessages = MainActivity.chatManager.previewMessage.getAllMembers();
+                            for (int _i=0; _i<chatMessages.size(); _i++)
+                                MainActivity.chatManager.previewMessage.delete(chatMessages.get(_i));
+                            recyclerViewAdapter.notifyDataSetChanged();
+                            searchUserTextbox.setText("");
+                            return;
+                        }
+
                         if (charSequence.toString().equals("ref")) {
                             users.clear();
                             loadUsersFromLocalDB();
                             recyclerViewAdapter.notifyDataSetChanged();
                             searchUserTextbox.setText("");
+                            return;
                         }
 
                         String name, message = "";
@@ -166,7 +177,7 @@ public class ChatLobbyFragment extends Fragment
 
 
     private void loadUsersFromLocalDB() { // TODO Work on another thread
-        List<PreviewChatMessage> chatMessages = MainActivity.chatManager.memberDao.getAllMembers();
+        List<PreviewChatMessage> chatMessages = MainActivity.chatManager.previewMessage.getAllMembers();
         users.addAll(chatMessages);
         recyclerViewAdapter.notifyItemRangeChanged(0, chatMessages.size());
     }
@@ -313,7 +324,7 @@ public class ChatLobbyFragment extends Fragment
         String name = chatMember.name;
         chatMember.unreadMessages = 0;
         MainActivity.chatManager.openConversationActivity(getContext(), userId, name);
-        MainActivity.chatManager.memberDao.resetUnreadMessages(userId);
+        MainActivity.chatManager.previewMessage.resetUnreadMessages(userId);
         recyclerViewAdapter.notifyItemChanged(position);
     }
 
@@ -330,7 +341,7 @@ public class ChatLobbyFragment extends Fragment
 
     public void insert(PreviewChatMessage chatMember) {
         AsyncTask.execute(() -> {
-            MainActivity.chatManager.memberDao.insert(chatMember);
+            MainActivity.chatManager.previewMessage.insert(chatMember);
         });
     }
 

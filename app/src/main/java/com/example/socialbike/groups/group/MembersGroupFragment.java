@@ -11,23 +11,17 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.socialbike.ConnectedUser;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.Updater;
-import com.example.socialbike.groups.Group;
+import com.example.socialbike.room_database.Member;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 
 public class MembersGroupFragment extends Fragment
@@ -36,7 +30,7 @@ public class MembersGroupFragment extends Fragment
     public static MembersGroupFragment groupFragment;
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
-    private final ArrayList<String> container = new ArrayList<>();
+    private final ArrayList<Member> container = new ArrayList<>();
     private ProgressBar progressBar;
     private View root;
     private SwipeRefreshLayout swipeLayout;
@@ -67,7 +61,12 @@ public class MembersGroupFragment extends Fragment
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.name.setText(container.get(position));
+        String name = Member.getNameFromLocal(container.get(position).publicKey);
+        if (name.equals("...")){
+            Member.fetchName(holder, container.get(position).publicKey);
+        }
+        else
+            holder.name.setText(name);
     }
 
 
@@ -115,10 +114,10 @@ public class MembersGroupFragment extends Fragment
                     DataSnapshot tmp;
                     while (iterator.hasNext()) {
                         tmp = iterator.next();
-                        container.add(tmp.getKey());
+                        container.add(new Member(tmp.getKey(), "..."));
                     }
                 }
-                    onFinishedTakingNewMessages();
+                    onFinishedUpdating();
             }
 
             @Override
@@ -129,7 +128,7 @@ public class MembersGroupFragment extends Fragment
     }
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
         swipeLayout.setRefreshing(false);
         recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
         progressBar.setVisibility(View.GONE);

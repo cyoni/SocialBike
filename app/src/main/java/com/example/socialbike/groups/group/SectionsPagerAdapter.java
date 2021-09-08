@@ -8,13 +8,13 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import com.example.socialbike.groups.GroupFragment;
 
 
-public class SectionsPagerAdapter2 extends FragmentPagerAdapter {
+public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     private static final String[] TAB_TITLES = new String[]{"Posts", "Events", "Members"};
     private final GroupActivity groupActivity;
 
 
-    public SectionsPagerAdapter2(GroupActivity groupActivity, FragmentManager fm) {
+    public SectionsPagerAdapter(GroupActivity groupActivity, FragmentManager fm) {
         super(fm);
         this.groupActivity = groupActivity;
     }

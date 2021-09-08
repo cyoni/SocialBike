@@ -1,6 +1,5 @@
 package com.example.socialbike.groups;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -125,7 +124,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
                 Group group = new Group(groupId, title, description);
                 container.add(group);
             }
-            onFinishedTakingNewMessages();
+            onFinishedUpdating();
         } catch (Exception e) {
             System.out.println("Error caught in message fetcher: " + e.getMessage());
         }
@@ -188,7 +187,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
 
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
         swipeLayout.setRefreshing(false);
         recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
         progressBar.setVisibility(View.GONE);

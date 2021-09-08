@@ -1,6 +1,5 @@
 package com.example.socialbike.groups.group;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -37,7 +36,7 @@ public class GroupActivity extends AppCompatActivity {
         Intent intent = getIntent();
         groupId = intent.getStringExtra("groupId");
 
-        SectionsPagerAdapter2 sectionsPagerAdapter = new SectionsPagerAdapter2(this, getSupportFragmentManager());
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
 
         viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
@@ -50,7 +49,7 @@ public class GroupActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed(){
-        SpeficicGroupFragment.homeFragment = null;
+        PrivateGroupFragment.homeFragment = null;
         GroupEvents.groupFragment = null;
         MembersGroupFragment.groupFragment = null;
         finish();
@@ -64,7 +63,7 @@ public class GroupActivity extends AppCompatActivity {
     public Fragment switchFragment(int position) {
         switch (position) {
             case 0:
-                return SpeficicGroupFragment.getInstance(groupId);
+                return PrivateGroupFragment.getInstance(groupId);
             case 1:
                 return GroupEvents.getInstance(groupId);
             case 2:

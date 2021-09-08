@@ -348,7 +348,7 @@ public class PostActivity extends AppCompatActivity
 
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
         System.out.println("Finished!!!");
     }
 }

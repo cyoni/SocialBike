@@ -1,4 +1,4 @@
-package com.example.socialbike.chat.history;
+package com.example.socialbike.room_database;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -8,15 +8,18 @@ import androidx.room.Update;
 
 import java.util.List;
 
-
 @Dao
 public interface MemberDao {
 
     @Query("SELECT * FROM Member")
     List<Member> getAllMembers();
 
-    @Query("SELECT * FROM Member WHERE publicKey = (:publicKey)")
-    List<Member> getMember(String publicKey);
+    @Query("SELECT * FROM Member WHERE publicKey = (:userId)")
+    List<Member> getUserById(int userId);
+
+    @Query("SELECT * FROM Member WHERE name = (:name)")
+    List<Member> getUserByName(String name);
+
 
     @Insert
     void insert(Member member);

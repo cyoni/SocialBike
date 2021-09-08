@@ -31,7 +31,6 @@ public class GroupEvents extends Fragment implements Updater.IUpdate {
 
     public static GroupEvents groupFragment;
     private final String groupId;
-    private ArrayList<Group> container;
     private View root;
     private SwipeRefreshLayout swipeLayout;
     private EventsManager eventsManager;
@@ -98,10 +97,11 @@ public class GroupEvents extends Fragment implements Updater.IUpdate {
     }
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
+        eventsManager.hideProgressbar();
         swipeLayout.setRefreshing(false);
         eventsManager.progressBar.setVisibility(View.INVISIBLE);
-        eventsManager.recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
+        eventsManager.recyclerViewAdapter.notifyItemRangeChanged(0, eventsManager.container.size());
         eventsManager.progressBar.setVisibility(View.GONE);
     }
 

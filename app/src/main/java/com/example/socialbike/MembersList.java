@@ -60,10 +60,10 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response:" + response);
                     parseStr(response);
-                    updater.referenceClass.onFinishedTakingNewMessages();
+                    updater.referenceClass.onFinishedUpdating();
                     return "";
                 }).addOnFailureListener(e -> {
-            updater.referenceClass.onFinishedTakingNewMessages();
+            updater.referenceClass.onFinishedUpdating();
             System.out.println("ERROR");
         });
     }
@@ -99,7 +99,7 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
     }
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
         progressBar.setVisibility(View.GONE);
     }
 }
