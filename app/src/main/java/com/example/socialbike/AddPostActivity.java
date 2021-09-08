@@ -124,7 +124,7 @@ public class AddPostActivity extends AppCompatActivity {
                         submit.setText("SUCCESS");
                         saveText("");
 //                        passItemHome();
-                        finish();
+                        onBackPressed();
 
                     } else {
                        // notifyUser_error();

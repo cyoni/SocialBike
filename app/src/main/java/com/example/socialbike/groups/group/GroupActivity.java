@@ -48,6 +48,14 @@ public class GroupActivity extends AppCompatActivity {
         changeTab(0);
     }
 
+    @Override
+    public void onBackPressed(){
+        SpeficicGroupFragment.homeFragment = null;
+        GroupEvents.groupFragment = null;
+        MembersGroupFragment.groupFragment = null;
+        finish();
+    }
+
 
     public void changeTab(int index){
         viewPager.setCurrentItem(index);
@@ -58,9 +66,9 @@ public class GroupActivity extends AppCompatActivity {
             case 0:
                 return SpeficicGroupFragment.getInstance(groupId);
             case 1:
-                return GroupEvents.getInstance();
+                return GroupEvents.getInstance(groupId);
             case 2:
-                return MembersGroupFragment.getInstance();
+                return MembersGroupFragment.getInstance(groupId);
             default:
                 return null;
         }

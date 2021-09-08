@@ -21,9 +21,9 @@ import static com.example.socialbike.Event.EVENTS_CONTAINER_CODE;
 
 public class EventsCommentsExtension {
 
-    private final EventsFragment eventsFragment;
+    private final EventsManager eventsFragment;
 
-    public EventsCommentsExtension(EventsFragment eventsFragment) {
+    public EventsCommentsExtension(EventsManager eventsFragment) {
         this.eventsFragment = eventsFragment;
     }
 

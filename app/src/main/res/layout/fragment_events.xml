@@ -8,8 +8,6 @@
     android:padding="5dp"
     tools:context=".EventsFragment">
 
-
-
     <RelativeLayout
         android:id="@+id/topMenu"
         android:layout_width="match_parent"

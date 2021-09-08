@@ -21,7 +21,15 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@null"
-            app:layout_collapseMode="pin" />
+            app:layout_collapseMode="pin" >
+            <Button
+                android:id="@+id/submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="POST" />
+
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -157,16 +165,6 @@
             android:inputType="textMultiLine|textCapSentences"
             android:minHeight="150dp"
             android:padding="5dp" />
-
-
-        <Button
-            android:id="@+id/submit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/txt_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:text="POST" />
 
     </LinearLayout>
 </LinearLayout>

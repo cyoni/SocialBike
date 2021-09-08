@@ -162,7 +162,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response:" + response);
                     holder.joinButton.setText("Joined");
-                    recyclerViewAdapter.notifyItemChanged(position);
+
                     return null;
                 });
     }

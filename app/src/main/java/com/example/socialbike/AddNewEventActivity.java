@@ -39,6 +39,7 @@ public class AddNewEventActivity extends AppCompatActivity {
     private Button timeButton, mapButton, locationAutoCompleteButton;
     private LinearLayout locationAddressSection;
     private Position position;
+    private String groupId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,8 @@ public class AddNewEventActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.flexible_example_toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+        groupId = getIntent().getStringExtra("groupId");
 
         time = findViewById(R.id.time);
         date = findViewById(R.id.date);
@@ -124,7 +127,6 @@ public class AddNewEventActivity extends AppCompatActivity {
 
         submitButton = findViewById(R.id.submit);
         submitButton.setOnClickListener(view -> {
-            submitButton.setEnabled(false);
             postEvent();
         });
     }
@@ -175,7 +177,12 @@ public class AddNewEventActivity extends AppCompatActivity {
 
     private void postEvent() {
 
+        if (submitButton.getText().toString().equals("posting..."))
+            return;
+
+        submitButton.setText("posting...");
         Map<String, Object> data = new HashMap<>();
+        data.put("groupId", groupId);
         data.put("lat", position.getLatLng().latitude);
         data.put("lng", position.getLatLng().longitude);
         data.put("date", date.getText().toString());
@@ -192,7 +199,7 @@ public class AddNewEventActivity extends AppCompatActivity {
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("add new event -> response:" + response);
-
+                    submitButton.setText("Success");
                     MainActivity.toast(getApplicationContext(), "Your event is live.", true);
                     Intent intent = new Intent();
                     intent.putExtra("status", "newEvent");
@@ -200,7 +207,7 @@ public class AddNewEventActivity extends AppCompatActivity {
                     finish();
 
                     if (response.equals("NOT_OK")) {
-                        submitButton.setEnabled(true);
+                        submitButton.setText("Post");
                     }
                     return "";
                 });

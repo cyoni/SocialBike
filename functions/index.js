@@ -271,23 +271,24 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     const dataType = request.dataType
     var data = {}
     data['events'] = []
-    var counter = 0;
     
     const lat = request.lat
     const lng = request.lng
     const range = request.range
     const country = request.country || null
-    const state = request.state || null
+    const groupId = request.groupId || null
 
- //   if (!isCountry(country))
-   //     return "[false]"
-       
-    return admin.database().ref('events').once('value').then(snapshot => {
+    var ref;
+    if (groupId !== null){
+        ref = admin.database().ref('groups').child(groupId).child('events')
+    }
+    else
+        ref = admin.database().ref('events')
+ 
+    return ref.once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
-            if ( ((country && raw_data.child('country').val() === country) 
-                   //  || (state && raw_data.child('state').val() === state) 
-                       ) 
+            if ( ((country && raw_data.child('country').val() === country) ) 
                     && distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range){
                 
             const dataOfEvent = {
@@ -339,7 +340,7 @@ exports.updateNickname = functions.https.onCall(async (data, context) => {
     const validNickname = isNicknameValid(inputNickname);
     if (!validNickname)
         return "[INVALID_NICKNAME]"
-    const takenNickname = await isNicknameTaken(inputNickname);
+    const takenNickname = isNicknameTaken(inputNickname);
     if (takenNickname)
         return "[NICKNAME_TAKEN]"
     const oldNickname = await getNickname(account.publicKey);
@@ -353,9 +354,19 @@ exports.updateNickname = functions.https.onCall(async (data, context) => {
 exports.AddNewEvent = functions.https.onCall(async (request, context) => {
     const privateKey = context.auth.uid;
     const account = await verifyUser(privateKey);
+    const groupId = request.groupId || null
 
     if (account === null)
         return "[AUTH_FAILED]";
+
+    var ref;
+
+    if (groupId !== null){
+        ref = admin.database().ref('groups').child(groupId).child('events')
+    }
+    else
+        ref = admin.database().ref('events')
+    
 
     const eventTime = request.time
     const eventDate = request.date
@@ -382,8 +393,8 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
         country: country
     }
 
-    const newKey = admin.database().ref('events').push().key
-    await admin.database().ref('events').child(newKey).set(data)
+    const newKey = ref.push().key
+    await ref.child(newKey).set(data)
 
     return "OK"
 })
@@ -764,7 +775,12 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
 
             var groupId = request.groupId
 
-            await admin.database().ref('public').child(account.publicKey).child('connected_groups').child(groupId).set(true)
+            const a = admin.database().ref('public').child(account.publicKey).child('connected_groups').child(groupId).set(true)
+            const b = admin.database().ref('groups').child(groupId).child('members').child(account.publicKey).set(Date.now())
+
+            await a
+            await b
+
             return "OK"
         })
 

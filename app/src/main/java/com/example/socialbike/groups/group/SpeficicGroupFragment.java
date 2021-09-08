@@ -38,7 +38,7 @@ import java.util.Map;
 
 public class SpeficicGroupFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
-    private static SpeficicGroupFragment homeFragment = null;
+    public static SpeficicGroupFragment homeFragment = null;
     private final String groupId;
     private ExtendedFloatingActionButton floatingButton;
     private final ArrayList<Post> container = new ArrayList<>();
@@ -96,14 +96,11 @@ public class SpeficicGroupFragment extends Fragment implements RecyclerViewAdapt
 
     private void getPosts() {
         container.clear();
-        recyclerView.setVisibility(View.INVISIBLE);
         messageManager.getPosts(groupId);
     }
 
     private void setSwipeLayout() {
         swipeLayout.setOnRefreshListener(this::getPosts);
-
-        // Scheme colors for animation
         swipeLayout.setColorSchemeColors(
                 getResources().getColor(android.R.color.holo_blue_bright),
                 getResources().getColor(android.R.color.holo_green_light),
@@ -112,13 +109,6 @@ public class SpeficicGroupFragment extends Fragment implements RecyclerViewAdapt
         );
     }
 
-    private boolean toolbarClickListener(MenuItem item) {
-        if (item.getItemId() == R.id.login) {
-            openLoginActivity();
-            return true;
-        }
-        return false;
-    }
 
     private void openLoginActivity() {
         Intent intent = new Intent(getContext(), LogInActivity.class);
@@ -140,11 +130,8 @@ public class SpeficicGroupFragment extends Fragment implements RecyclerViewAdapt
         Post current = container.get(position);
         holder.message.setText(container.get(position).getMsg());
         holder.name.setText(container.get(position).getName());
-        //holder.likes.setText(String.valueOf(container.get(position).getLikesCount()));
 
         PostButtons postButtons = new PostButtons(getActivity(), holder, container.get(position));
-        //      holder.commentsButton.setOnClickListener(view -> commentsButtonClick(container.get(position)));
-        //       holder.likeButton.setOnClickListener(view -> postButtons.likeButtonClick(container.get(position), holder, position));
         holder.message.setOnClickListener(view -> postButtons.commentsButtonClick());
         holder.followButton.setOnClickListener(view -> postButtons.followUser(container, holder, position));
     }
@@ -153,10 +140,6 @@ public class SpeficicGroupFragment extends Fragment implements RecyclerViewAdapt
     @Override
     public void onItemClick(@NonNull View holder, int position) {
 
-    }
-
-    public void addPost(Post post) {
-        updater.add(post);
     }
 
     @Override
