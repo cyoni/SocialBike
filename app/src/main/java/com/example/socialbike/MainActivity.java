@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
@@ -85,9 +86,9 @@ public class MainActivity extends AppCompatActivity {
     private void setupMembers() {
         memberDao = MainActivity.database.memberDao();
         List<Member> members = memberDao.getAllMembers();
-        //for (Member member : members)
-           // memberDao.delete(member);
-            //membersMap.put(member.publicKey, member.name);
+        for (Member member : members)
+            // memberDao.delete(member);
+            membersMap.put(member.publicKey, member.name);
     }
 
     @Override

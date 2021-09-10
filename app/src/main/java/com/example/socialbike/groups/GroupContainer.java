@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
@@ -15,13 +16,16 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.tabs.TabLayout;
 
 
-public class GroupContainer extends Fragment {
+public class GroupContainer extends Fragment implements IPageAdapter {
 
     private ExtendedFloatingActionButton floatingButton;
     private static GroupContainer groupContainer;
-    public TabLayout tabs;
+    public TabLayout tabLayout;
     public MainActivity mainActivity;
-    private ViewPager viewPager;
+    String[] tabTitles = {"My Groups", "Explore"};
+    private View root;
+    protected final GroupFragment groupsThatImInFragment = new GroupFragment(this, false);
+    protected final GroupFragment exploreFragment = new GroupFragment(this, true);
 
     public static GroupContainer getInstance() {
         if (groupContainer == null) {
@@ -36,21 +40,24 @@ public class GroupContainer extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_group_container, container, false);
-        floatingButton = root.findViewById(R.id.fab);
-        activateFloatingButton();
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (root == null) {
+            root = inflater.inflate(R.layout.fragment_group_container, container, false);
+            floatingButton = root.findViewById(R.id.fab);
+            activateFloatingButton();
 
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
-        viewPager = root.findViewById(R.id.view_pager);
-        viewPager.setAdapter(sectionsPagerAdapter);
+            ViewPager viewPager = root.findViewById(R.id.view_pager);
+            tabLayout = root.findViewById(R.id.tabs);
 
-        tabs = root.findViewById(R.id.tabs);
-        tabs.setupWithViewPager(viewPager);
+            TabManager tabManager = new TabManager(viewPager, tabLayout, tabTitles);
+            tabManager.init();
+            SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getParentFragmentManager(), this);
+            viewPager.setAdapter(sectionsPagerAdapter);
 
-        viewPager.setCurrentItem(0);
+        }
         return root;
     }
+
 
     private void activateFloatingButton() {
         floatingButton.setOnClickListener(view -> openCreateGroup());
@@ -61,7 +68,21 @@ public class GroupContainer extends Fragment {
         startActivity(intent);
     }
 
-    public void changeTab(int index){
-        viewPager.setCurrentItem(index);
+    @Override
+    public int getCount() {
+        return tabTitles.length;
     }
+
+    @Override
+    public Fragment createFragment(int position) {
+        switch (position) {
+            case 0:
+                return groupsThatImInFragment;
+            case 1:
+                return exploreFragment;
+            default:
+                return null;
+        }
+    }
+
 }

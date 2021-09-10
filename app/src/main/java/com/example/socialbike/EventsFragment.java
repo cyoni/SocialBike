@@ -94,7 +94,7 @@ public class EventsFragment extends Fragment
         data.put("state", position.getState());
         data.put("lat", position.getLatLng().latitude);
         data.put("lng", position.getLatLng().longitude);
-        eventsManager.getEvents(data);
+       // eventsManager.getEvents(data);
     }
 
     private void setListeners(View root) {

@@ -3,6 +3,7 @@ package com.example.socialbike.groups;
 import android.os.Bundle;
 
 import com.example.socialbike.MainActivity;
+import com.example.socialbike.Utils;
 import com.example.socialbike.databinding.ActivityCreateGroupBinding;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -36,8 +38,14 @@ public class CreateGroupActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbar);
 
+        Toolbar toolbar = binding.toolbar;
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
         submit = findViewById(R.id.submit);
         submit.setOnClickListener(view -> submitForm());
+
+        binding.title.requestFocus();
+        Utils.showKeyboard(this);
     }
 
     private void submitForm() {
@@ -61,12 +69,18 @@ public class CreateGroupActivity extends AppCompatActivity {
 
                     if (response.equals("OK")) {
                         submit.setText("Success!");
-                        finish();
+                        onBackPressed();
                     } else {
                         submit.setText("Create");
                     }
                     return null;
                 });
+    }
+
+    @Override
+    public void onBackPressed(){
+        Utils.hideKeyboard(this);
+        finish();
     }
 
 

@@ -24,44 +24,32 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
-    private static GroupFragment groupFragment;
-    private static GroupFragment groupFragment2;
     private final boolean isExplore;
+    private final GroupContainer groupContainer;
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private final ArrayList<Group> container = new ArrayList<>();
     private ProgressBar progressBar;
     private View root;
     private SwipeRefreshLayout swipeLayout;
+    protected Set<String> groupIds = new HashSet<>();
 
-    public GroupFragment(boolean isExplore) {
+    public GroupFragment(GroupContainer groupContainer, boolean isExplore) {
         this.isExplore = isExplore;
+        this.groupContainer = groupContainer;
     }
-
 
     private void initAdapter() {
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_group, container);
         recyclerViewAdapter.setClassReference(this);
         recyclerView.setAdapter(recyclerViewAdapter);
-    }
-
-    public static GroupFragment getInstance() {
-        if (groupFragment == null) {
-            groupFragment = new GroupFragment(false);
-        }
-        return groupFragment;
-    }
-
-    public static GroupFragment getInstance2() {
-        if (groupFragment2 == null) {
-            groupFragment2 = new GroupFragment(true);
-        }
-        return groupFragment2;
     }
 
     @Override
@@ -70,8 +58,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_group, container, false);
             recyclerView = root.findViewById(R.id.recyclerview);
@@ -80,9 +67,16 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
 
             setSwipeLayout();
             initAdapter();
-            getGroups();
+
         }
         return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (container.isEmpty())
+            getGroups();
     }
 
     private void getGroups() {
@@ -110,11 +104,6 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
             JSONObject obj = new JSONObject(response);
             JSONArray messages_array = obj.getJSONArray("groups");
 
-/*            if (obj.has("upNext")) {
-                upNext = obj.getString("upNext");
-            }
-            else
-                upNext = DEFAULT_END_OF_LIST;*/
 
             for (int i = 0; i < messages_array.length(); i++) {
                 String title = messages_array.getJSONObject(i).getString("title");
@@ -122,6 +111,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
                 String groupId = messages_array.getJSONObject(i).getString("groupId");
 
                 Group group = new Group(groupId, title, description);
+                groupIds.add(groupId);
                 container.add(group);
             }
             onFinishedUpdating();
@@ -134,23 +124,61 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Group current = container.get(position);
-        holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId()));
+        if (isExplore) {
+            holder.joinButton.setVisibility(View.VISIBLE);
+            holder.joinButton.setOnClickListener(view -> joinOrLeaveGroup(holder, position));
+        }
+        if (isExplore && getIndex(groupContainer.groupsThatImInFragment.container, current.getGroupId()) != -1)
+            holder.joinButton.setText("Joined");
+        else
+            holder.joinButton.setText("Join");
+        holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle()));
         holder.title.setText(current.getTitle());
         holder.description.setText(current.getDescription());
-        if (isExplore){
-            holder.joinButton.setVisibility(View.VISIBLE);
-            holder.joinButton.setOnClickListener(view -> joinGroup(holder, position));
-        }
     }
 
-    private void openGroupActivity(String groupId) {
+    private void joinOrLeaveGroup(RecyclerViewAdapter.ViewHolder holder, int position) {
+        if (holder.joinButton.getText().toString().toLowerCase().equals("join")) {
+            joinGroup(holder, position);
+        } else
+            leaveGroup(holder, position);
+    }
+
+    private void leaveGroup(RecyclerViewAdapter.ViewHolder holder, int position) {
+        holder.joinButton.setText("Join");
+        String groupId = container.get(position).getGroupId();
+        int index = getIndex(groupContainer.groupsThatImInFragment.container, groupId);
+        groupContainer.groupsThatImInFragment.container.remove(index);
+        groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRemoved(index);
+        Map<String, Object> data = new HashMap<>();
+        data.put("groupId", groupId);
+        MainActivity.mFunctions
+                .getHttpsCallable("LeaveGroup")
+                .call(data)
+                .continueWith(task -> {
+                    String response = String.valueOf(task.getResult().getData());
+                    System.out.println("response:" + response);
+                    return null;
+                });
+
+    }
+
+    private int getIndex(ArrayList<Group> container, String groupId) {
+        for (int i = 0; i < container.size(); i++)
+            if (container.get(i).getGroupId().equals(groupId))
+                return i;
+        return -1;
+    }
+
+    private void openGroupActivity(String groupId, String groupName) {
         Intent intent = new Intent(getContext(), GroupActivity.class);
         intent.putExtra("groupId", groupId);
+        intent.putExtra("groupName", groupName);
         startActivity(intent);
     }
 
     private void joinGroup(RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.joinButton.setText("Joining...");
+        holder.joinButton.setText("Joining");
         Map<String, Object> data = new HashMap<>();
         data.put("groupId", container.get(position).getGroupId());
 
@@ -160,8 +188,9 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response:" + response);
+                    groupContainer.groupsThatImInFragment.container.add(0, container.get(position));
+                    groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRangeChanged(0, groupContainer.groupsThatImInFragment.container.size());
                     holder.joinButton.setText("Joined");
-
                     return null;
                 });
     }
@@ -183,7 +212,6 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
                 getResources().getColor(android.R.color.holo_red_light)
         );
     }
-
 
 
     @Override

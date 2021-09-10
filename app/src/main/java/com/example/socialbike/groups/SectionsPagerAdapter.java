@@ -1,44 +1,33 @@
 package com.example.socialbike.groups;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.socialbike.ProfileFragment;
-import com.example.socialbike.groups.GroupFragment;
+import com.example.socialbike.groups.IPageAdapter;
 
 
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-    private static final String[] TAB_TITLES = new String[]{"My Groups", "Explore"};
+    private final IPageAdapter pageAdapter;
 
-
-    public SectionsPagerAdapter( FragmentManager fm) {
-        super(fm);
-     //   mContext = context;
+    public SectionsPagerAdapter(FragmentManager fragmentActivity, IPageAdapter pageAdapter) {
+        super((FragmentManager) fragmentActivity, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        this.pageAdapter = pageAdapter;
     }
 
+
+    @NonNull
     @Override
     public Fragment getItem(int position) {
-        switch (position) {
-            case 0:
-                return GroupFragment.getInstance();
-            case 1:
-                return GroupFragment.getInstance2();
-            default:
-                return null;
-        }
-    }
-
-    @Nullable
-    @Override
-    public CharSequence getPageTitle(int position) {
-        return TAB_TITLES[position];
+        return pageAdapter.createFragment(position);
     }
 
     @Override
     public int getCount() {
-        return TAB_TITLES.length;
+        return pageAdapter.getCount();
     }
 }

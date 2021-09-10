@@ -4,21 +4,26 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.socialbike.MainActivity;
-import androidx.appcompat.app.AppCompatActivity;
+
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.socialbike.R;
+import com.example.socialbike.groups.IPageAdapter;
+import com.example.socialbike.groups.SectionsPagerAdapter;
+import com.example.socialbike.groups.TabManager;
 import com.google.android.material.tabs.TabLayout;
 
-public class GroupActivity extends AppCompatActivity {
+public class GroupActivity extends FragmentActivity implements IPageAdapter {
 
     private static GroupActivity groupContainer;
     public TabLayout tabs;
     public MainActivity mainActivity;
-    private ViewPager viewPager;
     private String groupId;
-
+    String[] tabTitles = {"Discussion", "Events", "Members"};
 
     public static GroupActivity getInstance() {
         if (groupContainer == null) {
@@ -27,24 +32,28 @@ public class GroupActivity extends AppCompatActivity {
         return groupContainer;
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_group_container2);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
         Intent intent = getIntent();
+        String groupName = intent.getStringExtra("groupName");
         groupId = intent.getStringExtra("groupId");
 
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
+        toolbar.setTitle(groupName);
 
-        viewPager = findViewById(R.id.view_pager);
+        ViewPager viewPager = findViewById(R.id.view_pager);
+        tabs = findViewById(R.id.tabs);
+
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(sectionsPagerAdapter);
 
-        tabs = findViewById(R.id.tabs);
-        tabs.setupWithViewPager(viewPager);
-
-        changeTab(0);
+        TabManager tabManager = new TabManager(viewPager, tabs, tabTitles);
+        tabManager.init();
     }
 
     @Override
@@ -55,12 +64,13 @@ public class GroupActivity extends AppCompatActivity {
         finish();
     }
 
-
-    public void changeTab(int index){
-        viewPager.setCurrentItem(index);
+    @Override
+    public int getCount() {
+        return tabTitles.length;
     }
 
-    public Fragment switchFragment(int position) {
+    @Override
+    public Fragment createFragment(int position) {
         switch (position) {
             case 0:
                 return PrivateGroupFragment.getInstance(groupId);
@@ -72,4 +82,5 @@ public class GroupActivity extends AppCompatActivity {
                 return null;
         }
     }
+
 }

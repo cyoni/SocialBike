@@ -784,6 +784,22 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
             return "OK"
         })
 
+        exports.LeaveGroup = functions.https.onCall(async (request, context) => {       
+            const account = await verifyUser(context.auth.uid);
+            if (account === null)
+                return "AUTH_FAILED"
+
+            var groupId = request.groupId
+
+            const a = admin.database().ref('public').child(account.publicKey).child('connected_groups').child(groupId).remove()
+            const b = admin.database().ref('groups').child(groupId).child('members').child(account.publicKey).remove()
+
+            await a
+            await b
+
+            return "OK"
+        })
+
         exports.GetGroupPosts = functions.https.onCall(async (request, context) => {
 
             const account = await verifyUser(context.auth.uid);
