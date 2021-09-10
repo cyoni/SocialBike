@@ -14,6 +14,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.socialbike.AddPostActivity;
 import com.example.socialbike.ConnectedUser;
+import com.example.socialbike.Consts;
 import com.example.socialbike.LogInActivity;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.MessageGetter;
@@ -120,7 +121,7 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Post current = container.get(position);
         String name = Member.getNameFromLocal(current.getPublicKey());
-        if (name.equals("...")) {
+        if (name.equals(Consts.DEFAULT_TMP_NAME)) {
             Member.fetchName(holder, current.getPublicKey());
         }
         holder.message.setText(current.getMsg());

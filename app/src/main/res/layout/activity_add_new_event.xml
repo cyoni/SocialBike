@@ -99,7 +99,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Location name" />
+            android:text="Title" />
 
 
         <EditText
@@ -109,11 +109,7 @@
             android:ems="10"
             android:inputType="text" />
 
-        <LinearLayout
-            android:id="@+id/locationAddressSection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+
 
             <TextView
                 android:layout_width="wrap_content"
@@ -121,34 +117,30 @@
                 android:text="Address" />
 
 
-            <EditText
-                android:id="@+id/location_address"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="text" />
-        </LinearLayout>
+                android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                <EditText
+                    android:id="@+id/location_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="text" />
 
-            <Button
-                android:id="@+id/locationAutoCompleteButton"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Look up places" />
+                <Button
+                    android:id="@+id/mapButton"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_marginLeft="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="Show map" />
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/mapButton"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="Show map" />
-        </LinearLayout>
+
 
 
         <TextView

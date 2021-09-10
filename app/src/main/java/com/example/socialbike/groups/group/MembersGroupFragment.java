@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.socialbike.Consts;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
@@ -34,7 +35,7 @@ public class MembersGroupFragment extends Fragment
     private ProgressBar progressBar;
     private View root;
     private SwipeRefreshLayout swipeLayout;
-    private String groupId;
+    private final String groupId;
 
     public MembersGroupFragment(String groupId) {
         this.groupId = groupId;
@@ -62,7 +63,7 @@ public class MembersGroupFragment extends Fragment
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         String name = Member.getNameFromLocal(container.get(position).publicKey);
-        if (name.equals("...")){
+        if (name.equals(Consts.DEFAULT_TMP_NAME)){
             Member.fetchName(holder, container.get(position).publicKey);
         }
         else
@@ -95,7 +96,6 @@ public class MembersGroupFragment extends Fragment
             progressBar = root.findViewById(R.id.progressBar);
             swipeLayout = root.findViewById(R.id.swipe_refresh);
 
-            progressBar.setVisibility(View.VISIBLE);
             setSwipeLayout();
             initAdapter();
             getMembers();
@@ -104,6 +104,7 @@ public class MembersGroupFragment extends Fragment
     }
 
     private void getMembers() {
+        progressBar.setVisibility(View.VISIBLE);
         container.clear();
         MainActivity.mDatabase.child("groups").child(groupId).child("members").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -114,7 +115,7 @@ public class MembersGroupFragment extends Fragment
                     DataSnapshot tmp;
                     while (iterator.hasNext()) {
                         tmp = iterator.next();
-                        container.add(new Member(tmp.getKey(), "..."));
+                        container.add(new Member(tmp.getKey(), Consts.DEFAULT_TMP_NAME));
                     }
                 }
                     onFinishedUpdating();

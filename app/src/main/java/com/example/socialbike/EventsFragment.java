@@ -117,7 +117,7 @@ public class EventsFragment extends Fragment
                 eventsManager.changeTypeOfSearch(eventsManager.TRADING_CODE);
                 sortButton.setText("Treading");
             }*/
-          //  getEvents();
+            getEvents();
         });
 
     }

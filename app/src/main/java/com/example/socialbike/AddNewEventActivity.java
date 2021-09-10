@@ -36,8 +36,8 @@ public class AddNewEventActivity extends AppCompatActivity {
     private EditText time, date, details, locationName, locationAddress;
     private Button submitButton;
     private Button dateButton;
-    private Button timeButton, mapButton, locationAutoCompleteButton;
-    private LinearLayout locationAddressSection;
+    private Button timeButton, mapButton;
+
     private Position position;
     private String groupId;
 
@@ -58,12 +58,9 @@ public class AddNewEventActivity extends AppCompatActivity {
         timeButton = findViewById(R.id.timeButton);
         mapButton = findViewById(R.id.mapButton);
         locationName = findViewById(R.id.location);
-        locationAddressSection = findViewById(R.id.locationAddressSection);
-        locationAutoCompleteButton = findViewById(R.id.locationAutoCompleteButton);
         locationAddress = findViewById(R.id.location_address);
         locationName.setHint("Location name");
         locationAddress.setHint("Optional");
-        locationAddressSection.setVisibility(View.VISIBLE);
         setButtonListeners();
     }
 
@@ -79,11 +76,9 @@ public class AddNewEventActivity extends AppCompatActivity {
                 position = new Position(new LatLng(lat, lng), name, address);
                 locationAddress.setText(address);
                 locationName.setText(name);
-                locationAddressSection.setVisibility(View.VISIBLE);
             }
         } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                locationAddressSection.setVisibility(View.VISIBLE);
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 initiatePlace(place);
 
@@ -132,7 +127,7 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void setLocationInputListener() {
-        locationAutoCompleteButton.setOnClickListener(view -> openLocationWindow());
+
     }
 
     private void openLocationWindow() {
@@ -163,10 +158,12 @@ public class AddNewEventActivity extends AppCompatActivity {
 
     private void startMapsActivity() {
         Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra("lng", position.getLatLng().longitude);
-        intent.putExtra("lat", position.getLatLng().latitude);
-        intent.putExtra("name", position.getLocationName());
-        intent.putExtra("address", position.getAddress());
+        if (position != null) {
+            intent.putExtra("lng", position.getLatLng().longitude);
+            intent.putExtra("lat", position.getLatLng().latitude);
+        }
+        intent.putExtra("name", "position.getLocationName()");
+//        intent.putExtra("address", position.getAddress());
         startActivityForResult(intent, ADDRESS_FROM_MAPS_CODE);
     }
 

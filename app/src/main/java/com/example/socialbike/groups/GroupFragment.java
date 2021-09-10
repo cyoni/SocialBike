@@ -128,6 +128,9 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
             holder.joinButton.setVisibility(View.VISIBLE);
             holder.joinButton.setOnClickListener(view -> joinOrLeaveGroup(holder, position));
         }
+        else
+            holder.joinButton.setVisibility(View.GONE);
+
         if (isExplore && getIndex(groupContainer.groupsThatImInFragment.container, current.getGroupId()) != -1)
             holder.joinButton.setText("Joined");
         else

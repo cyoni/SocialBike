@@ -1,6 +1,8 @@
 package com.example.socialbike;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentActivity;
 
 import android.content.Intent;
@@ -33,7 +35,7 @@ import java.util.List;
 import static com.example.socialbike.MainActivity.geoApiContext;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -48,18 +50,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
         search_layout = findViewById(R.id.search_layout);
 
         Button search_button = findViewById(R.id.search_button);
-        set_button = findViewById(R.id.set_button);
+      //  set_button = findViewById(R.id.set_button);
 
         showOnlyLayout(search_layout);
 
-        search_button.setOnClickListener(view -> search());
-        set_button.setOnClickListener(view -> set());
+//        search_button.setOnClickListener(view -> search());
+     //   set_button.setOnClickListener(view -> set());
 
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -139,8 +143,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void showOnlyLayout(LinearLayout layout) {
-        search_layout.setVisibility(View.GONE);
-        layout.setVisibility(View.VISIBLE);
+//        search_layout.setVisibility(View.GONE);
+      //  layout.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -158,8 +162,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Bundle data = getIntent().getExtras();
 
-        double lat = data.getDouble("lat");
-        double lng = data.getDouble("lng");
+        double lat = data.getDouble("lat", 0);
+        double lng = data.getDouble("lng", 0);
         String name = data.getString("name");
         String address = data.getString("address");
         LatLng latLng = new LatLng(lat, lng);
