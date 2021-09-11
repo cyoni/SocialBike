@@ -2,7 +2,6 @@ package com.example.socialbike;
 
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -170,7 +169,7 @@ public class EventsCommentsExtension {
 
     private void sendSubComment(LinearLayout linearLayout, RecyclerViewAdapter.ViewHolder holder, int position, Comment comment) {
         EditText viewComment = linearLayout.findViewById(R.id.headCommentText);
-        Button commentButton = linearLayout.findViewById(R.id.commentButton);
+       /* Button commentButton = linearLayout.findViewById(R.id.commentButton);
         commentButton.setText("Sending...");
         String commentStr = viewComment.getText().toString();
 
@@ -183,7 +182,7 @@ public class EventsCommentsExtension {
             viewComment.setText("");
             commentButton.setText("Send");
             return null;
-        });
+        });*/
     }
 
 
@@ -202,7 +201,7 @@ public class EventsCommentsExtension {
     }
 
     private void showOrHideNewCommentSection(LinearLayout linearLayout) {
-        RelativeLayout relativeLayout = linearLayout.findViewById(R.id.newCommentSection);
+        RelativeLayout relativeLayout = linearLayout.findViewById(R.id.relativelayout);
 
         if (relativeLayout.getVisibility() == View.GONE)
             relativeLayout.setVisibility(View.VISIBLE);
@@ -219,9 +218,9 @@ public class EventsCommentsExtension {
 
         LinearLayout linearLayout = (LinearLayout) View.inflate(eventsFragment.getContext(), R.layout.item_sub_comment, null);
 
-        linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, headComment));
+    //    linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, headComment));
 
-        TextView commentText = linearLayout.findViewById(R.id.message);
+        TextView commentText = linearLayout.findViewById(R.id.description);
         TextView commentName = linearLayout.findViewById(R.id.name);
         commentText.setText(comment.getMsg());
         commentName.setText(comment.getName());
@@ -240,11 +239,11 @@ public class EventsCommentsExtension {
         LinearLayout linearLayout = (LinearLayout) View.inflate(eventsFragment.getContext(), commentType, null);
 
         if (commentType == R.layout.item_comment) {
-            linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> showOrHideNewCommentSection(linearLayout));
+        //    linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> showOrHideNewCommentSection(linearLayout));
             linearLayout.findViewById(R.id.postCommentButton).setOnClickListener(view -> sendSubComment(linearLayout, holder, position, comment));
         }
 
-        TextView commentText = linearLayout.findViewById(R.id.message);
+        TextView commentText = linearLayout.findViewById(R.id.description);
         TextView commentName = linearLayout.findViewById(R.id.name);
         commentText.setText(comment.getMsg());
         commentName.setText(comment.getName());
@@ -254,7 +253,7 @@ public class EventsCommentsExtension {
     }
 
     private void quoteMember(RecyclerViewAdapter.ViewHolder holder, int position, LinearLayout headComment) {
-        RelativeLayout section = headComment.findViewById(R.id.newCommentSection);
+        RelativeLayout section = headComment.findViewById(R.id.relativelayout);
         if (section.getVisibility() == View.GONE)
             section.setVisibility(View.VISIBLE);
         Post currentPost = eventsFragment.container.get(position);

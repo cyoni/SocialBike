@@ -13,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -243,7 +242,7 @@ public class PostActivity extends AppCompatActivity
         holder.name.setText(post.getName());
         holder.replyButton.setOnClickListener(view -> addNewComment(holder, position));
         holder.likeTextButton.setOnClickListener(view -> likeComment(holder, position));
-        holder.newCommentSection.setVisibility(View.GONE);
+        holder.relativelayout.setVisibility(View.GONE);
         handleSubComments(holder, position);
     }
 
@@ -277,11 +276,11 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void showOrHideNewCommentSection(RecyclerViewAdapter.ViewHolder holder) {
-        if (holder.newCommentSection.getVisibility() == View.VISIBLE) {
+        if (holder.relativelayout.getVisibility() == View.VISIBLE) {
             Utils.hideKeyboard(this);
-            holder.newCommentSection.setVisibility(View.GONE);
+            holder.relativelayout.setVisibility(View.GONE);
         } else {
-            holder.newCommentSection.setVisibility(View.VISIBLE);
+            holder.relativelayout.setVisibility(View.VISIBLE);
             holder.comments.requestFocus();
             Utils.showKeyboard(this);
         }
@@ -328,7 +327,7 @@ public class PostActivity extends AppCompatActivity
         relativeLayout.findViewById(R.id.replyButton).setOnClickListener(view -> quoteMember(holder));
         //relativeLayout.findViewById(R.id.LikeButton).setOnClickListener(view -> LikeSubComment(holder));
 
-        TextView commentText = relativeLayout.findViewById(R.id.message);
+        TextView commentText = relativeLayout.findViewById(R.id.description);
         commentText.setText(subComment.getMsg());
 
         commentLayout.addView(relativeLayout);

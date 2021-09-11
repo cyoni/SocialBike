@@ -151,19 +151,26 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.message.setText(container.get(position).getMsg());
-        holder.locationName.setText(container.get(position).getPosition().getLocationName());
-        holder.time.setText(container.get(position).getTimeOfEvent());
-        holder.date.setText(container.get(position).getDateOfEvent());
-        holder.name.setText(container.get(position).getName());
+    //    holder.message.setText(container.get(position).getMsg());
+     //   holder.locationName.setText(container.get(position).getPosition().getLocationName());
+     //   holder.time.setText(container.get(position).getTimeOfEvent());
+     //   holder.date.setText(container.get(position).getDateOfEvent());
+   /*     holder.name.setText(container.get(position).getName());
         holder.people_going.setText(container.get(position).getNumberOfParticipants() + " people going");
         holder.interested.setOnClickListener(view -> markAsInterested(holder, position));
         holder.coming.setOnClickListener(view -> markAsGoing(holder, position));
         holder.who_is_coming.setOnClickListener(view -> showWhoIsGoing(holder, position));
         holder.who_is_interested.setOnClickListener(view -> showWhoIsInterested(holder, position));
         holder.commentButton.setOnClickListener(view -> eventsCommentsExtension.commentButton(holder, position));
-        holder.mapButton.setOnClickListener(view -> openMap(container.get(position).getLatLng()));
+        holder.mapButton.setOnClickListener(view -> openMap(container.get(position).getLatLng()));*/
         // holder.amountOfInterestedPeople.setText(container.get(position).getAmountOfInterestedPeople());
+        holder.relativelayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), EventActivity.class);
+                getContext().startActivity(intent);
+            }
+        });
     }
 
     private void openMap(LatLng latLng) {

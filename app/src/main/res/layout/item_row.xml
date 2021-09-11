@@ -57,7 +57,7 @@
             android:text="10m" />
 
         <TextView
-            android:id="@+id/message"
+            android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:layout_below="@id/profile_image"
@@ -76,7 +76,7 @@
             layout="@layout/post_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/message" />
+            android:layout_below="@id/description" />
 
 
     </RelativeLayout>

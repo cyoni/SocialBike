@@ -11,9 +11,13 @@
     app:cardUseCompatPadding="true">
 
     <RelativeLayout
+        android:id="@+id/relativelayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
 
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -34,151 +38,92 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="15dp"
             android:layout_toRightOf="@id/profile_image"
             android:text="Yoni"
-            android:textSize="20sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/message"
+            android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/locationName"
+            android:layout_below="@id/title"
             android:layout_marginTop="5dp"
-            android:minHeight="200dp"
+            android:maxHeight="100dp"
             android:text="This Sunday the best bibke ride is happening. The event cost 10 shekels and everyone is welcome."
-            android:textSize="20sp" />
+            android:textSize="15sp" />
 
 
         <TextView
-            android:id="@+id/people_going"
+            android:id="@+id/date_and_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="10dp"
-            android:text="12 people going"
-
-            android:textSize="20sp" />
+            android:layout_below="@id/imageView2"
+            android:layout_marginTop="5dp"
+            android:drawablePadding="5dp"
+            android:gravity="start|center"
+            android:text="Friday 15/09/21 15:33"
+            app:drawableLeftCompat="@drawable/ic_baseline_access_time_24" />
 
         <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/profile_image"
-            android:text="Sunday, 25th May"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/locationName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/date"
-            android:text="Tel Aviv"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/profile_image"
-            android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@id/date"
-            android:text="10:00"
-            android:textSize="20sp" />
-
-
-        <Button
-            android:id="@+id/coming"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/message"
-            android:text="Mark as Going" />
-
-
-        <Button
-            android:id="@+id/interested"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/message"
-            android:layout_toRightOf="@id/coming"
-            android:text="Mark as Interested" />
-
-        <Button
-            android:id="@+id/who_is_coming"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/coming"
-            android:text="Going" />
-
-
-        <Button
-            android:id="@+id/who_is_interested"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/coming"
-            android:layout_toRightOf="@id/who_is_coming"
-            android:text="Interested" />
-
-        <Button
-            android:id="@+id/commentButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/coming"
-            android:layout_toRightOf="@id/who_is_interested"
-            android:text="Comment" />
-
-        <Button
-            android:id="@+id/mapButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/coming"
-            android:layout_toRightOf="@id/commentButton"
-            android:text="Map" />
-
-
-        <RelativeLayout
-            android:id="@+id/newCommentEvent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/mapButton">
-
-            <EditText
-                android:id="@+id/headCommentText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_toStartOf="@id/postCommentButton"
-                android:ems="10"
-                android:hint="Type your comment..."
-                android:inputType="textPersonName" />
-
-            <Button
-                android:id="@+id/postCommentButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginRight="5dp"
-                android:text="Send" />
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/headCommentText"
-                android:visibility="gone" />
-
-        </RelativeLayout>
-
-        <LinearLayout
-            android:id="@+id/commentLayout"
+            android:id="@+id/location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/newCommentEvent"
-            android:orientation="vertical"
-            android:visibility="gone"/>
+            android:layout_below="@id/date_and_time"
+            android:drawableLeft="@drawable/ic_baseline_location_on_24"
+            android:drawablePadding="5dp"
+            android:gravity="start|center"
+            android:text="Hayarkon Park" />
+
+        <TextView
+            android:id="@+id/person"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/location"
+            android:drawableLeft="@drawable/ic_baseline_person_24"
+            android:drawablePadding="5dp"
+            android:gravity="start|center"
+            android:text="5 members going" />
+
+
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/person"
+            android:text="Come ride with us this Friday"
+            android:textColor="@color/black"
+            android:textSize="25sp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/profile_image"
+            android:id="@+id/imageView2">
+
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp"
+                android:layout_marginTop="5dp"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/nature1" />
+
+            <ImageButton
+                android:id="@+id/followButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="10dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:scaleType="centerInside"
+                android:tint="@color/quantum_grey"
+                app:srcCompat="@drawable/ic_baseline_star_border_24" />
+
+
+        </RelativeLayout>
 
 
     </RelativeLayout>
