@@ -23,45 +23,31 @@
 
         <TextView
             android:id="@+id/date_and_time"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
-            android:focusable="true"
-            android:layout_marginTop="20dp"
             android:drawablePadding="5dp"
+            android:focusable="true"
             android:gravity="start|center"
             android:text="Friday 15/09/21 15:33"
             android:textSize="20sp"
             app:drawableLeftCompat="@drawable/ic_baseline_access_time_24" />
 
         <TextView
-            android:id="@+id/location"
-            android:layout_width="wrap_content"
+            android:id="@+id/title"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:drawablePadding="5dp"
-            android:gravity="start|center"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
+            android:drawablePadding="5dp"
             android:focusable="true"
+            android:gravity="start|center"
             android:text="Hayarkon Park"
             android:textSize="20sp"
             app:drawableLeftCompat="@drawable/ic_baseline_location_on_24" />
-
-        <TextView
-            android:id="@+id/organizer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:drawablePadding="5dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="start|center"
-            android:text="Organizer: yoni"
-            android:textSize="20sp"
-            app:drawableLeftCompat="@drawable/ic_baseline_person_24" />
 
 
     </LinearLayout>
@@ -71,8 +57,8 @@
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
         android:layout_below="@id/info_time"
-        android:layout_marginTop="5dp"
-        android:background="@android:color/darker_gray"/>
+        android:layout_marginTop="15dp"
+        android:background="@android:color/darker_gray" />
 
 
     <LinearLayout
@@ -116,7 +102,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/separator2"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:gravity="center">
 
         <LinearLayout
@@ -145,13 +131,14 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="3"
+                android:text="32"
                 android:textSize="25sp"
                 android:textStyle="bold" />
 

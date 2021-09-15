@@ -48,7 +48,7 @@
             android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/title"
+            android:layout_below="@id/_title"
             android:layout_marginTop="5dp"
             android:maxHeight="100dp"
             android:text="This Sunday the best bibke ride is happening. The event cost 10 shekels and everyone is welcome."
@@ -87,9 +87,8 @@
             android:text="5 members going" />
 
 
-
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/person"

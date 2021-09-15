@@ -1,5 +1,8 @@
 package com.example.socialbike;
 
+import static com.example.socialbike.Constants.ADDRESS_FROM_MAPS_CODE;
+import static com.example.socialbike.MainActivity.geoApiContext;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -7,22 +10,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.AddressComponents;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.TypeFilter;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-import com.google.maps.model.AddressComponent;
+import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 
 import java.util.Arrays;
@@ -32,11 +29,11 @@ import java.util.Map;
 
 public class AddNewEventActivity extends AppCompatActivity {
 
-    public static final int ADDRESS_FROM_MAPS_CODE = 1050;
-    private EditText time, date, details, locationName, locationAddress;
+    private EditText time, date, details, title, mapButton;
     private Button submitButton;
     private Button dateButton;
-    private Button timeButton, mapButton;
+    private Button timeButton;
+
 
     private Position position;
     private String groupId;
@@ -56,11 +53,8 @@ public class AddNewEventActivity extends AppCompatActivity {
         details = findViewById(R.id.content);
         dateButton = findViewById(R.id.dateButton);
         timeButton = findViewById(R.id.timeButton);
-        mapButton = findViewById(R.id.mapButton);
-        locationName = findViewById(R.id.location);
-        locationAddress = findViewById(R.id.location_address);
-        locationName.setHint("Location name");
-        locationAddress.setHint("Optional");
+        mapButton = findViewById(R.id.map_button);
+        title = findViewById(R.id.title);
         setButtonListeners();
     }
 
@@ -71,11 +65,8 @@ public class AddNewEventActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 double lat = data.getDoubleExtra("lat", -1);
                 double lng = data.getDoubleExtra("lng", -1);
-                String address = data.getStringExtra("address");
-                String name = data.getStringExtra("name");
-                position = new Position(new LatLng(lat, lng), name, address);
-                locationAddress.setText(address);
-                locationName.setText(name);
+                position = new Position(new LatLng(lat, lng), null, null);
+                getAddressAndSetBox();
             }
         } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
@@ -89,6 +80,30 @@ public class AddNewEventActivity extends AppCompatActivity {
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void getAddressAndSetBox() {
+        GeocodingResult[] results = null;
+        mapButton.setText("Loading...");
+        try {
+            com.google.maps.model.LatLng newLatLng = new com.google.maps.model.LatLng(position.getLatLng().latitude, position.getLatLng().longitude);
+            results = GeocodingApi.newRequest(geoApiContext).latlng(newLatLng).await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (results != null) {
+            String address = results[0].formattedAddress;
+           // position.setAddress(address);
+           // locationName.setText(name);
+            mapButton.setText(address);
+          //  if (address.contains(",")) {
+        //        position.setLocationName(address.substring(0, address.indexOf(",")));
+       //     } else
+        //        position.setLocationName("");
+        }
+        else{
+            mapButton.setText("");
+        }
     }
 
     private void initiatePlace(Place place) {
@@ -108,8 +123,8 @@ public class AddNewEventActivity extends AppCompatActivity {
 
         position = new Position(place.getLatLng(), place.getName(), place.getAddress(), country, state);
 
-        locationName.setText(position.getLocationName());
-        locationAddress.setText(position.getAddress());
+        title.setText(position.getLocationName());
+        mapButton.setText(position.getAddress());
     }
 
     private void setButtonListeners() {
@@ -157,14 +172,7 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void startMapsActivity() {
-        Intent intent = new Intent(this, MapsActivity.class);
-        if (position != null) {
-            intent.putExtra("lng", position.getLatLng().longitude);
-            intent.putExtra("lat", position.getLatLng().latitude);
-        }
-        intent.putExtra("name", "position.getLocationName()");
-//        intent.putExtra("address", position.getAddress());
-        startActivityForResult(intent, ADDRESS_FROM_MAPS_CODE);
+        Maps.openMap(this, position);
     }
 
     private void openDateAndTimeDialog(boolean isDataLayout) {
@@ -184,11 +192,9 @@ public class AddNewEventActivity extends AppCompatActivity {
         data.put("lng", position.getLatLng().longitude);
         data.put("date", date.getText().toString());
         data.put("time", time.getText().toString());
-        data.put("eventDetails", details.getText().toString());
-        data.put("locationName", position.getLocationName());
-        data.put("locationAddress", position.getAddress());
-        data.put("country", position.getCountry());
-        data.put("state", position.getState());
+        data.put("details", details.getText().toString());
+        data.put("address", position.getAddress());
+        data.put("title", title.getText().toString());
 
         MainActivity.mFunctions
                 .getHttpsCallable("AddNewEvent")

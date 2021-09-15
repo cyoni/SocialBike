@@ -34,9 +34,7 @@ function verifyUser(userPrivateKey) {
 
 
 async function isNicknameTaken(inputNickname) {
-    const nickname = inputNickname.toLowerCase();
-    const result = await admin.database().ref('nicknames').child(nickname).once('value');
-    return (result.exists());
+
 }
 
 
@@ -114,17 +112,21 @@ exports.updateProfile = functions.https.onCall(async (request, context) => {
 
     const publicKey = account.publicKey
 
-    const country = request.country;
-    const city = request.city;
-    const gender = request.gender;
-    const age = request.age;
+    var lat = request.lat || null
+    var lng = request.lng || null
+    if (lat === null || lng === null)
+        {
+            lat = null
+            lng = null
+        }
+    const gender = request.gender || null
+    const age = request.age || null
 
-    const a = admin.database().ref('public').child(publicKey).child('profile').child('country').set(country);
-    const b = admin.database().ref('public').child(publicKey).child('profile').child('city').set(city);
-    const c = admin.database().ref('public').child(publicKey).child('profile').child('gender').set(gender);
-    const d = admin.database().ref('public').child(publicKey).child('profile').child('age').set(age);
+    const a = admin.database().ref('public').child(publicKey).child('profile').child('gender').set(gender);
+    const b = admin.database().ref('public').child(publicKey).child('profile').child('age').set(age);
+    const c = admin.database().ref('public').child(publicKey).child('profile').child('preferred_location').set({lat: lat, lng: lng})
 
-    await a, b, c, d
+    await a, b, c
     return "OK"
 })
 
@@ -295,20 +297,19 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 eventId: raw_data.key,
                 name: "",
                 userPublicKey: raw_data.child('userPublicKey').val(),
-                eventDetails: raw_data.child('eventDetails').val(),
+                details: raw_data.child('details').val(),
                 createdEventTime: raw_data.child('createdEventTime').val(),
-                eventDate: raw_data.child('eventDate').val(),
-                eventTime: raw_data.child('eventTime').val(),
+                date: raw_data.child('date').val(),
+                time: raw_data.child('time').val(),
                 numOfInterestedMembers: raw_data.child('numOfInterestedMembers').val(),
                 numberOfParticipants: raw_data.child('numberOfParticipants').val(),
                 lat: raw_data.child('lat').val(),
                 lng: raw_data.child('lng').val(),
-                locationName: raw_data.child('locationName').val(),
-                locationAddress: raw_data.child('locationAddress').val(),
+                title: raw_data.child('title').val(),
+                address: raw_data.child('address').val(),
                 commentsNumber: raw_data.child('comments').numChildren(),
-                state: raw_data.child('state').val(),
-                country: raw_data.child('country').val()
             }
+
             const score = 2*dataOfEvent.numberOfParticipants + dataOfEvent.numOfInterestedMembers
             dataOfEvent['elementScore'] = score
 
@@ -340,12 +341,15 @@ exports.updateNickname = functions.https.onCall(async (data, context) => {
     const validNickname = isNicknameValid(inputNickname);
     if (!validNickname)
         return "[INVALID_NICKNAME]"
-    const takenNickname = isNicknameTaken(inputNickname);
-    if (takenNickname)
-        return "[NICKNAME_TAKEN]"
-    const oldNickname = await getNickname(account.publicKey);
+
+    const result = await admin.database().ref('nicknames').once('value')
+    const takenNickname = (result.child(inputNickname).exists());
+    
+   if (takenNickname === true)
+       return "[NICKNAME_TAKEN]"
+const oldNickname = await getNickname(account.publicKey);
     if (oldNickname !== "")
-        removeOldNickname(oldNickname.toLowerCase());
+        removeOldNickname(oldNickname);
     await setNewNickname(account.publicKey, inputNickname);
     return inputNickname;
 });
@@ -368,29 +372,25 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
         ref = admin.database().ref('events')
     
 
-    const eventTime = request.time
-    const eventDate = request.date
-    const eventDetails = request.eventDetails
+    const time = request.time
+    const date = request.date
+    const details = request.details
     const lat = request.lat
     const lng = request.lng
-    const locationName = request.locationName
-    const locationAddress = request.locationAddress
+    const title = request.title
+    const address = request.address
     const timestamp = Date.now()
-    const state = request.state
-    const country = request.country
 
     var data = {
         userPublicKey: account.publicKey,
         createdEventTime: timestamp,
-        eventTime: eventTime,
-        eventDate: eventDate,
-        locationName: locationName,
-        locationAddress: locationAddress,
-        eventDetails: eventDetails,
+        time: time,
+        date: date,
+        title: title,
+        address: address,
+        details: details,
         lat: lat,
         lng: lng,
-        state: state,
-        country: country
     }
 
     const newKey = ref.push().key

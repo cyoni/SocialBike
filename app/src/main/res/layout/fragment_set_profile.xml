@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".SetProfileFragment"
-    android:padding="5dp">
+    android:padding="5dp"
+    tools:context=".SetProfileFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/flexible.example.appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:elevation="0dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -21,7 +21,8 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/white"
             android:theme="@style/BlackBackButtonToolbar"
-            app:layout_collapseMode="pin" >
+            app:layout_collapseMode="pin">
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -32,9 +33,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="10dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:scaleType="centerInside"
-                    android:layout_marginEnd="10dp"
                     app:srcCompat="@drawable/ic_baseline_clear_24" />
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
@@ -57,47 +58,61 @@
             android:text="Set Your Profile"
             android:textSize="35dp" />
 
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
-            android:text="Country"
+            android:text="Preferred location"
             android:textSize="20dp" />
 
-        <EditText
-            android:id="@+id/country"
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName" />
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/preferred_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:focusable="false"
+                android:clickable="true"
+                android:ems="10"
+                android:inputType="text" />
+
+            <Button
+                android:id="@+id/clean_map_address_button"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="Clean"
+                android:visibility="gone" />
+        </LinearLayout>
 
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="City"
-            android:textSize="20dp" />
+            android:text="Visible only to you" />
 
-        <EditText
-            android:id="@+id/city"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
             android:text="Gender"
             android:textSize="20dp" />
 
-        <EditText
+        <Spinner
             android:id="@+id/gender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName" />
+            android:background="@android:drawable/btn_dropdown"
 
+
+            android:spinnerMode="dropdown" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -110,7 +125,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName" />
+            android:inputType="number"
+            android:maxLength="2" />
 
         <Button
             android:id="@+id/done_button"

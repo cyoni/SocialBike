@@ -45,6 +45,7 @@ public class SetNicknameFragment extends Fragment {
     }
 
     private void proceedToNextFragment() {
+        Utils.hideKeyboard(getActivity());
         nav.navigate(R.id.action_se2tNicknameFragment_to_setProfileFragment);
     }
 
@@ -98,6 +99,8 @@ public class SetNicknameFragment extends Fragment {
         nickname_txt = root.findViewById(R.id.nickname);
         continueButton = root.findViewById(R.id.continue_button);
         startListening();
+        nickname_txt.requestFocus();
+        Utils.showKeyboard(getActivity());
         return root;
     }
 }

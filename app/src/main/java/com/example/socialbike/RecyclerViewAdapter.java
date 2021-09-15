@@ -57,7 +57,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 time, msgStyle, message_preview,
                 comments, people_going, locationName, red_dot, likes, comments_count,
                 replyButton, likeTextButton, description, title;
-        public Button mapButton, interested, coming, joinButton;
+        public TextView mapButton;
+        public Button interested, coming, joinButton;
         public RelativeLayout layout;
         public ImageButton commentsButton, likeButton, followButton;
         public Button commentButton, postCommentButton, who_is_coming;
@@ -90,7 +91,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
        //     who_is_interested = itemView.findViewById(R.id.who_is_interested);
             people_going = itemView.findViewById(R.id.date_and_time);
             progressBar = itemView.findViewById(R.id.progressBar);
-            mapButton = itemView.findViewById(R.id.mapButton);
+            mapButton = itemView.findViewById(R.id.map_button);
         //    locationName = itemView.findViewById(R.id.locationName);
             red_dot = itemView.findViewById(R.id.red_dot);
             followButton = itemView.findViewById(R.id.followButton);

@@ -98,24 +98,25 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
             String userPublicKey = null;
             try {
                 userPublicKey = data.getJSONObject(i).getString("userPublicKey");
-                String eventDetails = data.getJSONObject(i).getString("eventDetails");
+                String eventDetails = data.getJSONObject(i).getString("details");
                 String name = data.getJSONObject(i).getString("name");
-                String dateOfEvent = data.getJSONObject(i).getString("eventDate");
-                String timeOfEvent = data.getJSONObject(i).getString("eventTime");
+                String dateOfEvent = data.getJSONObject(i).getString("date");
+                String timeOfEvent = data.getJSONObject(i).getString("time");
                 String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
                 String eventId = data.getJSONObject(i).getString("eventId");
                 String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
-                String locationName = data.getJSONObject(i).getString("locationName");
-                String locationAddress = data.getJSONObject(i).getString("locationAddress");
+                String title = data.getJSONObject(i).getString("title");
+                String address = data.getJSONObject(i).getString("address");
                 double lat = data.getJSONObject(i).getDouble("lat");
                 double lng = data.getJSONObject(i).getDouble("lng");
                 int commentsNumber = data.getJSONObject(i).getInt("commentsNumber");
 
                 int numberOfParticipants = 0;
-                if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
+                if (data.getJSONObject(i).has("numberOfParticipants")
+                        && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
                     numberOfParticipants = data.getJSONObject(i).getInt("numberOfParticipants");
 
-                Position position = new Position(new LatLng(lat, lng), locationName, locationAddress);
+                Position position = new Position(new LatLng(lat, lng), title, address);
                 Event event = new Event(
                         eventId, userPublicKey, name,
                         dateOfEvent, timeOfEvent, createdEventTime,
