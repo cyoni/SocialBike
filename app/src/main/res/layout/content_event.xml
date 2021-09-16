@@ -33,6 +33,20 @@
             android:gravity="start|center"
             android:text="Friday 15/09/21 15:33"
             android:textSize="20sp"
+            app:drawableLeftCompat="@drawable/ic_baseline_calendar_today_24" />
+
+        <TextView
+            android:id="@+id/duration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawablePadding="5dp"
+            android:focusable="true"
+            android:gravity="start|center"
+            android:text="2 hours"
+            android:textSize="20sp"
             app:drawableLeftCompat="@drawable/ic_baseline_access_time_24" />
 
         <TextView
@@ -85,15 +99,8 @@
             style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableTop="@drawable/ic_baseline_star_border_24"
+            android:drawableTop="@drawable/ic_baseline_add_24"
             android:text="Save" />
-
-        <Button
-            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableTop="@drawable/ic_baseline_star_border_24"
-            android:text="More" />
 
     </LinearLayout>
 

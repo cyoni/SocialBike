@@ -20,7 +20,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 
-public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
+public class HomeFragment extends Fragment{
+
+
+}
+/* implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate*/ /*{
 
     private static HomeFragment homeFragment = null;
     private ExtendedFloatingActionButton floatingButton;
@@ -110,12 +114,12 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         );
     }
 
-/*    private void setToolbar(View root) {
+*//*    private void setToolbar(View root) {
         Toolbar toolbar = root.findViewById(R.id.toolbar);
         toolbar.setTitle("Home");
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this::toolbarClickListener);
-    }*/
+    }*//*
 
     private boolean toolbarClickListener(MenuItem item) {
         if (item.getItemId() == R.id.login) {
@@ -172,4 +176,4 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         swipeLayout.setRefreshing(false);
     }
 
-}
+}*/

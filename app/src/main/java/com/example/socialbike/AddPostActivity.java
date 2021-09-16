@@ -1,5 +1,6 @@
 package com.example.socialbike;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -22,6 +23,7 @@ public class AddPostActivity extends AppCompatActivity {
     Button submit;
     private HomeFragment homeFragment;
     private String groupId;
+    private String eventId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,7 @@ public class AddPostActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         groupId = getIntent().getStringExtra("groupId");
+        eventId = getIntent().getStringExtra("eventId");
 
         setSupportActionBar(toolbar);
       //  toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
@@ -112,6 +115,9 @@ public class AddPostActivity extends AppCompatActivity {
         data.put("message", message);
         data.put("groupId", groupId);
 
+        if (eventId != null)
+            data.put("eventId", eventId);
+
         MainActivity.mFunctions
                 .getHttpsCallable("AddNewPost")
                 .call(data)
@@ -123,21 +129,24 @@ public class AddPostActivity extends AppCompatActivity {
                     if (!postIdFromServer.equals("FAIL") && !postIdFromServer.isEmpty()) {
                         submit.setText("SUCCESS");
                         saveText("");
-//                        passItemHome();
+                        passPostToActivity();
                         onBackPressed();
-
                     } else {
                        // notifyUser_error();
-                        submit.setText("PUBLISHING");
+                        submit.setText("PUBLISH");
                     }
                     return "";
                 });
     }
 
 
-    private void passItemHome() {
-        homeFragment.addPost(new Post("77777", ConnectedUser.getPublicKey(), ConnectedUser.getName(), 123412, textBox.getText().toString(), 0, 0, false));
-        homeFragment.updater.update(0);
+    private void passPostToActivity() {
+        Intent intent = new Intent();
+        intent.putExtra("publicId", ConnectedUser.getPublicKey());
+        intent.putExtra("name", ConnectedUser.getName());
+        intent.putExtra("time", Date.getTimeInMiliSecs());
+        intent.putExtra("message", textBox.getText().toString());
+        setResult(RESULT_OK, intent);
     }
 
     private boolean isMessageValid() {

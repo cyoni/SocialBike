@@ -19,7 +19,6 @@
         android:padding="5dp"
         android:minHeight="90dp">
 
-
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
@@ -32,19 +31,28 @@
             android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/title"
+            android:layout_below="@id/location"
+            android:minHeight="60dp"
             android:layout_marginTop="5dp"
             android:text="Group description Group description Group description Group description Group description Group description Group description Group description " />
 
 
         <TextView
-            android:id="@+id/members"
+            android:id="@+id/memberCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@id/title"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="10dp"
             android:text="0 members" />
+
+        <TextView
+            android:id="@+id/location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title"
+            android:layout_marginEnd="10dp"
+            android:text="Tel Aviv, Israel" />
 
         <Button
             android:id="@+id/joinButton"

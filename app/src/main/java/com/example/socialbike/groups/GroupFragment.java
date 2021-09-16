@@ -18,13 +18,17 @@ import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.Updater;
 import com.example.socialbike.groups.group.GroupActivity;
+import com.example.socialbike.groups.group.GroupDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -99,24 +103,15 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
     }
 
     private void parseGroups(String response) {
-        String tmp_category;
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            JSONObject obj = new JSONObject(response);
-            JSONArray messages_array = obj.getJSONArray("groups");
-
-
-            for (int i = 0; i < messages_array.length(); i++) {
-                String title = messages_array.getJSONObject(i).getString("title");
-                String description = messages_array.getJSONObject(i).getString("description");
-                String groupId = messages_array.getJSONObject(i).getString("groupId");
-
-                Group group = new Group(groupId, title, description);
-                groupIds.add(groupId);
-                container.add(group);
-            }
+            GroupDTO groupDTO = objectMapper.readValue(response, GroupDTO.class);
+            container.addAll(groupDTO.getGroups());
+            for (Group group : container)
+                groupIds.add(group.getGroupId());
             onFinishedUpdating();
-        } catch (Exception e) {
-            System.out.println("Error caught in message fetcher: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -138,6 +133,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
         holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle()));
         holder.title.setText(current.getTitle());
         holder.description.setText(current.getDescription());
+        holder.memberCount.setText(current.getMemberCount() + " members");
     }
 
     private void joinOrLeaveGroup(RecyclerViewAdapter.ViewHolder holder, int position) {

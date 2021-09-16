@@ -1,5 +1,7 @@
 package com.example.socialbike;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -68,23 +70,22 @@ public class MessageGetter {
 
     }
 
-    public void getPosts(String groupId){
+    public void getPosts(@NonNull String groupId, String eventId){
         System.out.println("getting posts...");
 
         Map<String, Object> data = new HashMap<>();
         data.put("groupId", groupId);
+        if (eventId != null)
+            data.put("eventId", eventId);
 
        MainActivity.mFunctions
                 .getHttpsCallable("GetGroupPosts")
                 .call(data)
                 .continueWith(task -> {
-
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);
-
-                    if (!response.isEmpty()) {
+                    if (!response.isEmpty())
                         parseMessages(response);
-                    }
                     return "";
                 });
     }

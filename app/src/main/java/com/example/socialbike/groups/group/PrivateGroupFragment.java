@@ -48,14 +48,27 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
     private ProgressBar progressBar;
     private View root;
     private SwipeRefreshLayout swipeLayout;
+    private String eventId;
+
 
     public PrivateGroupFragment(String groupId) {
         this.groupId = groupId;
     }
 
+    public PrivateGroupFragment(String groupId, String eventId) {
+        this.groupId = groupId;
+        this.eventId = eventId;
+    }
+
     public static PrivateGroupFragment getInstance(String groupId) {
         if (homeFragment == null)
             homeFragment = new PrivateGroupFragment(groupId);
+        return homeFragment;
+    }
+
+    public static PrivateGroupFragment getInstance(String groupId, String eventId) {
+        if (homeFragment == null)
+            homeFragment = new PrivateGroupFragment(groupId, eventId);
         return homeFragment;
     }
 
@@ -130,8 +143,6 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
         holder.message.setOnClickListener(view -> postButtons.commentsButtonClick());
         holder.followButton.setOnClickListener(view -> postButtons.followUser(container, holder, position));
     }
-
-
 
     @Override
     public void onItemClick(@NonNull View holder, int position) {

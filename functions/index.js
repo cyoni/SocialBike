@@ -73,12 +73,13 @@ exports.AddNewPost = functions.https.onCall(async (snapshot, context) => {
 
     const myPrivateKey = context.auth.uid;
     const user_message = snapshot.message.trim();
-    const groupId = snapshot.groupId;
+    const groupId = snapshot.groupId
+    const eventId = snapshot.eventId || null
 
     const now = Date.now();
 
     if (user_message.length > 5000)
-        return "FAIL";
+        return "TOO_LONG";
 
     const account = await verifyUser(myPrivateKey);
     if (account === null)
@@ -89,18 +90,26 @@ exports.AddNewPost = functions.https.onCall(async (snapshot, context) => {
     var data = {
         message: user_message,
         timestamp: now,
-        user_public_key: myPublicKey,
+        user_public_key: myPublicKey
     };
 
-    const post_id = await (admin.database().ref('groups').child(groupId).child('posts').push().key)
-    const set_data = admin.database().ref('groups').child(groupId).child('posts').child(post_id).set(data);
+    var route = admin.database().ref('groups').child(groupId)
+    
+    if (eventId === null)
+        route = route.child('posts')
+    else
+        route = route.child('events').child(eventId).child('posts')
+
+    const post_id = await route.push().key
+    const set_data = route.child(post_id).set(data);
 
     const ref = admin.database().ref('public').child(myPublicKey).child('profile').child('posts_count');
     const incrementMyPostsCounter = ref.transaction((current) => {
         return (current || 0) + 1;
     });
 
-    await set_data, incrementMyPostsCounter
+    await set_data
+    await incrementMyPostsCounter
     return post_id;
 
 });
@@ -309,7 +318,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                ){
                 
             const dataOfEvent = {
-                eventId: raw_data.key,
+                event_id: raw_data.key,
                 name: "...",
                 user_public_key: raw_data.child('user_public_key').val(),
                 details: raw_data.child('details').val(),
@@ -748,11 +757,7 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
             }).then(snapshot => {
                 snapshot.forEach(raw_post => {
                     if (groups.includes(raw_post.key)){
-                        data['groups'].push({
-                            groupId: raw_post.key,
-                            title: raw_post.child('title').val(),
-                            description: raw_post.child('description').val()
-                        })
+                        data['groups'].push(getGroupData(raw_post))
                     }
                 })
                 return null;
@@ -761,6 +766,14 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
             })
         })
 
+        function getGroupData(snapshot){
+            return ({
+                groupId: snapshot.key,
+                title: snapshot.child('title'),
+                description: snapshot.child('description'),
+                memberCount: snapshot.child('members').numChildren()
+            })
+        }
 
 
         exports.GetAllGroups = functions.https.onCall(async (request, context) => {       
@@ -770,11 +783,7 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
             return admin.database().ref('groups').once('value').then(snapshot => {
                 snapshot.forEach(raw_post => {
                     var group = []
-                    group = ({
-                        groupId: raw_post.key,
-                        title: raw_post.child('title'),
-                        description: raw_post.child('description')
-                    })
+                    group = getGroupData(raw_post)
                     data['groups'].push(group)
                 })
                 return JSON.stringify(data)

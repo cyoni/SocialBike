@@ -34,9 +34,10 @@ android {
 
 dependencies {
 
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.7.2'
+
     implementation 'com.google.maps:google-maps-services:0.9.3'
     implementation 'org.slf4j:slf4j-simple:1.7.25'
-
 
     implementation 'androidx.wear:wear:1.0.0'
     implementation 'com.google.firebase:firebase-firestore:22.1.2'

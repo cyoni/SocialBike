@@ -63,9 +63,23 @@ public class EventsFragment extends Fragment
             eventsManager = new EventsManager(getActivity(), getContext(), update);
             this.container = eventsManager.container;
             initiateScreen(root);
+            eventsManager.showProgressbar();
+            setSwipeLayout();
         }
         return root;
     }
+
+    private void setSwipeLayout() {
+        eventsManager.swipe_refresh.setOnRefreshListener(this::getEvents);
+
+        eventsManager.swipe_refresh.setColorSchemeColors(
+                getResources().getColor(android.R.color.holo_blue_bright),
+                getResources().getColor(android.R.color.holo_green_light),
+                getResources().getColor(android.R.color.holo_orange_light),
+                getResources().getColor(android.R.color.holo_red_light)
+        );
+    }
+
 
     private void initiateScreen(View root) {
         eventsManager.init(root);
@@ -105,16 +119,16 @@ public class EventsFragment extends Fragment
     }
 
     private void getEvents() {
-        eventsManager.showProgressbar();
         no_events_text.setVisibility(View.GONE);
         container.clear();
 
         Map<String, Object> data = new HashMap<>();
         data.put("range", eventsManager.range);
-        //data.put("country", position.getCountry());
-        //data.put("city", position.getCity());
+        data.put("country", position.getCountry());
+        data.put("city", position.getCity());
         data.put("lat", position.getLatLng().latitude);
         data.put("lng", position.getLatLng().longitude);
+        System.out.println( position.getLatLng().latitude + "," +  position.getLatLng().longitude);
         eventsManager.getEvents(data);
     }
 

@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -37,6 +38,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     Context context;
     Activity activity;
     TextView rangeText;
+    public SwipeRefreshLayout swipe_refresh;
 
 
     public EventsManager(Activity activity, Context context, Updater.IUpdate update) {
@@ -95,21 +97,22 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
         for (int i = 0; i < data.length(); i++) {
 
-            String userPublicKey = null;
+            String user_public_key = null;
             try {
-                userPublicKey = data.getJSONObject(i).getString("userPublicKey");
+                user_public_key = data.getJSONObject(i).getString("user_public_key");
                 String eventDetails = data.getJSONObject(i).getString("details");
                 String name = data.getJSONObject(i).getString("name");
                 String dateOfEvent = data.getJSONObject(i).getString("date");
                 String timeOfEvent = data.getJSONObject(i).getString("time");
-                String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
-                String eventId = data.getJSONObject(i).getString("eventId");
-                String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
+                String created_event_time = data.getJSONObject(i).getString("created_event_time");
+                String event_id = data.getJSONObject(i).getString("event_id");
+                String num_interested_members = data.getJSONObject(i).getString("num_interested_members");
+                String num_participants = data.getJSONObject(i).getString("num_participants");
                 String title = data.getJSONObject(i).getString("title");
                 String address = data.getJSONObject(i).getString("address");
                 double lat = data.getJSONObject(i).getDouble("lat");
                 double lng = data.getJSONObject(i).getDouble("lng");
-                int commentsNumber = data.getJSONObject(i).getInt("commentsNumber");
+                int comments_num = data.getJSONObject(i).getInt("comments_num");
 
                 int numberOfParticipants = 0;
                 if (data.getJSONObject(i).has("numberOfParticipants")
@@ -118,10 +121,10 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
                 Position position = new Position(new LatLng(lat, lng), title, address);
                 Event event = new Event(
-                        eventId, userPublicKey, name,
-                        dateOfEvent, timeOfEvent, createdEventTime,
-                        numOfInterestedMembers, numberOfParticipants,
-                        position, eventDetails, commentsNumber
+                        event_id, user_public_key, name,
+                        dateOfEvent, timeOfEvent, created_event_time,
+                        num_interested_members, numberOfParticipants,
+                        position, eventDetails, comments_num
                 );
 
                 container.add(event);
@@ -148,6 +151,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     public void hideProgressbar() {
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
+        swipe_refresh.setRefreshing(false);
     }
 
     @Override
@@ -169,6 +173,8 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getContext(), EventActivity.class);
+                intent.putExtra("groupId", container.get(position).getGroupId());
+                intent.putExtra("eventId", container.get(position).getEventId());
                 getContext().startActivity(intent);
             }
         });
@@ -245,10 +251,13 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         membersList.show();
     }
 
+
+
     public void init(View root) {
         recyclerView = root.findViewById(R.id.recyclerview);
         initAdapter();
         progressBar = root.findViewById(R.id.progressBar);
+        swipe_refresh = root.findViewById(R.id.swipe_refresh);
         progressBar.setVisibility(View.INVISIBLE);
     }
 }

@@ -41,7 +41,6 @@ public class MembersGroupFragment extends Fragment
         this.groupId = groupId;
     }
 
-
     private void initAdapter() {
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_member, container);
         recyclerView.setAdapter(recyclerViewAdapter);
