@@ -34,7 +34,7 @@ public class EventsFragment extends Fragment
     static EventsFragment eventsFragment = null;
     private SeekBar seekBar;
     private TextView cityText, no_events_text;
-    private Position position;
+    private Position position = new Position();
     private View root;
     private EventsManager eventsManager;
     protected ArrayList<Event> container;
@@ -73,14 +73,35 @@ public class EventsFragment extends Fragment
         cityText = root.findViewById(R.id.city);
         no_events_text = root.findViewById(R.id.no_events_text);
         no_events_text.setVisibility(View.GONE);
-        position = new Position(new LatLng(32.074022, 34.775507), "Tel Aviv", "Israel", "Tel Aviv District");
 
-        setCityTextView("Tel Aviv");
         setSeekBar(root);
+
+        initPreferredLocation();
+        updateCityTextView();
+
         setListeners(root);
 
         eventsManager.showProgressbar();
         getEvents();
+    }
+
+
+    private void initPreferredLocation() {
+        String lat = Utils.getPreference(getActivity(), "data", "lat");
+        String lng = Utils.getPreference(getActivity(), "data", "lng");
+        String preferredCity = Utils.getPreference(getActivity(), "data", "city");
+        String preferredCountry = Utils.getPreference(getActivity(), "data", "country");
+
+        if (lat != null && lng != null && preferredCity != null){
+            this.position = new Position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)), preferredCity, preferredCountry);
+        } else {
+            String userCountry = Utils.getUserCountry(getContext());
+            if (userCountry != null) {
+                preferredCity = userCountry.toUpperCase();
+                this.position = Utils.getLatLngOfString(preferredCity + " country");
+                savePosition();
+            }
+        }
     }
 
     private void getEvents() {
@@ -90,8 +111,8 @@ public class EventsFragment extends Fragment
 
         Map<String, Object> data = new HashMap<>();
         data.put("range", eventsManager.range);
-        data.put("country", position.getCountry());
-        data.put("state", position.getState());
+        //data.put("country", position.getCountry());
+        //data.put("city", position.getCity());
         data.put("lat", position.getLatLng().latitude);
         data.put("lng", position.getLatLng().longitude);
         eventsManager.getEvents(data);
@@ -128,10 +149,16 @@ public class EventsFragment extends Fragment
     }
 
 
-    private void setCityTextView(String city) {
+    private void updateCityTextView() {
+        String location;
+        if (seekBar.getProgress() == seekBar.getMax()){
+            location = position.getCountry();
+        } else
+            location = position.getCity();
+
         cityText.setOnClickListener(view -> openCitiesAutoComplete());
         cityText.setText(HtmlCompat.fromHtml
-                ("<u><b>" + city + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                ("<u><b>" + location + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
     }
 
     @Override
@@ -155,14 +182,21 @@ public class EventsFragment extends Fragment
                 } else
                     country = "DEFAULT";
 
-                position = new Position(place.getLatLng(), place.getName(), country, state);
-                System.out.println(position.toString());
-                setCityTextView(position.getLocationName());
+                position = new Position(place.getLatLng(), place.getName(), country);
+                savePosition();
+                updateCityTextView();
                 getEvents();
             }
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void savePosition() {
+        Utils.savePreference(getActivity(), "data", "lat", String.valueOf(position.getLatLng().latitude));
+        Utils.savePreference(getActivity(), "data", "lng", String.valueOf(position.getLatLng().longitude));
+        Utils.savePreference(getActivity(), "data", "city", position.getCity());
+        Utils.savePreference(getActivity(), "data", "country", position.getCountry());
     }
 
     private void openCitiesAutoComplete() {
@@ -186,9 +220,10 @@ public class EventsFragment extends Fragment
         int stepSize = 10;
         progress = (seekBar.getProgress() / stepSize) * stepSize;
         seekBar.setProgress(progress);
-        System.out.println(progress);
+
         eventsManager.range = seekBar.getProgress();
         eventsManager.updateSearchText();
+        updateCityTextView();
     }
 
 

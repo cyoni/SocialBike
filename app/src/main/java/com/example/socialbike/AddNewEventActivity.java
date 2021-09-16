@@ -65,14 +65,9 @@ public class AddNewEventActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 double lat = data.getDoubleExtra("lat", -1);
                 double lng = data.getDoubleExtra("lng", -1);
-                position = new Position(new LatLng(lat, lng), null, null);
+                position = new Position();
+                position.setLatLng(new LatLng(lat, lng));
                 getAddressAndSetBox();
-            }
-        } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Place place = Autocomplete.getPlaceFromIntent(data);
-                initiatePlace(place);
-
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
                 System.out.println(status.getStatusMessage());
@@ -93,19 +88,19 @@ public class AddNewEventActivity extends AppCompatActivity {
         }
         if (results != null) {
             String address = results[0].formattedAddress;
-           // position.setAddress(address);
-           // locationName.setText(name);
             mapButton.setText(address);
-          //  if (address.contains(",")) {
-        //        position.setLocationName(address.substring(0, address.indexOf(",")));
-       //     } else
-        //        position.setLocationName("");
+            String city = Utils.getEntity(results[0], com.example.socialbike.Enums.Place.LOCALITY);
+            String country = Utils.getEntity(results[0], com.example.socialbike.Enums.Place.COUNTRY);
+            position.setCity(city);
+            position.setCountry(country);
+            position.setAddress(address);
         }
         else{
             mapButton.setText("");
         }
     }
 
+/*
     private void initiatePlace(Place place) {
 
         String country = null, state = null;
@@ -121,11 +116,12 @@ public class AddNewEventActivity extends AppCompatActivity {
             }
         }
 
-        position = new Position(place.getLatLng(), place.getName(), place.getAddress(), country, state);
+        position = new Position(place.getLatLng(), place.getAddress(), place.getAddress(), country);
 
         title.setText(position.getLocationName());
         mapButton.setText(position.getAddress());
     }
+*/
 
     private void setButtonListeners() {
 
@@ -194,6 +190,8 @@ public class AddNewEventActivity extends AppCompatActivity {
         data.put("time", time.getText().toString());
         data.put("details", details.getText().toString());
         data.put("address", position.getAddress());
+        data.put("country", position.getCountry());
+        data.put("city", position.getCity());
         data.put("title", title.getText().toString());
 
         MainActivity.mFunctions

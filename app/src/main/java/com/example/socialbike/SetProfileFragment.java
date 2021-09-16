@@ -129,8 +129,8 @@ public class SetProfileFragment extends Fragment implements AdapterView.OnItemSe
         }
         if (results != null && results.length > 0) {
             String address = results[0].formattedAddress;
-            city = getEntity(results[0], Place.LOCALITY);
-            country = getEntity(results[0], Place.COUNTRY);
+            city = Utils.getEntity(results[0], Place.LOCALITY);
+            country = Utils.getEntity(results[0], Place.COUNTRY);
             preferred_location.setText(address);
             clean_map_address_button.setVisibility(View.VISIBLE);
         } else {
@@ -138,21 +138,10 @@ public class SetProfileFragment extends Fragment implements AdapterView.OnItemSe
         }
     }
 
-    private String getEntity(GeocodingResult results, Place entity) {
-        AddressComponent[] addressComponents = results.addressComponents;
-        for (int i = 0; i < addressComponents.length; i++) {
-            AddressComponent current = addressComponents[i];
-            for (int j = 0; j < current.types.length; j++) {
-                if (current.types[j].name().equals(entity.name())) {
-                    return current.longName;
-                }
-            }
-        }
-        return null;
-    }
 
     private void submitForm() {
-        // save city and country in device
+        Utils.savePreference(getActivity(), "data", "country", country);
+        Utils.savePreference(getActivity(), "data", "city", city);
 
         Map<String, Object> data = new HashMap<>();
         data.put("gender", intGender);
@@ -161,6 +150,9 @@ public class SetProfileFragment extends Fragment implements AdapterView.OnItemSe
             data.put("lng", position.getLatLng().longitude);
         }
         data.put("age", age.getText().toString());
+        data.put("country", country);
+        data.put("city", city);
+
         getActivity().finish();
 
         MainActivity.mFunctions

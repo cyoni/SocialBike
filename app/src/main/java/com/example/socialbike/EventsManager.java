@@ -188,7 +188,11 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
     protected void updateSearchText() {
         if (rangeText != null) {
-            String str = "Finds " + container.size() + " events within " + range + " km of";
+            String str;
+            if (range == 100){
+                str = "Shows " + container.size() + " events in";
+            } else
+                str = "Shows " + container.size() + " events within " + range + " km of";
             rangeText.setText(str);
         }
     }

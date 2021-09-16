@@ -35,8 +35,7 @@
             android:id="@+id/searchSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/sort_button"
-            >
+            android:layout_below="@id/sort_button">
 
             <TextView
                 android:id="@+id/rangeText"
@@ -61,7 +60,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_below="@id/rangeText" />
-
 
 
         </RelativeLayout>

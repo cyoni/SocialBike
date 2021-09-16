@@ -1,12 +1,25 @@
 package com.example.socialbike;
 
 
+import static android.content.Context.MODE_PRIVATE;
+
+import static com.example.socialbike.MainActivity.geoApiContext;
+
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.example.socialbike.Enums.Place;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.GeocodingApi;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.AddressComponent;
+import com.google.maps.model.GeocodingResult;
+
+import java.io.IOException;
 import java.util.Locale;
 
 public class Utils {
@@ -42,6 +55,48 @@ public class Utils {
             }
         }
         catch (Exception e) { }
+        return null;
+    }
+
+    public static Position getLatLngOfString(String address){
+        GeocodingResult[] request = new GeocodingResult[0];
+        try {
+            request = GeocodingApi.newRequest(geoApiContext).address(address).await();
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (request.length == 0)
+            return null;
+        com.google.maps.model.LatLng location = request[0].geometry.location;
+        String locationName = request[0].formattedAddress;
+        return new Position(new LatLng(location.lat, location.lng), locationName, locationName);
+    }
+
+
+    public static void savePreference(Activity activity, String preferenceFolder, String key, String value){
+        SharedPreferences.Editor editor = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE).edit();
+        editor.putString(key, value);
+        editor.apply();
+    }
+
+    public static String getPreference(Activity activity, String preferenceFolder, String key){
+        SharedPreferences prefs = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE);
+        return prefs.getString(key, null);
+    }
+
+    public static String getEntity(GeocodingResult results, Place entity) {
+        AddressComponent[] addressComponents = results.addressComponents;
+        for (AddressComponent current : addressComponents) {
+            for (int j = 0; j < current.types.length; j++) {
+                if (current.types[j].name().equals(entity.name())) {
+                    return current.longName;
+                }
+            }
+        }
         return null;
     }
 }

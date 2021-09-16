@@ -114,19 +114,31 @@ exports.updateProfile = functions.https.onCall(async (request, context) => {
 
     var lat = request.lat || null
     var lng = request.lng || null
+    var country = request.country || null
+    var city = request.city || null
+
     if (lat === null || lng === null)
         {
             lat = null
             lng = null
         }
+
     const gender = request.gender || null
     const age = request.age || null
 
-    const a = admin.database().ref('public').child(publicKey).child('profile').child('gender').set(gender);
-    const b = admin.database().ref('public').child(publicKey).child('profile').child('age').set(age);
-    const c = admin.database().ref('public').child(publicKey).child('profile').child('preferred_location').set({lat: lat, lng: lng})
+    const a = admin.database().ref('public').child(publicKey).child('profile').set({
+        age: age,
+        gender: gender
+    });
 
-    await a, b, c
+    const b = admin.database().ref('public').child(publicKey).child('profile').child('preferred_location').set({
+        lat: lat,
+        lng: lng, 
+        country: country,
+        city: city
+    })
+
+    await a, b
     return "OK"
 })
 
@@ -290,38 +302,35 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     return ref.once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
-            if (groupId !== null || (country && raw_data.child('country').val() === country)  
-                    && distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range){
+            if (
+                groupId !== null ||
+                 distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range ||
+                 range === 100 && raw_data.child('country').val() === country
+               ){
                 
             const dataOfEvent = {
                 eventId: raw_data.key,
-                name: "",
-                userPublicKey: raw_data.child('userPublicKey').val(),
+                name: "...",
+                user_public_key: raw_data.child('user_public_key').val(),
                 details: raw_data.child('details').val(),
-                createdEventTime: raw_data.child('createdEventTime').val(),
+                created_event_time: raw_data.child('created_event_time').val(),
                 date: raw_data.child('date').val(),
                 time: raw_data.child('time').val(),
-                numOfInterestedMembers: raw_data.child('numOfInterestedMembers').val(),
-                numberOfParticipants: raw_data.child('numberOfParticipants').val(),
+                num_interested_members: raw_data.child('num_interested_members').val(),
+                num_participants: raw_data.child('num_participants').val(),
                 lat: raw_data.child('lat').val(),
                 lng: raw_data.child('lng').val(),
                 title: raw_data.child('title').val(),
                 address: raw_data.child('address').val(),
-                commentsNumber: raw_data.child('comments').numChildren(),
+                comments_num: raw_data.child('comments').numChildren(),
             }
 
-            const score = 2*dataOfEvent.numberOfParticipants + dataOfEvent.numOfInterestedMembers
+            const score = 2 * dataOfEvent.num_participants + dataOfEvent.num_interested_members
             dataOfEvent['elementScore'] = score
 
             data['events'].push(dataOfEvent)
             }
-
         })
-        return admin.database().ref('public').once('value')
-    }).then(snapshot => {
-        for (var i = 0; i < data.events.length; i++) 
-            data.events[i].name = snapshot.child(data.events[i].userPublicKey).child('profile').child('nickname').val()
-
 
         if (dataType === "TRADING"){
             data.events = data.events.sort(compare)
@@ -329,6 +338,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
 
         data.events = data.events.reverse()
         return JSON.stringify(data) 
+
     })
 })
 
@@ -371,7 +381,6 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
     else
         ref = admin.database().ref('events')
     
-
     const time = request.time
     const date = request.date
     const details = request.details
@@ -379,11 +388,13 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
     const lng = request.lng
     const title = request.title
     const address = request.address
+    const country = request.country
+    const city = request.city
     const timestamp = Date.now()
 
     var data = {
-        userPublicKey: account.publicKey,
-        createdEventTime: timestamp,
+        user_public_key: account.publicKey,
+        created_event_time: timestamp,
         time: time,
         date: date,
         title: title,
@@ -391,6 +402,8 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
         details: details,
         lat: lat,
         lng: lng,
+        country: country,
+        city: city,
     }
 
     const newKey = ref.push().key
@@ -447,9 +460,9 @@ exports.updateParticipantsNumber = functions.database.ref('events/{eventId}/{goi
     
         var childName
         if (context.params.going_or_interested === "going")
-            childName = "numberOfParticipants"
+            childName = "num_participants"
         else 
-            childName = "numOfInterestedMembers"
+            childName = "num_interested_members"
       const collectionRef = change.after.ref.parent;
       const countRef = collectionRef.parent.child(childName);
 

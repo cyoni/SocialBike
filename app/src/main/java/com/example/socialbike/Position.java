@@ -5,26 +5,33 @@ import com.google.android.gms.maps.model.LatLng;
 public class Position {
 
     private LatLng latLng;
-    private String locationName, address, country, state;
+    private String locationName, address, country, state, city;
 
-    public Position(LatLng latLng, String locationName, String address) {
+    public Position(LatLng latLng, String city, String country) {
+        this.latLng = latLng;
+        this.city = city;
+        this.country = country;
+    }
+
+/*    public Position(LatLng latLng, String locationName, String country, String state) {
         this.latLng = latLng;
         this.locationName = locationName;
+        this.country = country;
+        this.state = state;
+    }*/
+
+    public Position(LatLng latLng, String address, String city, String country) {
+        this.latLng = latLng;
         this.address = address;
+        this.country = country;
+        this.city = city;
+        this.country = country;
     }
 
-    public Position(LatLng latLng, String locationName, String country, String state) {
-        this.latLng = latLng;
-        this.locationName = locationName;
-        this.country = country;
-        this.state = state;
+    public Position() {
+
     }
 
-    public Position(LatLng latLng, String locationName, String address, String country, String state) {
-        this(latLng, locationName, address);
-        this.country = country;
-        this.state = state;
-    }
 
     public LatLng getLatLng() {
         return latLng;
@@ -54,13 +61,24 @@ public class Position {
         this.locationName = locationName;
     }
 
-    public void setLatLng(LatLng latLng){
+    public void setLatLng(LatLng latLng) {
         this.latLng = latLng;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return locationName + ", " + address + ", " + country + ", " + state;
     }
 
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCity() {
+        return this.city;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 }
