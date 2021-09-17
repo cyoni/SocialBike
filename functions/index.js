@@ -18,7 +18,6 @@ exports.addUserToDB = functions.auth.user().onCreate((event) => {
 
 
 function verifyUser(userPrivateKey) {
-    ``
     const account = (async (resolve, reject) => {
         const snapshot = await admin.database().ref('users').child(userPrivateKey).once('value');
         if (snapshot.exists() && snapshot.child('accountActivated').val() === true) {
@@ -317,7 +316,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                  range === 100 && raw_data.child('country').val() === country
                ){
                 
-            const dataOfEvent = {
+            var dataOfEvent = {
                 event_id: raw_data.key,
                 name: "...",
                 user_public_key: raw_data.child('user_public_key').val(),
@@ -333,6 +332,9 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 address: raw_data.child('address').val(),
                 comments_num: raw_data.child('comments').numChildren(),
             }
+
+            if (groupId !== null)
+                dataOfEvent["group_id"] = groupId
 
             const score = 2 * dataOfEvent.num_participants + dataOfEvent.num_interested_members
             dataOfEvent['elementScore'] = score
@@ -829,11 +831,18 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
                 return "AUTH_FAILED"
 
             const groupId = request.groupId
-            
+            const eventId = request.eventId || null
+
             var data = {}
             data['posts'] = []
+
+            var route = admin.database().ref('groups').child(groupId)
+
+            if (eventId !== null){
+                route = route.child('events').child(eventId)
+            }
         
-            return admin.database().ref('groups').child(groupId).child('posts').once('value').then(snapshot => {
+            return route.child('posts').once('value').then(snapshot => {
                 snapshot.forEach(raw_post => {
 
                     var dataOfUser = ({

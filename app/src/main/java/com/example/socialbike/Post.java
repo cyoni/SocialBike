@@ -13,10 +13,10 @@ import java.util.Map;
 
 public class Post implements Serializable {
 
-    private final String postId, publicKey, name, msg;
+    private String postId, publicKey, name, msg;
     private boolean isLiked = false, doesUserLikeThePost = false;
-    private final long time;
-    private final int comments_count;
+    private long time;
+    private int comments_count;
     public static String POSTS_CONTAINER_CODE = "global_posts";
     public String DatabaseContainer = "";
     protected final ArrayList<Comment> commentsContainer = new ArrayList<>();
@@ -41,6 +41,10 @@ public class Post implements Serializable {
         this.isLiked = doesUserLikeThePost;
     }
 
+    public Post() {
+
+    }
+
     public String getPostId() {
         return postId;
     }
@@ -57,7 +61,7 @@ public class Post implements Serializable {
         return msg;
     }
 
-    public long getTime() {
+    public long getTimestamp() {
         return time;
     }
 

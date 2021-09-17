@@ -21,7 +21,6 @@ public class AddPostActivity extends AppCompatActivity {
     private final String ADD_POST_CODE = "add_post";
     private TextView textBox;
     Button submit;
-    private HomeFragment homeFragment;
     private String groupId;
     private String eventId;
 
@@ -42,7 +41,6 @@ public class AddPostActivity extends AppCompatActivity {
 
         submit = findViewById(R.id.submit);
         textBox = findViewById(R.id.txt_content);
-        homeFragment = HomeFragment.getInstance();
 
         submitButtonListener();
         getSavedText();

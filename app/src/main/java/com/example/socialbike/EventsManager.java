@@ -11,12 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -95,6 +96,16 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
             recyclerViewAdapter.notifyDataSetChanged();
         }
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            EventDTO eventDTO = objectMapper.readValue(rawData, EventDTO.class);
+            container.addAll(eventDTO.getEvents());
+            update.onFinishedUpdating();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+/*
         for (int i = 0; i < data.length(); i++) {
 
             String user_public_key = null;
@@ -134,8 +145,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
                 System.out.println("An error was caught in message fetcher: " + e.getMessage());
             }
         }
-        update.onFinishedUpdating();
-
+*/
     }
 
     protected void changeTypeOfSearch(String type) {
@@ -173,7 +183,8 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getContext(), EventActivity.class);
-                intent.putExtra("groupId", container.get(position).getGroupId());
+                if (container.get(position).getGroupId() != null)
+                    intent.putExtra("groupId", container.get(position).getGroupId());
                 intent.putExtra("eventId", container.get(position).getEventId());
                 getContext().startActivity(intent);
             }

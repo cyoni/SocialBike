@@ -3,16 +3,19 @@ package com.example.socialbike;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Event extends Post{
+public class Event extends Post {
 
     @JsonProperty("event_id")
     private String eventId;
+    @JsonProperty("group_id")
+    private String groupId;
     private String name;
     private String user_public_key;
     private String details;
     private String created_event_time;
     private String date;
-    private String time;
+    @JsonProperty("time")
+    private String eventTime;
     @JsonProperty("num_interested_members")
     private String numInterestedMembers;
     @JsonProperty("num_participants")
@@ -24,20 +27,24 @@ public class Event extends Post{
     @JsonProperty("comments_num")
     private String commentsNum;
     private String elementScore;
+    private Position position;
 
+    public Event(){
+        super();
+    }
     public Event(String eventId, String userPublicKey, String name,
                  String dateOfEvent, String timeOfEvent, String createdEventTime,
                  String amountOfInterestedPeople, int numberOfParticipants,
                  Position position, String message, int commentsNumber) {
 
-        super(eventId, userPublicKey, name, 1245, message,0, commentsNumber, false);
+        super(eventId, userPublicKey, name, 1245, message, 0, commentsNumber, false);
 
-        this.DatabaseContainer = EVENTS_CONTAINER_CODE;
+        this.DatabaseContainer = Consts.EVENTS_CONTAINER_CODE;
         this.eventId = eventId;
         this.user_public_key = userPublicKey;
         this.name = name;
         this.date = dateOfEvent;
-        this.time = timeOfEvent;
+        this.eventTime = timeOfEvent;
         this.created_event_time = createdEventTime;
         this.numInterestedMembers = amountOfInterestedPeople;
         this.numParticipants = numberOfParticipants;
@@ -49,10 +56,21 @@ public class Event extends Post{
         return eventId;
     }
 
+    @JsonProperty("group_id")
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    @JsonProperty("group_id")
+    public String getGroupId() {
+        return groupId;
+    }
+
     @JsonProperty("event_id")
     public void setEventId(String eventId) {
         this.eventId = eventId;
     }
+
 
     @JsonProperty("name")
     public String getName() {
@@ -106,12 +124,12 @@ public class Event extends Post{
 
     @JsonProperty("time")
     public String getTime() {
-        return time;
+        return eventTime;
     }
 
     @JsonProperty("time")
     public void setTime(String time) {
-        this.time = time;
+        this.eventTime = time;
     }
 
     @JsonProperty("num_interested_members")
@@ -193,4 +211,5 @@ public class Event extends Post{
     public void setElementScore(String elementScore) {
         this.elementScore = elementScore;
     }
+
 }

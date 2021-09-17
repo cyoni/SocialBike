@@ -23,6 +23,8 @@ public class GroupActivity extends FragmentActivity implements IPageAdapter {
     public TabLayout tabs;
     public MainActivity mainActivity;
     private String groupId;
+    private PrivateGroupFragment privateGroupFragment;
+
     String[] tabTitles = {"Discussion", "Events", "Members"};
 
     public static GroupActivity getInstance() {
@@ -49,6 +51,8 @@ public class GroupActivity extends FragmentActivity implements IPageAdapter {
         ViewPager viewPager = findViewById(R.id.view_pager);
         tabs = findViewById(R.id.tabs);
 
+        privateGroupFragment = new PrivateGroupFragment(groupId);
+
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(sectionsPagerAdapter);
 
@@ -58,7 +62,6 @@ public class GroupActivity extends FragmentActivity implements IPageAdapter {
 
     @Override
     public void onBackPressed(){
-        PrivateGroupFragment.homeFragment = null;
         GroupEvents.groupFragment = null;
         MembersGroupFragment.groupFragment = null;
         finish();
@@ -73,7 +76,7 @@ public class GroupActivity extends FragmentActivity implements IPageAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return PrivateGroupFragment.getInstance(groupId);
+                return privateGroupFragment;
             case 1:
                 return GroupEvents.getInstance(groupId);
             case 2:

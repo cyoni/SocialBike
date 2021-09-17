@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment">
-
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true">
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -26,8 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/swipe_refresh"
-
-            android:scrollbars="vertical"
+            android:nestedScrollingEnabled="true"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" >
 
         </androidx.recyclerview.widget.RecyclerView>
@@ -40,7 +38,7 @@
         android:layout_margin="@dimen/fab_margin"
         android:contentDescription="Add new post"
         android:text="Compose"
-        android:layout_gravity="bottom|right"
+        android:layout_gravity="bottom|end"
         android:visibility="visible"
         app:backgroundTint="@color/colorAccent"
         app:elevation="10dp"
@@ -51,4 +49,4 @@
         app:tint="#ffffff" />
 
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

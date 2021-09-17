@@ -37,7 +37,6 @@ import java.util.ArrayList;
 
 public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
-    public static PrivateGroupFragment homeFragment = null;
     private final String groupId;
     private ExtendedFloatingActionButton floatingButton;
     private final ArrayList<Post> container = new ArrayList<>();
@@ -50,7 +49,6 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
     private SwipeRefreshLayout swipeLayout;
     private String eventId;
 
-
     public PrivateGroupFragment(String groupId) {
         this.groupId = groupId;
     }
@@ -58,18 +56,6 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
     public PrivateGroupFragment(String groupId, String eventId) {
         this.groupId = groupId;
         this.eventId = eventId;
-    }
-
-    public static PrivateGroupFragment getInstance(String groupId) {
-        if (homeFragment == null)
-            homeFragment = new PrivateGroupFragment(groupId);
-        return homeFragment;
-    }
-
-    public static PrivateGroupFragment getInstance(String groupId, String eventId) {
-        if (homeFragment == null)
-            homeFragment = new PrivateGroupFragment(groupId, eventId);
-        return homeFragment;
     }
 
     private void initAdapter() {
@@ -107,7 +93,7 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
 
     private void getPosts() {
         container.clear();
-        messageManager.getPosts(groupId);
+        messageManager.getPosts(groupId, eventId);
     }
 
     private void setSwipeLayout() {
@@ -127,6 +113,8 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
     private void openNewPostActivity() {
         Intent intent = new Intent(getContext(), AddPostActivity.class);
         intent.putExtra("groupId", groupId);
+        if (eventId != null)
+            intent.putExtra("eventId", eventId);
         startActivity(intent);
     }
 

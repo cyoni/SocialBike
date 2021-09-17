@@ -1,5 +1,6 @@
 package com.example.socialbike;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ public class EventsFragment extends Fragment
     private EventsManager eventsManager;
     protected ArrayList<Event> container;
     Updater.IUpdate update = this;
+    private int lastRange = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -235,7 +237,6 @@ public class EventsFragment extends Fragment
         progress = (seekBar.getProgress() / stepSize) * stepSize;
         seekBar.setProgress(progress);
 
-        eventsManager.range = seekBar.getProgress();
         eventsManager.updateSearchText();
         updateCityTextView();
     }
@@ -247,13 +248,19 @@ public class EventsFragment extends Fragment
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        getEvents();
+        eventsManager.range = seekBar.getProgress();
+        if (lastRange != eventsManager.range) {
+            eventsManager.showProgressbar();
+            lastRange = eventsManager.range;
+            getEvents();
+        }
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onFinishedUpdating() {
-        eventsManager.recyclerViewAdapter.notifyItemRangeInserted(0, container.size());
+        eventsManager.recyclerViewAdapter.notifyDataSetChanged();
         eventsManager.updateSearchText();
         eventsManager.hideProgressbar();
     }

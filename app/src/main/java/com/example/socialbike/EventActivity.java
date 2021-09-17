@@ -24,6 +24,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     public TabLayout tabLayout;
     EventDetails eventDetails;
     String groupId, eventId;
+    PrivateGroupFragment privateGroupFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +42,13 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         groupId = intent.getStringExtra("groupId");
         eventId = intent.getStringExtra("eventId");
 
+
         TabManager tabManager = new TabManager(viewPager, tabLayout, tabTitles);
         tabManager.init();
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(sectionsPagerAdapter);
+
+        privateGroupFragment = new PrivateGroupFragment(groupId, eventId);
 
         eventDetails = new EventDetails("" +
                 "" +
@@ -59,7 +63,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
             case 0:
                 return eventDetails;
             case 1:
-                return PrivateGroupFragment.getInstance(groupId, eventId);
+                return privateGroupFragment;
             default:
                 return null;
         }

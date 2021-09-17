@@ -1,5 +1,7 @@
 package com.example.socialbike;
 
+import static com.example.socialbike.Consts.EVENTS_CONTAINER_CODE;
+
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -15,8 +17,6 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.example.socialbike.Event.EVENTS_CONTAINER_CODE;
 
 public class EventsCommentsExtension {
 
