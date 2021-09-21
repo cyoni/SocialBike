@@ -5,16 +5,19 @@ import java.util.ArrayList;
 public class SubComment extends Comment {
     String subCommentId;
 
-    public SubComment(String container,
-                      String postId,
-                      String headCommentId,
+    public SubComment(
+            String postId,
+                      String commentKey,
                       String subCommentId,
                       String publicKey,
                       String name,
                       long time,
                       String msg) {
-        super(container, headCommentId, postId, publicKey, name, time, msg);
+        super(postId, commentKey, publicKey, name, time, msg);
         this.subCommentId = subCommentId;
+    }
+
+    public SubComment(){
     }
 
     public String getSubCommentId(){
@@ -26,4 +29,7 @@ public class SubComment extends Comment {
         return null;
     }
 
+    public void setSubCommentId(String subCommentId) {
+        this.subCommentId = subCommentId;
+    }
 }

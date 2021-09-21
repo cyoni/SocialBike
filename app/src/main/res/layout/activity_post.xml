@@ -70,7 +70,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-
                     <include layout="@layout/content_more_of_post" />
 
                 </LinearLayout>

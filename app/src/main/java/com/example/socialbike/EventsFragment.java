@@ -229,6 +229,7 @@ public class EventsFragment extends Fragment
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             seekBar.setMin(10);
         }
+        eventsManager.updateSearchText();
     }
 
     @Override
@@ -237,7 +238,10 @@ public class EventsFragment extends Fragment
         progress = (seekBar.getProgress() / stepSize) * stepSize;
         seekBar.setProgress(progress);
 
-        eventsManager.updateSearchText();
+        if (progress < 100)
+            eventsManager.rangeText.setText("Release to find events within " + progress + " km of");
+        else
+            eventsManager.rangeText.setText("Release to find events in");
         updateCityTextView();
     }
 

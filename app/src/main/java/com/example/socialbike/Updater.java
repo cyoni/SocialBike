@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Updater {
 
-    private final List container;
+    public final List container;
     private final RecyclerViewAdapter recyclerViewAdapter;
     protected IUpdate referenceClass;
 
@@ -31,6 +31,7 @@ public class Updater {
     public void update(int index){
         recyclerViewAdapter.notifyItemInserted(index);
     }
+
 
 
     public interface IUpdate {

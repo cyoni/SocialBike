@@ -127,7 +127,8 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
         }
         holder.message.setText(current.getMsg());
         holder.name.setText(name);
-        PostButtons postButtons = new PostButtons(getActivity(), holder, container.get(position));
+        current.setName(name);
+        PostButtons postButtons = new PostButtons(getActivity(), holder, container.get(position), groupId, eventId);
         holder.message.setOnClickListener(view -> postButtons.commentsButtonClick());
         holder.followButton.setOnClickListener(view -> postButtons.followUser(container, holder, position));
     }
@@ -139,6 +140,7 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
 
     @Override
     public void onFinishedUpdating() {
+        recyclerViewAdapter.notifyDataSetChanged();
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
         swipeLayout.setRefreshing(false);

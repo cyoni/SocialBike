@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         memberDao = MainActivity.database.memberDao();
         List<Member> members = memberDao.getAllMembers();
         for (Member member : members)
-            // memberDao.delete(member);
+             //memberDao.delete(member);
             membersMap.put(member.publicKey, member.name);
     }
 

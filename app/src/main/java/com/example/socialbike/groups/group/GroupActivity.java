@@ -25,7 +25,7 @@ public class GroupActivity extends FragmentActivity implements IPageAdapter {
     private String groupId;
     private PrivateGroupFragment privateGroupFragment;
 
-    String[] tabTitles = {"Discussion", "Events", "Members"};
+    String[] tabTitles = {"Posts", "Events", "Members"};
 
     public static GroupActivity getInstance() {
         if (groupContainer == null) {

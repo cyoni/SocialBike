@@ -20,7 +20,6 @@ public interface MemberDao {
     @Query("SELECT * FROM Member WHERE name = (:name)")
     List<Member> getUserByName(String name);
 
-
     @Insert
     void insert(Member member);
 

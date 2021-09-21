@@ -11,6 +11,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.List;
+
 @Entity
 public class Member {
 
@@ -31,6 +33,7 @@ public class Member {
     }
 
     public static void fetchName(RecyclerViewAdapter.ViewHolder holder, String publicKey) {
+        System.out.println("Getting name of " + publicKey + " from database...");
         MainActivity.mDatabase.child("public").child(publicKey).child("profile").child("nickname")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -39,7 +42,10 @@ public class Member {
                                 Member member = new Member(publicKey, String.valueOf(snapshot.getValue()));
                                 MainActivity.membersMap.put(publicKey, member.name);
                                 holder.name.setText(member.name);
-                                MainActivity.memberDao.update(member);
+                                try {
+                                    MainActivity.memberDao.insert(member);
+                                }
+                                catch(Exception ignored){}
                         }
                     }
 
@@ -48,6 +54,18 @@ public class Member {
 
                     }
                 });
+    }
+
+    public static void fetchAndSetName(RecyclerViewAdapter.ViewHolder holder, String name, String publicKey) {
+        if (holder.name.getText().toString().equals("...")){
+            String ans = getNameFromLocal(publicKey);
+            if (ans.equals("..."))
+                Member.fetchName(holder, publicKey);
+            else
+                holder.name.setText(ans);
+        }
+        else
+            holder.name.setText(name);
     }
 }
 

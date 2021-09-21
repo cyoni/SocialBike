@@ -47,7 +47,7 @@ public class EventsCommentsExtension {
     }
 
     private void getComments(RecyclerViewAdapter.ViewHolder holder, int position) {
-        eventsFragment.container.get(position).getComments()
+       /* eventsFragment.container.get(position).getComments()
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);
@@ -56,7 +56,7 @@ public class EventsCommentsExtension {
                         processComments(response, holder, position);
                     }
                     return "";
-                });
+                });*/
     }
 
 
@@ -101,7 +101,7 @@ public class EventsCommentsExtension {
                     has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
                 }
 
-                Comment comment = new Comment(EVENTS_CONTAINER_CODE, eventsFragment.container.get(position).getEventId(), commentId, publicKey, name, 8888, message);
+                Comment comment = new Comment( eventsFragment.container.get(position).getEventId(), commentId, publicKey, name, 8888, message);
 
                 LinearLayout layout = addCommentToLayout(R.layout.item_comment, comment, holder, position);
 
@@ -114,7 +114,7 @@ public class EventsCommentsExtension {
 
                     //System.out.println("Got subComment: " + subCommentsArray.getJSONObject(j).getString("commentId"));
                     System.out.println("got subcomment: " + subCommentMessage);
-                    SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, commentId, subCommentId, "33", subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
+                    SubComment subComment = new SubComment( commentId, subCommentId, "33", subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
                     addSUBCommentToLayout(layout, subComment, holder, position);
                     //comment.addSubComment(subCommentMessage);
                 }
@@ -144,7 +144,7 @@ public class EventsCommentsExtension {
                     System.out.println("response: " + commentIdFromServer);
 
                     Comment newComment = new Comment(
-                            EVENTS_CONTAINER_CODE,
+
                             eventsFragment.container.get(position).getEventId(),
                             commentIdFromServer,
                             ConnectedUser.getPublicKey(),

@@ -44,16 +44,6 @@
             android:textSize="15sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/_title"
-            android:layout_marginTop="5dp"
-            android:maxHeight="100dp"
-            android:text="This Sunday the best bibke ride is happening. The event cost 10 shekels and everyone is welcome."
-            android:textSize="15sp" />
-
 
         <TextView
             android:id="@+id/date_and_time"
@@ -87,15 +77,6 @@
             android:text="5 members going" />
 
 
-        <TextView
-            android:id="@+id/_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/person"
-            android:text="Come ride with us this Friday"
-            android:textColor="@color/black"
-            android:textSize="25sp" />
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,7 +89,17 @@
                 android:layout_height="200dp"
                 android:layout_marginTop="5dp"
                 android:scaleType="fitXY"
-                app:srcCompat="@drawable/nature1" />
+                android:src="@drawable/nature1" />
+
+            <TextView
+                android:id="@+id/_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/image"
+                android:text="Come ride with us this Friday in Tel Dan!"
+                android:textColor="@color/black"
+                android:textSize="25sp" />
+
 
             <ImageButton
                 android:id="@+id/followButton"

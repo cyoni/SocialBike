@@ -157,41 +157,44 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 
     var data = {}
     data['posts'] = []
-    var count = 0
 
-    return admin.database().ref('global_posts').once('value').then(snapshot => {
+    const groupId = request.groupId || null
+    const eventId = request.eventId || null
+
+    var route
+
+    if (groupId === null && eventId === null)
+        return "bad_request"
+    else if (groupId !== null && eventId === null){
+        route = admin.database().ref('groups').child(groupId)
+    } else if (groupId !== null && eventId !== null)
+        route = admin.database().ref('groups').child(groupId).child('events').child(eventId)
+    else if (groupId === null && eventId !== null)
+        route = admin.database().ref('events').child(eventId)
+   
+
+    return route.child('posts').once('value').then(snapshot => {
         snapshot.forEach(raw_post => {
            
-            var dataOfUser = []
-            dataOfUser = ({
+            var post = []
+            post = ({
                 postId: raw_post.key,
                 publicKey: raw_post.child('user_public_key').val(),
-                name: "",
+                name: "...",
                 message: raw_post.child('message').val(),
                 timestamp: raw_post.child('timestamp').val(),
             })
 
-            if (raw_post.child('comments_count').exists()){
-                dataOfUser['comments_count'] = 
-                     raw_post.child('comments_count').val()
-            }
+            if (raw_post.child('comments').exists())
+                post['comment_count'] = raw_post.child('comments').numChildren()
 
             if (raw_post.child('likes_count').exists()){
-                dataOfUser['likes_count'] = raw_post.child('likes_count').val()
-                dataOfUser['doesUserLikeThePost'] = raw_post.child('likes').child(userPublicId).exists()
+                post['likes_count'] = raw_post.child('likes_count').val()
+                post['doesUserLikeThePost'] = raw_post.child('likes').child(userPublicId).exists()
             }
             
-
-            data['posts'].push(dataOfUser)
+            data['posts'].push(post)
         })
-        return admin.database().ref('public').once('value')
-
-    }).then(da => {
-
-        for (var i = 0; i < data.posts.length; i++) {
-            data.posts[i].name = da.child(data.posts[i].publicKey).child('profile').child('nickname').val()
-        }
-
         return JSON.stringify(data)
     })
 })
@@ -199,61 +202,54 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 exports.getComments = functions.https.onCall(async (request, context) => {
 
     const postId = request.postId
-    const container = request.container
-     
-    if (container !== "global_posts" && container !== "events")
-        return "BAD REQUEST"
-    
+    const groupId = request.groupId
+    const eventId = request.eventId
+
+    var route;
+    if (groupId === null && eventId === null)
+        return "bad_request"
+    else if (groupId !== null && eventId === null){
+            route = admin.database().ref('groups').child(groupId)
+    } else if (groupId !== null && eventId !== null)
+                route = admin.database().ref('groups').child(groupId).child('events').child(eventId)
+    else if (groupId === null && eventId !== null)
+            route = admin.database().ref('events').child(eventId)
+
     var data = {}
     data['posts'] = []
     var counter = 0;
 
-    return admin.database().ref(container).child(postId).child('comments').once('value').then(snapshot => {
+    return route.child('posts').child(postId).child('comments').once('value').then(snapshot => {
 
         data.posts[counter] = []
 
         snapshot.forEach(raw_post => {
             var commentData = {
-                postId: raw_post.key,
-                publicKey: raw_post.child('senderPublicKey').val(),
-                name: "",
+                commentId: raw_post.key,
+                publicKey: raw_post.child('publicKey').val(),
                 message: raw_post.child('comment').val(),
                 timestamp: raw_post.child('timestamp').val()
             }
 
-
             commentData['subComments'] = []
 
-            if (raw_post.child('subComments').exists()){
-
-                raw_post.child('subComments').forEach(subComment => {
-
+            if (raw_post.child('comments').exists()){
+                raw_post.child('comments').forEach(subComment => {
                     var subCommentToInsert = {
                         commentId: subComment.key,
-                        senderPublicKey: subComment.child('senderPublicKey').val(),
-                        name: "TODO",
-                        comment: subComment.child('comment').val(),
+                        publicKey: subComment.child('publicKey').val(),
+                        message: subComment.child('comment').val(),
                         timestamp: subComment.child('timestamp').val(),
                     }
-
                     commentData.subComments.push(subCommentToInsert)
                 })
                 commentData.subComments = commentData.subComments.reverse()
             }
-
             data.posts[counter] = commentData
             counter++
         })
-        return admin.database().ref('public').once('value')
 
-    }).then(da => {
-
-        for (var i = 0; i < data.posts.length; i++) {
-            data.posts[i].name = da.child(data.posts[i].publicKey).child('profile').child('nickname').val()
-        }
-        
         data.posts = data.posts.reverse()
-
         return JSON.stringify(data)
     })
 })
@@ -432,7 +428,7 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
         return "[AUTH_FAILED]";
 
     const receiverPublicKey = request.receiver;
-    const senderPublicKey = account.publicKey
+    const publicKey = account.publicKey
     const message = request.message
     const timestamp = Date.now()
 
@@ -447,7 +443,7 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
 
     const data = {
         receiverPublicKey: receiverPublicKey,
-        senderPublicKey: senderPublicKey,
+        publicKey: publicKey,
         message: message,
         sendersName: sendersName,
         timestamp: timestamp,
@@ -509,30 +505,42 @@ exports.sendComment = functions.https.onCall(async (request, context) => {
     if (account === null)
         return "[AUTH_FAILED]";
 
-    const container = request.container
     const comment = request.comment
     const postId = request.postId
-    const replyTo = request.replyTo.trim()
+    const replyTo = request.replyTo || null
+    const groupId = request.groupId || null
+    const eventId = request.eventId || null
 
-    if (container !== "global_posts" && container !== "events")
-        return "WRONG_CONTAINER";
+    var route
+    
+    if (groupId === null && eventId !== null){ // send comment to 'events' bucket
+        route = admin.database().ref('events').child(eventId)
+    } else if (groupId !== null && eventId === null){ // send comment to group -> posts
+        route = admin.database().ref('groups').child(groupId)
+    } else if (groupId !== null && eventId !== null){ // send comment to group -> events -> posts
+        route = admin.database().ref('groups').child(groupId).child('events').child(eventId)
+    }
+    else
+        return "VALIDATION_FAILURE"
+
+    route = route.child('posts').child(postId).child('comments')
 
     const data = {
-        senderPublicKey: account.publicKey,
+        publicKey: account.publicKey,
         comment: comment,
-     //   postId: postId,
         timestamp: Date.now(),
     }
 
-    var messageId;
+    var messageId
 
-    if (replyTo !== ""){
-        messageId = await admin.database().ref(container).child(postId).child('comments').child(replyTo).push().key
-        admin.database().ref(container).child(postId).child('comments').child(replyTo).child('subComments').child(messageId).set(data)
+    if (replyTo === null){
+        messageId = await route.push().key
+        route.child(messageId).set(data)
     }
     else{
-        messageId = await (await admin.database().ref(container).child(postId).child('comments').push()).key
-        admin.database().ref(container).child(postId).child('comments').child(messageId).set(data)
+        route = route.child(replyTo).child('comments')
+        messageId = await route.push().key
+        route.child(messageId).set(data)
     }
 
     return messageId
@@ -662,7 +670,7 @@ exports.findUsers = functions.https.onCall(async (request, context) => {
     })
 })
 
-exports.like = functions.database.ref('global_posts/{postId}/likes/{userId}').onWrite(
+exports.LikePost = functions.database.ref('groups/{groupId}/{posts_or_events}/{id}/posts/{postId}/likes/{userId}').onWrite(
     async (change) => {
         const collectionRef = change.after.ref.parent;
         const countRef = collectionRef.parent.child('likes_count');
@@ -824,6 +832,7 @@ exports.commentCountTrigger = functions.database.ref('global_posts/{postId}/comm
             return "OK"
         })
 
+        // deprecated
         exports.GetGroupPosts = functions.https.onCall(async (request, context) => {
 
             const account = await verifyUser(context.auth.uid);
