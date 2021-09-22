@@ -8,11 +8,13 @@ import java.util.ArrayList;
 public class Post_Basic implements Serializable {
 
     private String publicKey, name, msg;
-    private boolean isLiked = false, doesUserLikeThePost = false;
+    @JsonProperty("doesUserLikeThePost")
+    private boolean isLiked = false;
     private long timestamp;
     private int comments_count;
     public String DatabaseContainer = "";
     protected final ArrayList<Comment> commentsContainer = new ArrayList<>();
+    @JsonProperty("likes_count")
     private int likesCount;
     public Post_Basic(){}
 
@@ -75,12 +77,12 @@ public class Post_Basic implements Serializable {
         this.timestamp = timestamp;
     }
 
-    @JsonProperty("comment_count")
+    @JsonProperty("comments_count")
     public int getCommentCount() {
         return comments_count;
     }
 
-    @JsonProperty("comment_count")
+    @JsonProperty("comments_count")
     public void setCommentCount(int commentCount) {
         this.comments_count = commentCount;
     }
@@ -95,15 +97,6 @@ public class Post_Basic implements Serializable {
         this.likesCount = likesCount;
     }
 
-    @JsonProperty("doesUserLikeThePost")
-    public boolean getDoesUserLikeThePost() {
-        return doesUserLikeThePost;
-    }
-
-    @JsonProperty("doesUserLikeThePost")
-    public void setDoesUserLikeThePost(boolean doesUserLikeThePost) {
-        this.doesUserLikeThePost = doesUserLikeThePost;
-    }
     public String getMsg() {
         return msg;
     }
@@ -127,7 +120,6 @@ public class Post_Basic implements Serializable {
     public void setIsLiked(boolean isLiked){
         this.isLiked = isLiked;
     }
-
 
     public void incrementLike() {
         this.likesCount++;

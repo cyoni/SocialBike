@@ -76,76 +76,28 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
                 });
     }
 
-    public void parseMessages(String rawData) {
-        JSONArray data = null;
-        JSONObject obj;
-        try {
-            obj = new JSONObject(rawData);
-            data = obj.getJSONArray("events");
-        } catch (Exception e) {
-            System.out.println("An error was caught in message fetcher: " + e.getMessage());
-        }
+    public void parseMessages(String data) {
+
         if (data == null || data.length() == 0) {
             // no_events_text.setVisibility(View.VISIBLE);
             update.onFinishedUpdating();
             return;
         }
 
-        if (container.size() > 0 && data.length() > 0) {
+        if (container.size() > 0) {
             container.clear();
             recyclerViewAdapter.notifyDataSetChanged();
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            EventDTO eventDTO = objectMapper.readValue(rawData, EventDTO.class);
+            EventDTO eventDTO = objectMapper.readValue(data, EventDTO.class);
             container.addAll(eventDTO.getEvents());
             update.onFinishedUpdating();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-/*
-        for (int i = 0; i < data.length(); i++) {
-
-            String user_public_key = null;
-            try {
-                user_public_key = data.getJSONObject(i).getString("user_public_key");
-                String eventDetails = data.getJSONObject(i).getString("details");
-                String name = data.getJSONObject(i).getString("name");
-                String dateOfEvent = data.getJSONObject(i).getString("date");
-                String timeOfEvent = data.getJSONObject(i).getString("time");
-                String created_event_time = data.getJSONObject(i).getString("created_event_time");
-                String event_id = data.getJSONObject(i).getString("event_id");
-                String num_interested_members = data.getJSONObject(i).getString("num_interested_members");
-                String num_participants = data.getJSONObject(i).getString("num_participants");
-                String title = data.getJSONObject(i).getString("title");
-                String address = data.getJSONObject(i).getString("address");
-                double lat = data.getJSONObject(i).getDouble("lat");
-                double lng = data.getJSONObject(i).getDouble("lng");
-                int comments_num = data.getJSONObject(i).getInt("comments_num");
-
-                int numberOfParticipants = 0;
-                if (data.getJSONObject(i).has("numberOfParticipants")
-                        && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
-                    numberOfParticipants = data.getJSONObject(i).getInt("numberOfParticipants");
-
-                Position position = new Position(new LatLng(lat, lng), title, address);
-                Event event = new Event(
-                        event_id, user_public_key, name,
-                        dateOfEvent, timeOfEvent, created_event_time,
-                        num_interested_members, numberOfParticipants,
-                        position, eventDetails, comments_num
-                );
-
-                container.add(event);
-
-                System.out.println("event  " + i + " " + eventDetails);
-            } catch (JSONException e) {
-                System.out.println("An error was caught in message fetcher: " + e.getMessage());
-            }
-        }
-*/
     }
 
     protected void changeTypeOfSearch(String type) {
@@ -166,6 +118,9 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
+        Event event = container.get(position);
+        holder.title.setText(event.getTitle());
+
     //    holder.message.setText(container.get(position).getMsg());
      //   holder.locationName.setText(container.get(position).getPosition().getLocationName());
      //   holder.time.setText(container.get(position).getTimeOfEvent());

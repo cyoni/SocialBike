@@ -12,8 +12,12 @@ import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.annotation.NonNull;
+
 import com.example.socialbike.Enums.Place;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.firestore.auth.User;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.AddressComponent;
@@ -36,7 +40,7 @@ public class Utils {
     }
 
     public static void showKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager)   activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
@@ -46,19 +50,18 @@ public class Utils {
             final String simCountry = tm.getSimCountryIso();
             if (simCountry != null && simCountry.length() == 2) { // SIM country code is available
                 return simCountry.toLowerCase(Locale.US);
-            }
-            else if (tm.getPhoneType() != TelephonyManager.PHONE_TYPE_CDMA) { // device is not 3G (would be unreliable)
+            } else if (tm.getPhoneType() != TelephonyManager.PHONE_TYPE_CDMA) { // device is not 3G (would be unreliable)
                 String networkCountry = tm.getNetworkCountryIso();
                 if (networkCountry != null && networkCountry.length() == 2) { // network country code is available
                     return networkCountry.toLowerCase(Locale.US);
                 }
             }
+        } catch (Exception e) {
         }
-        catch (Exception e) { }
         return null;
     }
 
-    public static Position getLatLngOfString(String address){
+    public static Position getLatLngOfString(String address) {
         GeocodingResult[] request = new GeocodingResult[0];
         try {
             request = GeocodingApi.newRequest(geoApiContext).address(address).await();
@@ -77,13 +80,13 @@ public class Utils {
     }
 
 
-    public static void savePreference(Activity activity, String preferenceFolder, String key, String value){
+    public static void savePreference(Activity activity, String preferenceFolder, String key, String value) {
         SharedPreferences.Editor editor = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE).edit();
         editor.putString(key, value);
         editor.apply();
     }
 
-    public static String getPreference(Activity activity, String preferenceFolder, String key){
+    public static String getPreference(Activity activity, String preferenceFolder, String key) {
         SharedPreferences prefs = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE);
         return prefs.getString(key, null);
     }
@@ -99,4 +102,61 @@ public class Utils {
         }
         return null;
     }
+
+    public static void registerLike(Post post, String groupId, String eventId, boolean state) {
+        DatabaseReference route = null;
+
+        if (post instanceof Comment) {
+            if (groupId != null && eventId == null)
+                route = MainActivity.
+                        mDatabase.
+                        child("groups").
+                        child(groupId);
+
+            else if (groupId == null && eventId != null)
+                route = MainActivity.
+                        mDatabase.
+                        child("events").
+                        child(eventId);
+
+            else if (groupId != null && eventId != null)
+                route = MainActivity.
+                        mDatabase.
+                        child("groups").
+                        child(groupId).
+                        child("events").
+                        child(eventId);
+
+            route = route.child("posts").
+                    child(post.getPostId()).
+                    child("comments").
+                    child(((Comment) post).
+                            getCommentKey());
+        } else {
+
+            if (eventId == null)
+                route = MainActivity.
+                        mDatabase.
+                        child("groups").
+                        child(groupId);
+            else
+                route = MainActivity.
+                        mDatabase.
+                        child("events").
+                        child(eventId);
+
+            route = route.child("posts").
+                    child(post.getPostId());
+        }
+
+        route = route.
+                child("likes").
+                child(ConnectedUser.getPublicKey());
+
+        if (state)
+            route.setValue(true);
+        else
+            route.removeValue();
+    }
+
 }

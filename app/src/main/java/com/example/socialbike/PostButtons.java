@@ -57,11 +57,11 @@ public class PostButtons {
     public void likeButtonClick() {
         if (post.getIsLiked()) {
             post.setIsLiked(false);
-            registerLike(post, false);
+            Utils.registerLike(post, groupId, eventId, false);
             post.decrementLike();
         } else {
             post.setIsLiked(true);
-            registerLike(post, true);
+            Utils.registerLike(post, groupId, eventId, true);
             post.incrementLike();
         }
         setLikeButton();
@@ -85,36 +85,6 @@ public class PostButtons {
             likeButton.setImageResource(R.drawable.ic_like_pressed);
         else
             likeButton.setImageResource(R.drawable.ic_like);
-    }
-
-    private void registerLike(Post post, boolean state) {
-        DatabaseReference route;
-
-        if (post instanceof Comment) {
-            System.out.println("comment TODO");
-            return;
-        }
-
-        if (eventId == null)
-            route = MainActivity.
-                    mDatabase.
-                    child("groups").
-                    child(groupId);
-         else
-            route = MainActivity.
-                    mDatabase.
-                    child("events").
-                    child(eventId);
-
-        route = route.child("posts").
-                child(post.getPostId()).
-                child("likes").
-                child(ConnectedUser.getPublicKey());
-
-        if (state)
-            route.setValue("ok");
-        else
-            route.removeValue();
     }
 
     public void followUser(ArrayList<Post> container, RecyclerViewAdapter.ViewHolder holder, int position) {

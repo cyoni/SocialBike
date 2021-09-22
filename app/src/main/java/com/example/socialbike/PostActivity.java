@@ -128,52 +128,6 @@ public class PostActivity extends AppCompatActivity
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-/*
-        try {
-            JSONObject obj = new JSONObject(rawComments);
-            JSONArray messages_array = obj.getJSONArray("posts");
-
-            for (int i = 0; i < messages_array.length(); i++) {
-
-                String publicKey = messages_array.getJSONObject(i).getString("publicKey");
-                String message = messages_array.getJSONObject(i).getString("message");
-                long time = messages_array.getJSONObject(i).getLong("timestamp");
-                String commentId = messages_array.getJSONObject(i).getString("commentId");
-
-                JSONArray subCommentsArray = messages_array.getJSONObject(i).getJSONArray("subComments");
-
-
-                Comment comment = new Comment(post.getPostId(), commentId, publicKey, "...", time, message);
-
-                for (int j = 0; j < subCommentsArray.length(); j++) {
-                    String subCommentMessage = subCommentsArray.getJSONObject(j).getString("comment");
-                    String subCommentId = subCommentsArray.getJSONObject(j).getString("commentId");
-                    String subCommentSenderPublicKey = subCommentsArray.getJSONObject(j).getString("senderPublicKey");
-                    int subCommentTimestamp = subCommentsArray.getJSONObject(j).getInt("timestamp");
-
-
-                    SubComment subComment = new SubComment(
-                            post.getPostId(),
-                            commentId,
-                            subCommentId,
-                            subCommentSenderPublicKey,
-                            "...",
-                            subCommentTimestamp,
-                            subCommentMessage
-                    );
-
-                    comment.addSubComment(subComment);
-                }
-
-                updater.add(comment);
-
-                System.out.println("msg " + i + " " + message);
-            }
-        } catch (Exception e) {
-            System.out.println("Error caught in message fetcher: " + e.getMessage());
-        }
-*/
     }
 
 
@@ -248,10 +202,10 @@ public class PostActivity extends AppCompatActivity
         Comment comment = commentsContainer.get(position);
         if (comment.getIsLiked()) {
             holder.likeTextButton.setTextColor(getResources().getColor(R.color.default_black));
-            comment.registerLike(false);
+            Utils.registerLike(comment, groupId, eventId, false);
         } else {
             holder.likeTextButton.setTextColor(getResources().getColor(R.color.black));
-            comment.registerLike(true);
+            Utils.registerLike(comment, groupId, eventId, true);
         }
     }
 
