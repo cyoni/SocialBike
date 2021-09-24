@@ -24,7 +24,9 @@ import com.google.maps.model.AddressComponent;
 import com.google.maps.model.GeocodingResult;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class Utils {
 
@@ -104,9 +106,15 @@ public class Utils {
     }
 
     public static void registerLike(Post post, String groupId, String eventId, boolean state) {
-        DatabaseReference route = null;
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("eventId", eventId);
+        data.put("groupId", groupId);
 
         if (post instanceof Comment) {
+            data.put("commentId", ((Comment) post).getCommentKey());
+            data.put("postId", post.getPostId());
+        /*
             if (groupId != null && eventId == null)
                 route = MainActivity.
                         mDatabase.
@@ -146,17 +154,21 @@ public class Utils {
                         child(eventId);
 
             route = route.child("posts").
-                    child(post.getPostId());
+                    child(post.getPostId());*/
         }
-
+/*
         route = route.
                 child("likes").
-                child(ConnectedUser.getPublicKey());
+                child(ConnectedUser.getPublicKey());*/
 
-        if (state)
+        MainActivity.mFunctions
+                .getHttpsCallable("RegisterLike")
+                .call(data);
+
+/*        if (state)
             route.setValue(true);
         else
-            route.removeValue();
+            route.removeValue();*/
     }
 
 }

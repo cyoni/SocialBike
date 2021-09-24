@@ -10,8 +10,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
@@ -22,6 +24,8 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 
+import org.w3c.dom.Text;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -29,12 +33,9 @@ import java.util.Map;
 
 public class AddNewEventActivity extends AppCompatActivity {
 
-    private EditText time, date, details, title, mapButton;
+    private EditText details, title, mapButton;
+    private TextView time, date, time2, date2;
     private Button submitButton;
-    private Button dateButton;
-    private Button timeButton;
-
-
     private Position position;
     private String groupId;
 
@@ -50,9 +51,15 @@ public class AddNewEventActivity extends AppCompatActivity {
 
         time = findViewById(R.id.time);
         date = findViewById(R.id.date);
+        date2 = findViewById(R.id.date2);
+        time2 = findViewById(R.id.time2);
+
+        date.setText(Date.convertDateToDay(Date.getDate()));
+        date2.setText(date.getText().toString());
+        time.setText(Date.convertTime(Date.getTime()));
+        time2.setText(time.getText().toString());
+
         details = findViewById(R.id.content);
-        dateButton = findViewById(R.id.dateButton);
-        timeButton = findViewById(R.id.timeButton);
         mapButton = findViewById(R.id.map_button);
         title = findViewById(R.id.title);
         setButtonListeners();
@@ -128,8 +135,10 @@ public class AddNewEventActivity extends AppCompatActivity {
         setLocationInputListener();
 
         mapButton.setOnClickListener(view -> startMapsActivity());
-        dateButton.setOnClickListener(view -> openDateAndTimeDialog(true));
-        timeButton.setOnClickListener(view -> openDateAndTimeDialog(false));
+        date.setOnClickListener(view -> openDateAndTimeDialog(true, date, date2));
+        time.setOnClickListener(view -> openDateAndTimeDialog(false, time, time2));
+        time2.setOnClickListener(view -> openDateAndTimeDialog(false, time2, null));
+        date2.setOnClickListener(view -> openDateAndTimeDialog(true, date2, null));
 
         submitButton = findViewById(R.id.submit);
         submitButton.setOnClickListener(view -> {
@@ -171,8 +180,8 @@ public class AddNewEventActivity extends AppCompatActivity {
         Maps.openMap(this, position);
     }
 
-    private void openDateAndTimeDialog(boolean isDataLayout) {
-        DateAndTimeDialog dateAndTimeDialog = new DateAndTimeDialog(this, R.layout.date_time_layout, isDataLayout);
+    private void openDateAndTimeDialog(boolean isDataLayout, TextView view, TextView view2) {
+        DateAndTimeDialog dateAndTimeDialog = new DateAndTimeDialog(this, R.layout.date_time_layout, isDataLayout, view, view2);
         dateAndTimeDialog.show();
     }
 

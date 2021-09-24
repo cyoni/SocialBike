@@ -120,6 +120,17 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Event event = container.get(position);
         holder.title.setText(event.getTitle());
+        holder.date_and_time.setText(event.getDate() + " " + event.getTime());
+        if (event.getNumParticipants() > 1) {
+            holder.people_going.setVisibility(View.VISIBLE);
+            holder.people_going.setText(event.getNumParticipants() + " people going");
+        }
+        else
+            holder.people_going.setVisibility(View.GONE);
+        if (event.getAddress() == null)
+            holder.location.setVisibility(View.GONE);
+        else
+            holder.location.setText(event.getAddress());
 
     //    holder.message.setText(container.get(position).getMsg());
      //   holder.locationName.setText(container.get(position).getPosition().getLocationName());
@@ -138,9 +149,10 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getContext(), EventActivity.class);
-                if (container.get(position).getGroupId() != null)
+             /*   if (container.get(position).getGroupId() != null)
                     intent.putExtra("groupId", container.get(position).getGroupId());
-                intent.putExtra("eventId", container.get(position).getEventId());
+                intent.putExtra("eventId", container.get(position).getEventId());*/
+                intent.putExtra("event", container.get(position));
                 getContext().startActivity(intent);
             }
         });

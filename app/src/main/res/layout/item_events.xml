@@ -67,7 +67,7 @@
             android:text="Hayarkon Park" />
 
         <TextView
-            android:id="@+id/person"
+            android:id="@+id/going_count"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/location"

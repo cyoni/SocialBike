@@ -7,23 +7,34 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class DateAndTimeDialog extends Dialog {
 
     private final int layout;
     private final boolean isDateLayout;
     private final AddNewEventActivity callerClass;
+    private final TextView view;
+    private final TextView view2;
     private DatePicker date_picker;
     private TimePicker time_picker;
 
     Button cancelButton, applyButton;
 
-    public DateAndTimeDialog(@NonNull AddNewEventActivity context, int layout, boolean isDateLayout) {
+    public DateAndTimeDialog(@NonNull AddNewEventActivity context, int layout, boolean isDateLayout, TextView view, TextView view2) {
         super(context);
         this.layout = layout;
+        this.view = view;
+        this.view2 = view2;
         this.isDateLayout = isDateLayout;
         callerClass = context;
     }
@@ -55,10 +66,18 @@ public class DateAndTimeDialog extends Dialog {
     }
 
     private void apply() {
-        if (isDateLayout)
-            callerClass.setDate(date_picker.getDayOfMonth() + "/" + (date_picker.getMonth() + 1) + "/" + date_picker.getYear());
-        else
-            callerClass.setTime(time_picker.getHour() + ":" + time_picker.getMinute());
+        if (isDateLayout) {
+            String date = String.format(Locale.US,"%d/%d/%d", date_picker.getDayOfMonth(), (date_picker.getMonth() + 1), date_picker.getYear());
+            view.setText(Date.convertDateToDay(date));
+        }
+        else {
+            String time = String.format("%d.%d", time_picker.getHour(), time_picker.getMinute());
+            view.setText(Date.convertTime(time));
+        }
+
+        if (view.getId() == R.id.time || view.getId() == R.id.date){
+            view2.setText(view.getText().toString());
+        }
         dismiss();
     }
 

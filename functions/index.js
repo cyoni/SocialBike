@@ -92,12 +92,16 @@ exports.AddNewPost = functions.https.onCall(async (snapshot, context) => {
         user_public_key: myPublicKey
     };
 
-    var route = admin.database().ref('groups').child(groupId)
+    var route
 
-    if (eventId === null)
-        route = route.child('posts')
+    if (groupId !== null && eventId === null)
+        route = admin.database().ref('groups').child(groupId).child('posts')
+    else if (groupId !== null && eventId !== null)
+        route = admin.database().ref('groups').child(groupId).child('events').child(eventId).child('posts')
+    else if (groupId === null && eventId !== null)
+        route = admin.database().ref('events').child(eventId).child('posts')
     else
-        route = route.child('events').child(eventId).child('posts')
+        return "failure"
 
     const post_id = await route.push().key
     const set_data = route.child(post_id).set(data);
@@ -110,7 +114,6 @@ exports.AddNewPost = functions.https.onCall(async (snapshot, context) => {
     await set_data
     await incrementMyPostsCounter
     return post_id;
-
 });
 
 exports.updateProfile = functions.https.onCall(async (request, context) => {
@@ -851,6 +854,24 @@ exports.LeaveGroup = functions.https.onCall(async (request, context) => {
 
     return "OK"
 })
+
+
+
+exports.RegisterLike = functions.https.onCall(async (request, context) => {
+
+    const account = await verifyUser(context.auth.uid);
+    if (account === null)
+        return "AUTH_FAILED"
+
+    const groupId = request.groupId || null
+    const eventId = request.eventId || null
+    const commentId = request.commentId || null
+    const postId = request.postId || null
+
+    
+
+})
+
 
 // deprecated
 exports.GetGroupPosts = functions.https.onCall(async (request, context) => {

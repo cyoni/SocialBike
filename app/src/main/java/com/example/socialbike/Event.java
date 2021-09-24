@@ -3,7 +3,9 @@ package com.example.socialbike;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Event extends Post {
+import java.io.Serializable;
+
+public class Event extends Post implements Serializable {
 
     @JsonProperty("event_id")
     private String eventId;

@@ -7,6 +7,8 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.example.socialbike.events.EventDetails;
 import com.example.socialbike.groups.GroupFragment;
@@ -18,13 +20,15 @@ import com.example.socialbike.groups.group.MembersGroupFragment;
 import com.example.socialbike.groups.group.PrivateGroupFragment;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.Serializable;
+
 public class EventActivity extends AppCompatActivity implements IPageAdapter {
 
     String[] tabTitles = {"Details", "Discussion"};
     public TabLayout tabLayout;
     EventDetails eventDetails;
-    String groupId, eventId;
     PrivateGroupFragment privateGroupFragment;
+    private Event event;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,21 +43,27 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         tabLayout = findViewById(R.id.tabs);
 
         Intent intent = getIntent();
-        groupId = intent.getStringExtra("groupId");
-        eventId = intent.getStringExtra("eventId");
-
+        event = (Event) intent.getSerializableExtra("event");
 
         TabManager tabManager = new TabManager(viewPager, tabLayout, tabTitles);
         tabManager.init();
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(sectionsPagerAdapter);
 
-        privateGroupFragment = new PrivateGroupFragment(groupId, eventId);
+        privateGroupFragment = new PrivateGroupFragment(event.getGroupId(), event.getEventId());
+        eventDetails = new EventDetails(event.getDetails());
 
-        eventDetails = new EventDetails("" +
-                "" +
-                "טיול מיטיבי לכת כפול: מחורבת מנות נרד אל מבצר המונפורט המרשים ומשם בשביל מוצל אל בריכות המים בנחל כזיב לרחצה בעין טמיר ונסיים במצד אבירים. לא חובה להרטב !" +
-                "");
+        setAllFields();
+
+
+    }
+
+    private void setAllFields() {
+        TextView date_and_time = findViewById(R.id.date_and_time);
+        date_and_time.setText(event.getDate());
+        TextView location = findViewById(R.id.location);
+        location.setText(event.getAddress());
+
 
     }
 

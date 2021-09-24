@@ -53,10 +53,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView name, message, date,
+        public TextView name, message, date, date_and_time,
                 time, msgStyle, message_preview,
                 comments, people_going, locationName, red_dot, likes, comments_count,
-                replyButton, likeTextButton, description, title, memberCount;
+                replyButton, likeTextButton, description, title, memberCount, location;
         public TextView mapButton;
         public Button interested, coming, joinButton;
         public RelativeLayout layout;
@@ -76,6 +76,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             layout = itemView.findViewById(R.id.layout);
             commentsButton = itemView.findViewById(R.id.commentsButton);
             description = itemView.findViewById(R.id.description);
+            location = itemView.findViewById(R.id.location);
             title = itemView.findViewById(R.id.title);
       //      commentButton = itemView.findViewById(R.id.commentButton);
             comments_count = itemView.findViewById(R.id.comments);
@@ -85,11 +86,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             comments = itemView.findViewById(R.id.headCommentText);
             relativelayout = itemView.findViewById(R.id.relativelayout);
             commentLayout = itemView.findViewById(R.id.commentLayout);
+            date_and_time = itemView.findViewById(R.id.date_and_time);
        //     interested = itemView.findViewById(R.id.interested);
         //    coming = itemView.findViewById(R.id.coming);
        //     who_is_coming = itemView.findViewById(R.id.who_is_coming);
        //     who_is_interested = itemView.findViewById(R.id.who_is_interested);
-            people_going = itemView.findViewById(R.id.date_and_time);
+            people_going = itemView.findViewById(R.id.going_count);
             progressBar = itemView.findViewById(R.id.progressBar);
             mapButton = itemView.findViewById(R.id.map_button);
             memberCount = itemView.findViewById(R.id.memberCount);
