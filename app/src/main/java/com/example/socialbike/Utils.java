@@ -12,12 +12,8 @@ import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import androidx.annotation.NonNull;
-
 import com.example.socialbike.Enums.Place;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.firestore.auth.User;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.AddressComponent;
@@ -93,6 +89,16 @@ public class Utils {
         return prefs.getString(key, null);
     }
 
+    public static Map<String, ?> getAllPreferences(Activity activity, String preferenceFolder) {
+        SharedPreferences prefs = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE);
+        return prefs.getAll();
+    }
+
+    public static void removePreference(EventActivity activity, String preferenceFolder, String key) {
+        SharedPreferences prefs = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE);
+        prefs.edit().remove(key).apply();
+    }
+
     public static String getEntity(GeocodingResult results, Place entity) {
         AddressComponent[] addressComponents = results.addressComponents;
         for (AddressComponent current : addressComponents) {
@@ -105,70 +111,24 @@ public class Utils {
         return null;
     }
 
-    public static void registerLike(Post post, String groupId, String eventId, boolean state) {
+    public static void registerLike(Post post, String groupId, String eventId) {
 
         Map<String, Object> data = new HashMap<>();
         data.put("eventId", eventId);
         data.put("groupId", groupId);
+        data.put("postId", post.getPostId());
 
         if (post instanceof Comment) {
             data.put("commentId", ((Comment) post).getCommentKey());
-            data.put("postId", post.getPostId());
-        /*
-            if (groupId != null && eventId == null)
-                route = MainActivity.
-                        mDatabase.
-                        child("groups").
-                        child(groupId);
-
-            else if (groupId == null && eventId != null)
-                route = MainActivity.
-                        mDatabase.
-                        child("events").
-                        child(eventId);
-
-            else if (groupId != null && eventId != null)
-                route = MainActivity.
-                        mDatabase.
-                        child("groups").
-                        child(groupId).
-                        child("events").
-                        child(eventId);
-
-            route = route.child("posts").
-                    child(post.getPostId()).
-                    child("comments").
-                    child(((Comment) post).
-                            getCommentKey());
-        } else {
-
-            if (eventId == null)
-                route = MainActivity.
-                        mDatabase.
-                        child("groups").
-                        child(groupId);
-            else
-                route = MainActivity.
-                        mDatabase.
-                        child("events").
-                        child(eventId);
-
-            route = route.child("posts").
-                    child(post.getPostId());*/
+            data.put("subCommentId", ((SubComment) post).getSubCommentId());
         }
-/*
-        route = route.
-                child("likes").
-                child(ConnectedUser.getPublicKey());*/
 
         MainActivity.mFunctions
                 .getHttpsCallable("RegisterLike")
                 .call(data);
 
-/*        if (state)
-            route.setValue(true);
-        else
-            route.removeValue();*/
     }
+
+
 
 }

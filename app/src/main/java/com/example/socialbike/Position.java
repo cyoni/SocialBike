@@ -32,6 +32,10 @@ public class Position {
 
     }
 
+    public Position(double lat, double lng) {
+        this.latLng = new LatLng(lat, lng);
+    }
+
 
     public LatLng getLatLng() {
         return latLng;

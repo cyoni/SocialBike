@@ -202,11 +202,10 @@ public class PostActivity extends AppCompatActivity
         Comment comment = commentsContainer.get(position);
         if (comment.getIsLiked()) {
             holder.likeTextButton.setTextColor(getResources().getColor(R.color.default_black));
-            Utils.registerLike(comment, groupId, eventId, false);
         } else {
             holder.likeTextButton.setTextColor(getResources().getColor(R.color.black));
-            Utils.registerLike(comment, groupId, eventId, true);
         }
+        Utils.registerLike(comment, groupId, eventId);
     }
 
     private void handleSubComments(RecyclerViewAdapter.ViewHolder holder, int position) {

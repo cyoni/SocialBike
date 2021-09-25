@@ -59,7 +59,7 @@ public class Member {
     public static void fetchAndSetName(RecyclerViewAdapter.ViewHolder holder, String name, String publicKey) {
         if (holder.name.getText().toString().equals("...")){
             String ans = getNameFromLocal(publicKey);
-            if (ans.equals("..."))
+            if (ans.isEmpty() || ans.equals("..."))
                 Member.fetchName(holder, publicKey);
             else
                 holder.name.setText(ans);

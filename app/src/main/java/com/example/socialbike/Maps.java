@@ -52,13 +52,14 @@ public class Maps extends FragmentActivity implements OnMapReadyCallback {
         }
     }
 
-    public static void openMap(Activity activity, Position position) {
+    public static void openMap(Activity activity, Position position, boolean isForDisplayOnly) {
         Intent intent = new Intent(activity, MapsActivity.class);
         if (position != null) {
             intent.putExtra("lng", position.getLatLng().longitude);
             intent.putExtra("lat", position.getLatLng().latitude);
         }
         intent.putExtra("name", "");
+        intent.putExtra("isForDisplayOnly", isForDisplayOnly);
         activity.startActivityForResult(intent, ADDRESS_FROM_MAPS_CODE);
     }
 }

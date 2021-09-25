@@ -19,7 +19,7 @@ public class Event extends Post implements Serializable {
     @JsonProperty("time")
     private String eventTime;
     @JsonProperty("num_interested_members")
-    private String numInterestedMembers;
+    private int numInterestedMembers;
     @JsonProperty("num_participants")
     private int numParticipants;
     private double lat;
@@ -30,13 +30,14 @@ public class Event extends Post implements Serializable {
     private String commentsNum;
     private String elementScore;
     private Position position;
+    private boolean isInterested, isGoing;
 
     public Event(){
         super();
     }
     public Event(String eventId, String userPublicKey, String name,
                  String dateOfEvent, String timeOfEvent, String createdEventTime,
-                 String amountOfInterestedPeople, int numberOfParticipants,
+                 int amountOfInterestedPeople, int numberOfParticipants,
                  Position position, String message, int commentsNumber) {
 
         super(eventId, userPublicKey, name, Date.getTimeInMiliSecs(), message, 0, commentsNumber, false);
@@ -135,12 +136,12 @@ public class Event extends Post implements Serializable {
     }
 
     @JsonProperty("num_interested_members")
-    public String getNumInterestedMembers() {
+    public int getNumInterestedMembers() {
         return numInterestedMembers;
     }
 
     @JsonProperty("num_interested_members")
-    public void setNumInterestedMembers(String numInterestedMembers) {
+    public void setNumInterestedMembers(int numInterestedMembers) {
         this.numInterestedMembers = numInterestedMembers;
     }
 
@@ -214,4 +215,26 @@ public class Event extends Post implements Serializable {
         this.elementScore = elementScore;
     }
 
+    public boolean getIsInterested(){
+        return this.isInterested;
+    }
+    public boolean getIsGoing(){
+        return this.isGoing;
+    }
+
+    public void setIsInterested(boolean state){
+        int inc = state ? 1 : -1;
+        this.setNumInterestedMembers(getNumInterestedMembers() + inc);
+        this.isInterested = state;
+    }
+
+    public void setIsGoing(boolean state){
+        int inc = state ? 1 : -1;
+        this.setNumParticipants(getNumParticipants() + inc);
+        this.isGoing = state;
+    }
+
+    public Position getPosition() {
+        return new Position(getLat(), getLng());
+    }
 }

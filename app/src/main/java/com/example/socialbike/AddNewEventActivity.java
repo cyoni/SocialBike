@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,11 +23,14 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 
-import org.w3c.dom.Text;
-
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class AddNewEventActivity extends AppCompatActivity {
@@ -141,9 +143,21 @@ public class AddNewEventActivity extends AppCompatActivity {
         date2.setOnClickListener(view -> openDateAndTimeDialog(true, date2, null));
 
         submitButton = findViewById(R.id.submit);
-        submitButton.setOnClickListener(view -> {
-            postEvent();
-        });
+        submitButton.setOnClickListener(view -> convertTimes());
+    }
+
+    public void convertTimes(){
+       // String dateTime = this.date.getText().toString() + " " + this.time.getText().toString();
+     //   SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yy");
+    //    Date _date = simpleDateFormat.parse(dateTime.toString("EEE, d MMM yyyy h:mm aa"));
+
+        String dateInString = this.date.getText().toString() + " " + this.time.getText().toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, d MMM yyyy h:mm a", Locale.ENGLISH);
+        LocalDate dateTime = LocalDate.parse(dateInString, formatter);
+        java.util.Date date = java.util.Date.from(dateTime.atStartOfDay(ZoneId.of( "America/Montreal" )).toInstant());
+        System.out.println(date.getTime());
+
+
     }
 
     private void setLocationInputListener() {
@@ -177,7 +191,7 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void startMapsActivity() {
-        Maps.openMap(this, position);
+        Maps.openMap(this, position, true);
     }
 
     private void openDateAndTimeDialog(boolean isDataLayout, TextView view, TextView view2) {

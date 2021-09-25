@@ -4,10 +4,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.MediaRouteButton;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 
@@ -18,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -45,6 +50,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Position position = null;
     private EditText search_bar;
     private Button set_button;
+    Toolbar toolbar;
+    private ImageView pin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,15 +60,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         search_layout = findViewById(R.id.search_layout);
         search_bar = findViewById(R.id.search_bar);
         search_bar.setOnClickListener(view -> openSearchBar());
 
+
         Button search_button = findViewById(R.id.search_button);
         set_button = findViewById(R.id.set_button);
+
+        pin = findViewById(R.id.pin);
 
         showOnlyLayout(search_layout);
         set_button.setOnClickListener(view -> set());
@@ -160,7 +170,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         double lat = data.getDouble("lat", 32.078436);
         double lng = data.getDouble("lng", 34.802066);
-        LatLng latLng = new LatLng(lat, lng);
+        boolean isForDisplayOnly = data.getBoolean("isForDisplayOnly", false);
+        LatLng latLng;
 
        // setMarker(new Position(latLng, null, null));
 
@@ -172,6 +183,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 1));
             }
      //   }
+
+        if (isForDisplayOnly){
+            toolbar.setVisibility(View.GONE);
+            search_bar.setVisibility(View.GONE);
+            pin.setVisibility(View.GONE);
+            ImageButton return_button = findViewById(R.id.return_button);
+            return_button.setVisibility(View.VISIBLE);
+            return_button.setOnClickListener(view -> finish());
+            mMap.addMarker(new MarkerOptions()
+                    .position(position.getLatLng()));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position.getLatLng(), 15));
+        }
     }
 
     public LatLng getLatLngOfString(String address){

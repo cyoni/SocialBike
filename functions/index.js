@@ -292,6 +292,8 @@ function distanceFromMe(lat1, lon1, lat2, lon2) {
 
 exports.getEvents = functions.https.onCall(async (request, context) => {
 
+    const account = await verifyUser(context.auth.uid)
+
     const dataType = request.dataType
     var data = {}
     data['events'] = []
@@ -333,6 +335,8 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                     title: raw_data.child('title').val(),
                     address: raw_data.child('address').val(),
                     comments_num: raw_data.child('comments').numChildren(),
+                    isGoing: raw_data.child('going').child(account.publicKey).exists(),
+                    isInterested: raw_data.child('interested').child(account.publicKey).exists(),
                 }
 
                 if (groupId !== null)
@@ -594,33 +598,30 @@ exports.going = functions.https.onCall(async (request, context) => {
 
 exports.getMemberList = functions.https.onCall(async (request, context) => {
 
-    const privateKey = context.auth.uid;
-    const account = await verifyUser(privateKey);
-    const eventId = request.eventId
+    const eventId = request.eventId || null
+    const groupId = request.groupId || null
     const keyName = request.keyName
-
-    if (account === null)
-        return "[AUTH_FAILED]"
 
     if (keyName !== "going" && keyName !== "interested")
         return "[FAIL]"
 
+    var route
+    if (groupId !== null)
+        route = admin.database().ref('groups').child(groupId).child('events').child(eventId).child(keyName)
+    else 
+        route = admin.database().ref('events').child(eventId).child(keyName)
+
     var data = {}
     data['members'] = []
-    return admin.database().ref('events').child(eventId).child(keyName).once('value').then(snapshot => {
+    return route.once('value').then(snapshot => {
 
         snapshot.forEach(raw_data => {
             data.members.push(raw_data.key)
         })
-        return admin.database().ref('public').once('value')
-    }).then(snapshot => {
-        for (var i = 0; i < data.members.length; i++)
-            data.members[i] = snapshot.child(data.members[i]).child('profile').child('nickname').val()
-
+        
         data.members = data.members.reverse()
         return JSON.stringify(data)
     })
-
 })
 
 
@@ -676,21 +677,6 @@ exports.findUsers = functions.https.onCall(async (request, context) => {
     })
 })
 
-
-exports.LikePostInEvent = functions.database.ref('events/{eventId}/posts/{postId}/likes/{userId}'). onWrite(
-    async (change) => {
-        return LikeHandler(change)
-    })
-
-exports.LikePost = functions.database.ref('groups/{groupId}/posts/{postId}/likes/{userId}').onWrite(
-    async (change) => {
-        return LikeHandler(change)
-    })
-
-exports.LikeEventInGroup = functions.database.ref('groups/{groupId}/{events}/{id}/posts/{postId}/likes/{userId}').onWrite(
-    async (change) => {
-        return LikeHandler(change)
-    });
 
 
 async function LikeHandler(change) {
@@ -867,8 +853,47 @@ exports.RegisterLike = functions.https.onCall(async (request, context) => {
     const eventId = request.eventId || null
     const commentId = request.commentId || null
     const postId = request.postId || null
+    const subCommentId = request.subCommentId || null
 
+    var route
+
+    if (groupId !== null){
+        if (eventId === null)
+            route = admin.database().ref('groups').child(groupId).child('posts').child(postId)
+         else
+            route = admin.database().ref('groups').child(groupId).child('events').child(eventId).child('posts').child(postId)
+    }
+    else if (eventId !== null){
+        route = admin.database().ref('events').child(eventId).child('posts').child(postId)
+    }
+
+    if (commentId !== null){
+        route = route.child('comments').child(commentId)
+        if (subCommentId !== null)
+            route = route.child('comments').child(subCommentId)
+    }
+
+    route = route.child('likes').child(account.publicKey)
+
+    var increment
+    const x = await route.once('value')
+    if (x.exists()){
+        // delete
+        increment = -1
+        route.remove()
+    } else{
+        // create
+        increment = 1
+        route.set(true)
+    }
     
+    const incrementMyPostsCounter = route.parent.parent.child('likes_count').transaction((current) => {
+        return (current || 0) + increment;
+    });
+
+    await incrementMyPostsCounter
+
+    return "OK"
 
 })
 

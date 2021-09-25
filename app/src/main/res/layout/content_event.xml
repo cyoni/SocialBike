@@ -82,24 +82,30 @@
         android:gravity="center">
 
         <Button
+            android:id="@+id/interested_button"
             style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableTop="@drawable/ic_baseline_star_border_24"
+            android:layout_marginEnd="2dp"
             android:text="Interested" />
 
         <Button
+            android:id="@+id/going_button"
             style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableTop="@drawable/ic_baseline_done_24"
+            android:layout_marginEnd="2dp"
             android:text="Going" />
 
         <Button
+            android:id="@+id/save_button"
             style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableTop="@drawable/ic_baseline_add_24"
+            android:layout_marginEnd="2dp"
             android:text="Save" />
 
     </LinearLayout>
@@ -113,12 +119,18 @@
         android:gravity="center">
 
         <LinearLayout
+            android:id="@+id/interested_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:orientation="vertical">
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:minWidth="80dp"
+            android:orientation="vertical"
+            android:padding="5dp">
 
             <TextView
+                android:id="@+id/interested_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -136,12 +148,18 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/going_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:orientation="vertical">
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:minWidth="80dp"
+            android:orientation="vertical"
+            android:padding="5dp">
 
             <TextView
+                android:id="@+id/going_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"

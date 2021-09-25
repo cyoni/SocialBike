@@ -26,7 +26,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="15dp"
         android:layout_toEndOf="@id/profile_image"
-        android:text="Yoni"
+        android:text="..."
         android:textStyle="bold" />
 
 </RelativeLayout>

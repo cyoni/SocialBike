@@ -182,55 +182,6 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     }
 
 
-    private void markAsGoing(RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.coming.setEnabled(false);
-
-        System.out.println(container.get(position).getEventId());
-        Map<String, Object> data = new HashMap<>();
-        data.put("eventId", container.get(position).getEventId());
-
-        MainActivity.mFunctions
-                .getHttpsCallable("going")
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    holder.coming.setEnabled(true);
-                    return "";
-                });
-    }
-
-    private void markAsInterested(RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.interested.setEnabled(false);
-
-        System.out.println(container.get(position).getEventId());
-        Map<String, Object> data = new HashMap<>();
-        data.put("eventId", container.get(position).getEventId());
-
-        MainActivity.mFunctions
-                .getHttpsCallable("interested")
-                .call(data)
-                .continueWith(task -> {
-
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    holder.interested.setEnabled(true);
-                    return "";
-                });
-    }
-
-    private void showWhoIsGoing(RecyclerViewAdapter.ViewHolder holder, int position) {
-        MembersList membersList = new MembersList(activity, container.get(position).getEventId(), "going");
-        membersList.show();
-    }
-
-    private void showWhoIsInterested(RecyclerViewAdapter.ViewHolder holder, int position) {
-        MembersList membersList = new MembersList(activity, container.get(position).getEventId(), "interested");
-        membersList.show();
-    }
-
-
-
     public void init(View root) {
         recyclerView = root.findViewById(R.id.recyclerview);
         initAdapter();

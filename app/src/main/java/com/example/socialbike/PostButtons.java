@@ -57,13 +57,12 @@ public class PostButtons {
     public void likeButtonClick() {
         if (post.getIsLiked()) {
             post.setIsLiked(false);
-            Utils.registerLike(post, groupId, eventId, false);
             post.decrementLike();
         } else {
             post.setIsLiked(true);
-            Utils.registerLike(post, groupId, eventId, true);
             post.incrementLike();
         }
+        Utils.registerLike(post, groupId, eventId);
         setLikeButton();
         likes.setText("" + post.getLikesCount());
     }
