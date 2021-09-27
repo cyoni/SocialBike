@@ -6,11 +6,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,6 +23,7 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class EventActivity extends AppCompatActivity implements IPageAdapter {
 
@@ -36,8 +34,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     private Event event;
     Button save, interested, going;
     LinearLayout interestedLayOut, goingLayout;
-    TextView interested_count, going_count;
-
+    TextView interested_count, going_count, duration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +47,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
 
         ViewPager viewPager = findViewById(R.id.view_pager);
         tabLayout = findViewById(R.id.tabs);
+        duration = findViewById(R.id.duration);
 
         Intent intent = getIntent();
         event = (Event) intent.getSerializableExtra("event");
@@ -67,7 +65,13 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
 
     private void setAllFields() {
         TextView date_and_time = findViewById(R.id.date_and_time);
-        date_and_time.setText(event.getDate());
+        String start = DateUtils.convertMiliToDateTime(event.getStart(), Consts.FULL_DATE_TIME);
+        date_and_time.setText(start);
+
+        long diff = event.getEnd() - event.getStart();
+        long hours = TimeUnit.MILLISECONDS.toHours(diff);
+        duration.setText("Duration: " + hours + " hrs");
+
         TextView location = findViewById(R.id.location);
         location.setText(event.getAddress());
         location.setOnClickListener(view -> openMap());

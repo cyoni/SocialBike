@@ -17,7 +17,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import com.example.socialbike.ConnectedUser;
-import com.example.socialbike.Date;
+import com.example.socialbike.DateUtils;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
@@ -147,11 +147,11 @@ public class ChatLobbyFragment extends Fragment
                             map.put("receiverPublicKey", "-MYVCkWexSO_jumnbr0l");
                             map.put("message", message);
                             map.put("sendersName", name);
-                            map.put("timestamp", Date.getTimeInMiliSecs());
+                            map.put("timestamp", DateUtils.getTimeInMiliSecs());
 
                             MainActivity.mDatabase.child("private_msgs").
                                     child("-MYVCkWexSO_jumnbr0l").
-                                    child("fakeMsgId_" + Date.getTimeInMiliSecs()).
+                                    child("fakeMsgId_" + DateUtils.getTimeInMiliSecs()).
                                     child("testSenderKey").
                                     setValue(map);
                             System.out.println("SENT " + message + "; " + name);
@@ -297,7 +297,7 @@ public class ChatLobbyFragment extends Fragment
         PreviewChatMessage current = users.get(position);
         holder.name.setText(current.name);
         holder.message_preview.setText(current.previewMsg);
-        holder.time.setText(Date.convertMiliToTime(current.time));
+        holder.time.setText(DateUtils.convertMiliToTime(current.time));
         System.out.println(current.name + ", unread msgs: " + users.get(position).unreadMessages + ", time: " + current.time );
         if (current.unreadMessages == 0) {
             holder.red_dot.setVisibility(View.INVISIBLE);

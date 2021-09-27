@@ -142,7 +142,7 @@ public class AddPostActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.putExtra("publicId", ConnectedUser.getPublicKey());
         intent.putExtra("name", ConnectedUser.getName());
-        intent.putExtra("time", Date.getTimeInMiliSecs());
+        intent.putExtra("time", DateUtils.getTimeInMiliSecs());
         intent.putExtra("message", textBox.getText().toString());
         setResult(RESULT_OK, intent);
     }

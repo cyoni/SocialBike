@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -23,14 +24,9 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class AddNewEventActivity extends AppCompatActivity {
@@ -40,6 +36,7 @@ public class AddNewEventActivity extends AppCompatActivity {
     private Button submitButton;
     private Position position;
     private String groupId;
+    private CheckBox end_time_checkbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +52,11 @@ public class AddNewEventActivity extends AppCompatActivity {
         date = findViewById(R.id.date);
         date2 = findViewById(R.id.date2);
         time2 = findViewById(R.id.time2);
+        end_time_checkbox = findViewById(R.id.end_time_checkbox);
 
-        date.setText(Date.convertDateToDay(Date.getDate()));
+        date.setText(DateUtils.convertDateToDay(DateUtils.getDate()));
         date2.setText(date.getText().toString());
-        time.setText(Date.convertTime(Date.getTime()));
+        time.setText(DateUtils.convertTime(DateUtils.getTime()));
         time2.setText(time.getText().toString());
 
         details = findViewById(R.id.content);
@@ -143,22 +141,23 @@ public class AddNewEventActivity extends AppCompatActivity {
         date2.setOnClickListener(view -> openDateAndTimeDialog(true, date2, null));
 
         submitButton = findViewById(R.id.submit);
-        submitButton.setOnClickListener(view -> convertTimes());
+        submitButton.setOnClickListener(view -> postEvent());
+
+        end_time_checkbox.setOnClickListener(view -> enableOrDisableEndDate());
+        enableOrDisableEndDate();
     }
 
-    public void convertTimes(){
-       // String dateTime = this.date.getText().toString() + " " + this.time.getText().toString();
-     //   SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yy");
-    //    Date _date = simpleDateFormat.parse(dateTime.toString("EEE, d MMM yyyy h:mm aa"));
-
-        String dateInString = this.date.getText().toString() + " " + this.time.getText().toString();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, d MMM yyyy h:mm a", Locale.ENGLISH);
-        LocalDate dateTime = LocalDate.parse(dateInString, formatter);
-        java.util.Date date = java.util.Date.from(dateTime.atStartOfDay(ZoneId.of( "America/Montreal" )).toInstant());
-        System.out.println(date.getTime());
-
-
+    private void enableOrDisableEndDate() {
+        if (end_time_checkbox.isChecked()){
+            date2.setEnabled(true);
+            time2.setEnabled(true);
+        }
+        else{
+            date2.setEnabled(false);
+            time2.setEnabled(false);
+        }
     }
+
 
     private void setLocationInputListener() {
 
@@ -191,7 +190,7 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void startMapsActivity() {
-        Maps.openMap(this, position, true);
+        Maps.openMap(this, position, false);
     }
 
     private void openDateAndTimeDialog(boolean isDataLayout, TextView view, TextView view2) {
@@ -204,12 +203,27 @@ public class AddNewEventActivity extends AppCompatActivity {
         if (submitButton.getText().toString().equals("posting..."))
             return;
 
+        String pattern = "EEE, d MMM yyyy h:m a";
+        String dateTime1 = date.getText().toString() + " " + time.getText().toString();
+        String dateTime2 = date2.getText().toString() + " " + time2.getText().toString();
+        long start = DateUtils.convertTimes(dateTime1, pattern);
+        long end = DateUtils.convertTimes(dateTime2, pattern);
+        if (start > end){
+            MainActivity.toast(this, "Please correct the dates.", true);
+            return;
+        }
+
+        MainActivity.toast(this, "SENDING", true);
+
+/*
         submitButton.setText("posting...");
         Map<String, Object> data = new HashMap<>();
         data.put("groupId", groupId);
         data.put("lat", position.getLatLng().latitude);
         data.put("lng", position.getLatLng().longitude);
         data.put("date", date.getText().toString());
+        data.put("start", start);
+        data.put("end", end);
         data.put("time", time.getText().toString());
         data.put("details", details.getText().toString());
         data.put("address", position.getAddress());
@@ -234,7 +248,7 @@ public class AddNewEventActivity extends AppCompatActivity {
                         submitButton.setText("Post");
                     }
                     return "";
-                });
+                });*/
 
     }
 

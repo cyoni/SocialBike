@@ -16,8 +16,8 @@ public class Post_Basic implements Serializable {
     protected final ArrayList<Comment> commentsContainer = new ArrayList<>();
     @JsonProperty("likes_count")
     private int likesCount;
-    public Post_Basic(){}
 
+    public Post_Basic() {}
 
     public Post_Basic(
             String publicKey,

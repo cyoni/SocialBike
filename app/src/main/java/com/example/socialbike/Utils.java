@@ -118,9 +118,11 @@ public class Utils {
         data.put("groupId", groupId);
         data.put("postId", post.getPostId());
 
-        if (post instanceof Comment) {
-            data.put("commentId", ((Comment) post).getCommentKey());
+        if (post instanceof SubComment){
+            data.put("commentId", ((SubComment) post).getCommentKey());
             data.put("subCommentId", ((SubComment) post).getSubCommentId());
+        } else if (post instanceof Comment) {
+            data.put("commentId", ((Comment) post).getCommentKey());
         }
 
         MainActivity.mFunctions

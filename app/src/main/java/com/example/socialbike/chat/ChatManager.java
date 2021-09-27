@@ -6,7 +6,7 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.socialbike.Date;
+import com.example.socialbike.DateUtils;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.ConnectedUser;
 import com.example.socialbike.chat.history.History;
@@ -206,7 +206,7 @@ public class ChatManager {
         data.put("message", message);
 
         System.out.println("sending private msg to " + receiver + "...");
-        handleNewMessage("123456", receiver, ConnectedUser.getName(), message, false, Date.getTimeInMiliSecs());
+        handleNewMessage("123456", receiver, ConnectedUser.getName(), message, false, DateUtils.getTimeInMiliSecs());
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")

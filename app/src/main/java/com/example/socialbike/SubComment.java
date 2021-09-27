@@ -1,8 +1,11 @@
 package com.example.socialbike;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 
 public class SubComment extends Comment {
+
     String subCommentId;
 
     public SubComment(

@@ -120,7 +120,7 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
         Post current = container.get(position);
         String name = Member.getNameFromLocal(current.getPublicKey());
         if (name.equals(Consts.DEFAULT_TMP_NAME)) {
-            Member.fetchName(holder, current.getPublicKey());
+            Member.fetchName(holder.name, current.getPublicKey());
         }
         holder.message.setText(current.getMsg());
         holder.name.setText(name);

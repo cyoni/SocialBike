@@ -3,10 +3,16 @@ package com.example.socialbike;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
-public class Date {
+public class DateUtils {
 
     public static long getTimeInMiliSecs() {
         java.util.Date date = new java.util.Date();
@@ -34,17 +40,24 @@ public class Date {
         return format2.format(dt1);*/
     }
 
-    public static String getDate(){
+    public static String getDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         return sdf.format(new java.util.Date());
     }
 
-    public static String getTime(){
+    public static String getTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("HH.mm");
         return sdf.format(new java.util.Date());
     }
 
+    public static String convertMiliToDateTime(long timestamp, String pattern) {
+        Date date = new Date(timestamp);
+        SimpleDateFormat timeZoneDate = new SimpleDateFormat(pattern, Locale.getDefault());
+        return timeZoneDate.format(date);
+    }
+//"EEE, dd-MM-yyyy  hh:mm a"
     public static String convertMiliToTime(long timeStamp) {
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(timeStamp);
 
@@ -56,7 +69,6 @@ public class Date {
         String am_pm = calendar.get(Calendar.AM_PM) == Calendar.PM ? "PM" : "AM";
 
         return String.format(Locale.US, "%d:%d %s", hour, minute, am_pm);
-
     }
 
     public static String convertTime(String time) {
@@ -69,5 +81,12 @@ public class Date {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static long convertTimes(String source, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH);
+        LocalDateTime dateTime = LocalDateTime.parse(source, formatter);
+        ZonedDateTime zdt = dateTime.atZone(OffsetDateTime.now().getOffset());
+        return zdt.toInstant().toEpochMilli();
     }
 }

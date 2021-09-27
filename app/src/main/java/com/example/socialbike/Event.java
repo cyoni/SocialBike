@@ -15,9 +15,8 @@ public class Event extends Post implements Serializable {
     private String user_public_key;
     private String details;
     private String created_event_time;
-    private String date;
-    @JsonProperty("time")
-    private String eventTime;
+    private long start;
+    private long end;
     @JsonProperty("num_interested_members")
     private int numInterestedMembers;
     @JsonProperty("num_participants")
@@ -36,18 +35,18 @@ public class Event extends Post implements Serializable {
         super();
     }
     public Event(String eventId, String userPublicKey, String name,
-                 String dateOfEvent, String timeOfEvent, String createdEventTime,
+                 long start, long end, String createdEventTime,
                  int amountOfInterestedPeople, int numberOfParticipants,
                  Position position, String message, int commentsNumber) {
 
-        super(eventId, userPublicKey, name, Date.getTimeInMiliSecs(), message, 0, commentsNumber, false);
+        super(eventId, userPublicKey, name, DateUtils.getTimeInMiliSecs(), message, 0, commentsNumber, false);
 
         this.DatabaseContainer = Consts.EVENTS_CONTAINER_CODE;
         this.eventId = eventId;
         this.user_public_key = userPublicKey;
         this.name = name;
-        this.date = dateOfEvent;
-        this.eventTime = timeOfEvent;
+        this.start = start;
+        this.end = end;
         this.created_event_time = createdEventTime;
         this.numInterestedMembers = amountOfInterestedPeople;
         this.numParticipants = numberOfParticipants;
@@ -115,24 +114,21 @@ public class Event extends Post implements Serializable {
         this.created_event_time = created_event_time;
     }
 
-    @JsonProperty("date")
-    public String getDate() {
-        return date;
+    public long getStart() {
+        return start;
     }
 
-    @JsonProperty("date")
-    public void setDate(String date) {
-        this.date = date;
+    @JsonProperty("start")
+    public void setStart(long start) {
+        this.start = start;
     }
 
-    @JsonProperty("time")
-    public String getTime() {
-        return eventTime;
+    public long getEnd() {
+        return end;
     }
 
-    @JsonProperty("time")
-    public void setTime(String time) {
-        this.eventTime = time;
+    public void setEnd(long time) {
+        this.end = time;
     }
 
     @JsonProperty("num_interested_members")

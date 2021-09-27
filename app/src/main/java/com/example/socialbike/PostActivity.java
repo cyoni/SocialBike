@@ -16,16 +16,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.socialbike.groups.Group;
-import com.example.socialbike.groups.group.GroupDTO;
 import com.example.socialbike.room_database.Member;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.firebase.functions.HttpsCallableResult;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -157,7 +152,7 @@ public class PostActivity extends AppCompatActivity
                             postIdFromServer,
                             ConnectedUser.getPublicKey(),
                             ConnectedUser.getName(),
-                            Date.getTimeInMiliSecs(),
+                            DateUtils.getTimeInMiliSecs(),
                             comment));
                     recyclerViewAdapter.notifyItemInserted(0);
                     recyclerViewAdapter.notifyItemRangeChanged(0, commentsContainer.size() - 1);
@@ -192,18 +187,17 @@ public class PostActivity extends AppCompatActivity
         holder.message.setText(post.getMsg());
         Member.fetchAndSetName(holder, post.getName(), post.getPublicKey());
         holder.replyButton.setOnClickListener(view -> addNewComment(holder, position));
-        holder.likeTextButton.setOnClickListener(view -> likeComment(holder, position));
+        holder.likeTextButton.setOnClickListener(view -> likeComment(holder.likeTextButton, post));
         holder.relativelayout.setVisibility(View.GONE);
         handleSubComments(holder, position);
     }
 
 
-    private void likeComment(RecyclerViewAdapter.ViewHolder holder, int position) {
-        Comment comment = commentsContainer.get(position);
+    private void likeComment(TextView reference, Post comment) {
         if (comment.getIsLiked()) {
-            holder.likeTextButton.setTextColor(getResources().getColor(R.color.default_black));
+            reference.setTextColor(getResources().getColor(R.color.default_black));
         } else {
-            holder.likeTextButton.setTextColor(getResources().getColor(R.color.black));
+            reference.setTextColor(getResources().getColor(R.color.black));
         }
         Utils.registerLike(comment, groupId, eventId);
     }
@@ -264,7 +258,7 @@ public class PostActivity extends AppCompatActivity
                 null,
                 ConnectedUser.getPublicKey(),
                 ConnectedUser.getName(),
-                Date.getTimeInMiliSecs(),
+                DateUtils.getTimeInMiliSecs(),
                 comment);
 
         sendSubComment(subComment).continueWith(task -> {
@@ -299,14 +293,16 @@ public class PostActivity extends AppCompatActivity
 
         TextView holderName = relativeLayout.findViewById(R.id.name);
         String name = holderName.getText().toString();
+        Member.fetchAndSetName(holderName, name, subComment.getPublicKey());
         relativeLayout.findViewById(R.id.replyButton).setOnClickListener(view -> quoteMember(holder, name));
-        //relativeLayout.findViewById(R.id.LikeButton).setOnClickListener(view -> LikeSubComment(holder));
+        relativeLayout.findViewById(R.id.likeTextButton).setOnClickListener(view -> likeComment((TextView) view, subComment));
 
         TextView commentText = relativeLayout.findViewById(R.id.description);
         commentText.setText(subComment.getMsg());
 
         commentLayout.addView(relativeLayout);
     }
+
 
     private void quoteMember(RecyclerViewAdapter.ViewHolder holder, String name) {
         showOrHideNewCommentSection(holder);

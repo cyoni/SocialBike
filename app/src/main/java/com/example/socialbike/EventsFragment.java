@@ -267,5 +267,7 @@ public class EventsFragment extends Fragment
         eventsManager.recyclerViewAdapter.notifyDataSetChanged();
         eventsManager.updateSearchText();
         eventsManager.hideProgressbar();
+        if (eventsManager.container.isEmpty())
+            no_events_text.setVisibility(View.VISIBLE);
     }
 }

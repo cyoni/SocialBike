@@ -1,7 +1,6 @@
 package com.example.socialbike;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -12,10 +11,6 @@ import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Locale;
 
 public class DateAndTimeDialog extends Dialog {
@@ -68,11 +63,11 @@ public class DateAndTimeDialog extends Dialog {
     private void apply() {
         if (isDateLayout) {
             String date = String.format(Locale.US,"%d/%d/%d", date_picker.getDayOfMonth(), (date_picker.getMonth() + 1), date_picker.getYear());
-            view.setText(Date.convertDateToDay(date));
+            view.setText(DateUtils.convertDateToDay(date));
         }
         else {
             String time = String.format("%d.%d", time_picker.getHour(), time_picker.getMinute());
-            view.setText(Date.convertTime(time));
+            view.setText(DateUtils.convertTime(time));
         }
 
         if (view.getId() == R.id.time || view.getId() == R.id.date){

@@ -63,7 +63,7 @@ public class MembersGroupFragment extends Fragment
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         String name = Member.getNameFromLocal(container.get(position).publicKey);
         if (name.equals(Consts.DEFAULT_TMP_NAME)){
-            Member.fetchName(holder, container.get(position).publicKey);
+            Member.fetchName(holder.name, container.get(position).publicKey);
         }
         else
             holder.name.setText(name);

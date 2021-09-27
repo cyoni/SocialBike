@@ -173,6 +173,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         boolean isForDisplayOnly = data.getBoolean("isForDisplayOnly", false);
         LatLng latLng;
 
+        if (isForDisplayOnly){
+            position = new Position(lat, lng);
+        }
+
        // setMarker(new Position(latLng, null, null));
 
       //  if (position == null){
@@ -191,9 +195,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ImageButton return_button = findViewById(R.id.return_button);
             return_button.setVisibility(View.VISIBLE);
             return_button.setOnClickListener(view -> finish());
-            mMap.addMarker(new MarkerOptions()
-                    .position(position.getLatLng()));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position.getLatLng(), 15));
+            if (!(position == null || position.getLatLng() == null)) {
+                mMap.addMarker(new MarkerOptions()
+                        .position(position.getLatLng()));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position.getLatLng(), 15));
+            }
         }
     }
 

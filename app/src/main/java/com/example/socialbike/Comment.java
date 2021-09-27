@@ -21,8 +21,14 @@ public class Comment extends Post {
         this.commentKey = commentKey;
     }
 
+    @JsonProperty("commentId")
     public String getCommentKey(){
         return commentKey;
+    }
+
+    @JsonProperty("commentId")
+    public void SetCommentKey(String commentKey){
+        this.commentKey = commentKey;
     }
 
     public Comment(){ }
@@ -35,14 +41,4 @@ public class Comment extends Post {
         return subComments;
     }
 
-    protected void registerLike(boolean state) {
-        setIsLiked(state);
-        DatabaseReference ref = MainActivity.mDatabase.
-                child("global_posts").
-                child(ConnectedUser.getPublicKey());
-        if (state)
-            ref.setValue("ok");
-        else
-            ref.removeValue();
-    }
 }

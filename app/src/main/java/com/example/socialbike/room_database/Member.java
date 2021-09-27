@@ -1,5 +1,7 @@
 package com.example.socialbike.room_database;
 
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -32,7 +34,7 @@ public class Member {
         return MainActivity.membersMap.getOrDefault(publicKey, "...");
     }
 
-    public static void fetchName(RecyclerViewAdapter.ViewHolder holder, String publicKey) {
+    public static void fetchName(TextView reference, String publicKey) {
         System.out.println("Getting name of " + publicKey + " from database...");
         MainActivity.mDatabase.child("public").child(publicKey).child("profile").child("nickname")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -41,7 +43,7 @@ public class Member {
                         if (snapshot.exists()) {
                                 Member member = new Member(publicKey, String.valueOf(snapshot.getValue()));
                                 MainActivity.membersMap.put(publicKey, member.name);
-                                holder.name.setText(member.name);
+                                reference.setText(member.name);
                                 try {
                                     MainActivity.memberDao.insert(member);
                                 }
@@ -57,15 +59,19 @@ public class Member {
     }
 
     public static void fetchAndSetName(RecyclerViewAdapter.ViewHolder holder, String name, String publicKey) {
-        if (holder.name.getText().toString().equals("...")){
+        fetchAndSetName(holder.name, name, publicKey);
+    }
+
+    public static void fetchAndSetName(TextView reference, String name, String publicKey) {
+        if (reference.getText().toString().equals("...")){
             String ans = getNameFromLocal(publicKey);
             if (ans.isEmpty() || ans.equals("..."))
-                Member.fetchName(holder, publicKey);
+                Member.fetchName(reference, publicKey);
             else
-                holder.name.setText(ans);
+                reference.setText(ans);
         }
         else
-            holder.name.setText(name);
+            reference.setText(name);
     }
 }
 

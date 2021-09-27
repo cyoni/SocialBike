@@ -232,7 +232,7 @@ exports.getComments = functions.https.onCall(async (request, context) => {
                 publicKey: raw_post.child('publicKey').val(),
                 message: raw_post.child('comment').val(),
                 timestamp: raw_post.child('timestamp').val(),
-                comments_count: raw_post.child('comments').val(),
+                comments_count: raw_post.child('comments_count').val(),
                 likes_count: raw_post.child('likes').numChildren()
             }
 
@@ -241,7 +241,7 @@ exports.getComments = functions.https.onCall(async (request, context) => {
             if (raw_post.child('comments').exists()) {
                 raw_post.child('comments').forEach(subComment => {
                     var subCommentToInsert = {
-                        commentId: subComment.key,
+                        subCommentId: subComment.key,
                         postId: postId,
                         publicKey: subComment.child('publicKey').val(),
                         message: subComment.child('comment').val(),
@@ -322,12 +322,11 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
 
                 var dataOfEvent = {
                     event_id: raw_data.key,
-                    name: "...",
                     user_public_key: raw_data.child('user_public_key').val(),
                     details: raw_data.child('details').val(),
                     created_event_time: raw_data.child('created_event_time').val(),
-                    date: raw_data.child('date').val(),
-                    time: raw_data.child('time').val(),
+                    start: raw_data.child('start').val(),
+                    end: raw_data.child('end').val(),
                     num_interested_members: raw_data.child('num_interested_members').val(),
                     num_participants: raw_data.child('num_participants').val(),
                     lat: raw_data.child('lat').val(),
@@ -398,8 +397,8 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
     else
         ref = admin.database().ref('events')
 
-    const time = request.time
-    const date = request.date
+    const start = request.start
+    const end = request.end
     const details = request.details
     const lat = request.lat
     const lng = request.lng
@@ -409,11 +408,15 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
     const city = request.city
     const timestamp = Date.now()
 
+    if (start > end)
+        return "BAD_DATES"
+    
+
     var data = {
         user_public_key: account.publicKey,
         created_event_time: timestamp,
-        time: time,
-        date: date,
+        start: start,
+        end: end,
         title: title,
         address: address,
         details: details,
