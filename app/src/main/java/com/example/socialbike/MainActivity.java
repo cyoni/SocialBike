@@ -3,11 +3,13 @@ package com.example.socialbike;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -19,7 +21,9 @@ import android.widget.Toast;
 
 import com.example.socialbike.chat.ChatLobbyFragment;
 import com.example.socialbike.chat.ChatManager;
-import com.example.socialbike.chat.history.Member;
+import com.example.socialbike.groups.GroupContainer;
+import com.example.socialbike.room_database.Member;
+import com.example.socialbike.room_database.MemberDao;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.libraries.places.api.Places;
@@ -30,6 +34,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.maps.GeoApiContext;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     public static FirebaseAuth mAuth;
@@ -39,13 +47,16 @@ public class MainActivity extends AppCompatActivity {
     public static GeoApiContext geoApiContext;
     public static BottomNavigationView bottomNavigationView;
     public static AppDatabase database;
+    public static Map<String, String> membersMap = new HashMap<>();
+    public static MemberDao memberDao;
+    public static boolean isUserConnected;
 
     public static void toast(Context context, String msg, boolean isLong) {
         int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
         Toast.makeText(context, msg, displayLongMessage).show();
     }
 
-    public MainActivity(){
+    public MainActivity() {
         chatManager = new ChatManager();
     }
 
@@ -56,24 +67,32 @@ public class MainActivity extends AppCompatActivity {
         setGeoContext();
         setContentView(R.layout.activity_main);
         setFirebase();
+        setIsUserConnected();
+
         loadUser();
         startListeningBottomMenu();
-        changeFragment(HomeFragment.getInstance());
+
+
+        changeFragment(EventsFragment.getInstance());
 
         database = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "appDatabase").allowMainThreadQueries().build();
 
-        if (isUserConnected())
+        if (isUserConnected)
             startChat();
         initiatePlaces();
+        setupMembers();
 
-
-
-        Member.setup();
-
-       // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
+    private void setupMembers() {
+        memberDao = MainActivity.database.memberDao();
+        List<Member> members = memberDao.getAllMembers();
+        for (Member member : members)
+             //memberDao.delete(member);
+            membersMap.put(member.publicKey, member.name);
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -95,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadUser() {
-        if (isUserConnected()){
+        if (isUserConnected) {
             ConnectedUser.setPublicKey(MyPreferences.getUserPublicKey(this));
             ConnectedUser.setNickname(MyPreferences.getNicknameFromDevice(this));
         }
@@ -105,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-       mFunctions = FirebaseFunctions.getInstance();
+        mFunctions = FirebaseFunctions.getInstance();
         //mFunctions.useEmulator("127.0.0.1", 5001);
 
     }
@@ -116,58 +135,47 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean isUserConnected(){
+    public void setIsUserConnected() {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        return account != null;
+        isUserConnected = account != null;
     }
 
 
+    @SuppressLint("NonConstantResourceId")
     private void startListeningBottomMenu() {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
 
-                switch (item.getItemId()){
-                    case R.id.home:
-                        changeFragment(HomeFragment.getInstance());
-                        break;
-                    case R.id.events:
-                        changeFragment(EventsFragment.getInstance());
-                        break;
-                    case R.id.chat:
-                        changeFragment(ChatLobbyFragment.getInstance());
-                        break;
-                    case R.id.profile:
-                        changeFragment(ProfileFragment.getInstance());
-                        break;
-                }
-
-             /*   if (item.getItemId() == R.id.home){
-                    changeFragment(HomeFragment.getInstance());
-                }  else if (item.getItemId() == R.id.events)
+            switch (item.getItemId()) {
+                case R.id.events:
                     changeFragment(EventsFragment.getInstance());
-                else if (item.getItemId() == R.id.chat)
-                    changeFragment(ContainerForChat.getInstance());
-                else if (item.getItemId() == R.id.profile)
-                    changeFragment(ProfileFragment.getInstance());*/
-
-                return true;
+                    break;
+                case R.id.groups:
+                    changeFragment(GroupContainer.getInstance());
+                    break;
+                case R.id.chat:
+                    changeFragment(ChatLobbyFragment.getInstance());
+                    break;
+                case R.id.profile:
+                    changeFragment(ProfileFragment.getInstance());
+                    break;
             }
+            return true;
         });
     }
 
     private void changeFragment(Object fragment) {
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
-        transaction.replace (R.id.contentFragment, (Fragment) fragment);
+        transaction.replace(R.id.contentFragment, (Fragment) fragment);
         transaction.commit();
     }
 
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.login:
                 login();
                 break;

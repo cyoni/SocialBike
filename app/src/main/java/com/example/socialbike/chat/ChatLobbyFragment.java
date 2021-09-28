@@ -17,7 +17,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import com.example.socialbike.ConnectedUser;
-import com.example.socialbike.Date;
+import com.example.socialbike.DateUtils;
 import com.example.socialbike.MainActivity;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
@@ -116,11 +116,22 @@ public class ChatLobbyFragment extends Fragment
                             return;
 
 
+                        if (charSequence.toString().equals("reset")) {
+                            users.clear();
+                            List<PreviewChatMessage> chatMessages = MainActivity.chatManager.previewMessage.getAllMembers();
+                            for (int _i=0; _i<chatMessages.size(); _i++)
+                                MainActivity.chatManager.previewMessage.delete(chatMessages.get(_i));
+                            recyclerViewAdapter.notifyDataSetChanged();
+                            searchUserTextbox.setText("");
+                            return;
+                        }
+
                         if (charSequence.toString().equals("ref")) {
                             users.clear();
                             loadUsersFromLocalDB();
                             recyclerViewAdapter.notifyDataSetChanged();
                             searchUserTextbox.setText("");
+                            return;
                         }
 
                         String name, message = "";
@@ -136,11 +147,11 @@ public class ChatLobbyFragment extends Fragment
                             map.put("receiverPublicKey", "-MYVCkWexSO_jumnbr0l");
                             map.put("message", message);
                             map.put("sendersName", name);
-                            map.put("timestamp", Date.getTimeInMiliSecs());
+                            map.put("timestamp", DateUtils.getTimeInMiliSecs());
 
                             MainActivity.mDatabase.child("private_msgs").
                                     child("-MYVCkWexSO_jumnbr0l").
-                                    child("fakeMsgId_" + Date.getTimeInMiliSecs()).
+                                    child("fakeMsgId_" + DateUtils.getTimeInMiliSecs()).
                                     child("testSenderKey").
                                     setValue(map);
                             System.out.println("SENT " + message + "; " + name);
@@ -166,7 +177,7 @@ public class ChatLobbyFragment extends Fragment
 
 
     private void loadUsersFromLocalDB() { // TODO Work on another thread
-        List<PreviewChatMessage> chatMessages = MainActivity.chatManager.memberDao.getAllMembers();
+        List<PreviewChatMessage> chatMessages = MainActivity.chatManager.previewMessage.getAllMembers();
         users.addAll(chatMessages);
         recyclerViewAdapter.notifyItemRangeChanged(0, chatMessages.size());
     }
@@ -286,7 +297,7 @@ public class ChatLobbyFragment extends Fragment
         PreviewChatMessage current = users.get(position);
         holder.name.setText(current.name);
         holder.message_preview.setText(current.previewMsg);
-        holder.time.setText(Date.convertMiliToTime(current.time));
+        holder.time.setText(DateUtils.convertMiliToTime(current.time));
         System.out.println(current.name + ", unread msgs: " + users.get(position).unreadMessages + ", time: " + current.time );
         if (current.unreadMessages == 0) {
             holder.red_dot.setVisibility(View.INVISIBLE);
@@ -313,7 +324,7 @@ public class ChatLobbyFragment extends Fragment
         String name = chatMember.name;
         chatMember.unreadMessages = 0;
         MainActivity.chatManager.openConversationActivity(getContext(), userId, name);
-        MainActivity.chatManager.memberDao.resetUnreadMessages(userId);
+        MainActivity.chatManager.previewMessage.resetUnreadMessages(userId);
         recyclerViewAdapter.notifyItemChanged(position);
     }
 
@@ -330,7 +341,7 @@ public class ChatLobbyFragment extends Fragment
 
     public void insert(PreviewChatMessage chatMember) {
         AsyncTask.execute(() -> {
-            MainActivity.chatManager.memberDao.insert(chatMember);
+            MainActivity.chatManager.previewMessage.insert(chatMember);
         });
     }
 

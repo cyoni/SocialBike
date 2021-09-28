@@ -1,8 +1,9 @@
 package com.example.socialbike;
 
+import static com.example.socialbike.Consts.EVENTS_CONTAINER_CODE;
+
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -17,13 +18,11 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.socialbike.Event.EVENTS_CONTAINER_CODE;
-
 public class EventsCommentsExtension {
 
-    private final EventsFragment eventsFragment;
+    private final EventsManager eventsFragment;
 
-    public EventsCommentsExtension(EventsFragment eventsFragment) {
+    public EventsCommentsExtension(EventsManager eventsFragment) {
         this.eventsFragment = eventsFragment;
     }
 
@@ -48,7 +47,7 @@ public class EventsCommentsExtension {
     }
 
     private void getComments(RecyclerViewAdapter.ViewHolder holder, int position) {
-        eventsFragment.container.get(position).getComments()
+       /* eventsFragment.container.get(position).getComments()
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);
@@ -57,7 +56,7 @@ public class EventsCommentsExtension {
                         processComments(response, holder, position);
                     }
                     return "";
-                });
+                });*/
     }
 
 
@@ -102,7 +101,7 @@ public class EventsCommentsExtension {
                     has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
                 }
 
-                Comment comment = new Comment(EVENTS_CONTAINER_CODE, eventsFragment.container.get(position).getEventId(), commentId, publicKey, name, 8888, message);
+                Comment comment = new Comment( eventsFragment.container.get(position).getEventId(), commentId, publicKey, name, 8888, message);
 
                 LinearLayout layout = addCommentToLayout(R.layout.item_comment, comment, holder, position);
 
@@ -115,7 +114,7 @@ public class EventsCommentsExtension {
 
                     //System.out.println("Got subComment: " + subCommentsArray.getJSONObject(j).getString("commentId"));
                     System.out.println("got subcomment: " + subCommentMessage);
-                    SubComment subComment = new SubComment(EVENTS_CONTAINER_CODE, commentId, subCommentId, "33", subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
+                    SubComment subComment = new SubComment( commentId, subCommentId, "33", subCommentSenderPublicKey, subCommentName, subCommentTimestamp, subCommentMessage);
                     addSUBCommentToLayout(layout, subComment, holder, position);
                     //comment.addSubComment(subCommentMessage);
                 }
@@ -145,7 +144,7 @@ public class EventsCommentsExtension {
                     System.out.println("response: " + commentIdFromServer);
 
                     Comment newComment = new Comment(
-                            EVENTS_CONTAINER_CODE,
+
                             eventsFragment.container.get(position).getEventId(),
                             commentIdFromServer,
                             ConnectedUser.getPublicKey(),
@@ -170,7 +169,7 @@ public class EventsCommentsExtension {
 
     private void sendSubComment(LinearLayout linearLayout, RecyclerViewAdapter.ViewHolder holder, int position, Comment comment) {
         EditText viewComment = linearLayout.findViewById(R.id.headCommentText);
-        Button commentButton = linearLayout.findViewById(R.id.commentButton);
+       /* Button commentButton = linearLayout.findViewById(R.id.commentButton);
         commentButton.setText("Sending...");
         String commentStr = viewComment.getText().toString();
 
@@ -183,7 +182,7 @@ public class EventsCommentsExtension {
             viewComment.setText("");
             commentButton.setText("Send");
             return null;
-        });
+        });*/
     }
 
 
@@ -202,7 +201,7 @@ public class EventsCommentsExtension {
     }
 
     private void showOrHideNewCommentSection(LinearLayout linearLayout) {
-        RelativeLayout relativeLayout = linearLayout.findViewById(R.id.newCommentSection);
+        RelativeLayout relativeLayout = linearLayout.findViewById(R.id.relativelayout);
 
         if (relativeLayout.getVisibility() == View.GONE)
             relativeLayout.setVisibility(View.VISIBLE);
@@ -219,9 +218,9 @@ public class EventsCommentsExtension {
 
         LinearLayout linearLayout = (LinearLayout) View.inflate(eventsFragment.getContext(), R.layout.item_sub_comment, null);
 
-        linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, headComment));
+    //    linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> quoteMember(holder, position, headComment));
 
-        TextView commentText = linearLayout.findViewById(R.id.message);
+        TextView commentText = linearLayout.findViewById(R.id.description);
         TextView commentName = linearLayout.findViewById(R.id.name);
         commentText.setText(comment.getMsg());
         commentName.setText(comment.getName());
@@ -240,11 +239,11 @@ public class EventsCommentsExtension {
         LinearLayout linearLayout = (LinearLayout) View.inflate(eventsFragment.getContext(), commentType, null);
 
         if (commentType == R.layout.item_comment) {
-            linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> showOrHideNewCommentSection(linearLayout));
+        //    linearLayout.findViewById(R.id.commentButton).setOnClickListener(view -> showOrHideNewCommentSection(linearLayout));
             linearLayout.findViewById(R.id.postCommentButton).setOnClickListener(view -> sendSubComment(linearLayout, holder, position, comment));
         }
 
-        TextView commentText = linearLayout.findViewById(R.id.message);
+        TextView commentText = linearLayout.findViewById(R.id.description);
         TextView commentName = linearLayout.findViewById(R.id.name);
         commentText.setText(comment.getMsg());
         commentName.setText(comment.getName());
@@ -254,7 +253,7 @@ public class EventsCommentsExtension {
     }
 
     private void quoteMember(RecyclerViewAdapter.ViewHolder holder, int position, LinearLayout headComment) {
-        RelativeLayout section = headComment.findViewById(R.id.newCommentSection);
+        RelativeLayout section = headComment.findViewById(R.id.relativelayout);
         if (section.getVisibility() == View.GONE)
             section.setVisibility(View.VISIBLE);
         Post currentPost = eventsFragment.container.get(position);

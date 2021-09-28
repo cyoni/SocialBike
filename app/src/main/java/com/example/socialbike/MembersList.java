@@ -10,6 +10,8 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.socialbike.room_database.Member;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,7 +22,7 @@ import java.util.Map;
 
 public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
-    private final String eventId;
+    private final String eventId, groupId;
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private final ArrayList<String> container = new ArrayList<>();
@@ -28,13 +30,12 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
     private final Updater updater;
     private final String keyName;
 
-    public MembersList(@NonNull Activity activity, String eventId, String functionName) {
+    public MembersList(@NonNull Activity activity, String groupId, String eventId, String functionName) {
         super(activity);
-
         this.keyName = functionName;
         this.eventId = eventId;
+        this.groupId = groupId;
         updater = new Updater(this, container, recyclerViewAdapter);
-
     }
 
     @Override
@@ -51,6 +52,7 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
     private void getMembers() {
         Map<String, Object> data = new HashMap<>();
         data.put("eventId", eventId);
+        data.put("groupId", groupId);
         data.put("keyName", keyName);
 
         MainActivity.mFunctions
@@ -60,10 +62,10 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response:" + response);
                     parseStr(response);
-                    updater.referenceClass.onFinishedTakingNewMessages();
-                    return "";
+                    onFinishedUpdating();
+                    return null;
                 }).addOnFailureListener(e -> {
-            updater.referenceClass.onFinishedTakingNewMessages();
+            onFinishedUpdating();
             System.out.println("ERROR");
         });
     }
@@ -79,7 +81,6 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        recyclerViewAdapter.notifyDataSetChanged();
     }
 
     private void initAdapter() {
@@ -90,7 +91,7 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.name.setText(container.get(position));
+        Member.fetchAndSetName(holder, holder.name.getText().toString(), container.get(position));
     }
 
     @Override
@@ -99,7 +100,8 @@ public class MembersList extends Dialog implements RecyclerViewAdapter.ItemClick
     }
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
+        recyclerViewAdapter.notifyDataSetChanged();
         progressBar.setVisibility(View.GONE);
     }
 }

@@ -4,27 +4,27 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
 
-public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
+public class HomeFragment extends Fragment{
+
+
+}
+/* implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate*/ /*{
 
     private static HomeFragment homeFragment = null;
     private ExtendedFloatingActionButton floatingButton;
@@ -66,7 +66,6 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
             swipeLayout = root.findViewById(R.id.swipe_refresh);
 
             setSwipeLayout();
-            setToolbar(root);
             activateFloatingButton();
             initAdapter();
 
@@ -100,7 +99,7 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     private void getPosts() {
         container.clear();
         recyclerView.setVisibility(View.INVISIBLE);
-     //   messageManager.getPosts();
+        messageManager.getPosts("hhhhh");
     }
 
     private void setSwipeLayout() {
@@ -115,12 +114,12 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
         );
     }
 
-    private void setToolbar(View root) {
+*//*    private void setToolbar(View root) {
         Toolbar toolbar = root.findViewById(R.id.toolbar);
         toolbar.setTitle("Home");
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this::toolbarClickListener);
-    }
+    }*//*
 
     private boolean toolbarClickListener(MenuItem item) {
         if (item.getItemId() == R.id.login) {
@@ -171,10 +170,10 @@ public class HomeFragment extends Fragment implements RecyclerViewAdapter.ItemCl
     }
 
     @Override
-    public void onFinishedTakingNewMessages() {
+    public void onFinishedUpdating() {
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
         swipeLayout.setRefreshing(false);
     }
 
-}
+}*/

@@ -1,5 +1,6 @@
 package com.example.socialbike;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -20,7 +21,8 @@ public class AddPostActivity extends AppCompatActivity {
     private final String ADD_POST_CODE = "add_post";
     private TextView textBox;
     Button submit;
-    private HomeFragment homeFragment;
+    private String groupId;
+    private String eventId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,10 @@ public class AddPostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_adding_post);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+
+        groupId = getIntent().getStringExtra("groupId");
+        eventId = getIntent().getStringExtra("eventId");
+
         setSupportActionBar(toolbar);
       //  toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
         toolbar.setTitle("New post");
@@ -35,7 +41,6 @@ public class AddPostActivity extends AppCompatActivity {
 
         submit = findViewById(R.id.submit);
         textBox = findViewById(R.id.txt_content);
-        homeFragment = HomeFragment.getInstance();
 
         submitButtonListener();
         getSavedText();
@@ -98,12 +103,19 @@ public class AddPostActivity extends AppCompatActivity {
 
     private void submitPost() {
 
-        //progressbar.setVisibility(View.VISIBLE);
         final String message = textBox.getText().toString();
+
+        if (submit.getText().toString().equals("PUBLISHING..."))
+            return;
+
         submit.setText("PUBLISHING...");
-        submit.setEnabled(false);
         Map<String, Object> data = new HashMap<>();
         data.put("message", message);
+        data.put("groupId", groupId);
+
+        if (eventId != null)
+            data.put("eventId", eventId);
+
         MainActivity.mFunctions
                 .getHttpsCallable("AddNewPost")
                 .call(data)
@@ -113,27 +125,26 @@ public class AddPostActivity extends AppCompatActivity {
                     System.out.println("response:" + postIdFromServer);
 
                     if (!postIdFromServer.equals("FAIL") && !postIdFromServer.isEmpty()) {
+                        submit.setText("SUCCESS");
                         saveText("");
-                        passItemHome();
-                        showSuccessMsg();
-                        finish();
-
+                        passPostToActivity();
+                        onBackPressed();
                     } else {
                        // notifyUser_error();
-                        submit.setText("PUBLISHING");
-                        submit.setEnabled(true);
+                        submit.setText("PUBLISH");
                     }
                     return "";
                 });
     }
 
-    private void showSuccessMsg() {
-        MainActivity.toast(this, "Success!", false);
-    }
 
-    private void passItemHome() {
-        homeFragment.addPost(new Post("77777", ConnectedUser.getPublicKey(), ConnectedUser.getName(), 123412, textBox.getText().toString(), 0, 0, false));
-        homeFragment.updater.update(0);
+    private void passPostToActivity() {
+        Intent intent = new Intent();
+        intent.putExtra("publicId", ConnectedUser.getPublicKey());
+        intent.putExtra("name", ConnectedUser.getName());
+        intent.putExtra("time", DateUtils.getTimeInMiliSecs());
+        intent.putExtra("message", textBox.getText().toString());
+        setResult(RESULT_OK, intent);
     }
 
     private boolean isMessageValid() {

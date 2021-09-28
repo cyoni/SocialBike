@@ -21,7 +21,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ViewHolder viewHolder;
     private List mData; // reference
     private LayoutInflater mInflater;
-    private ItemClickListener msgItemListener;
+    private ItemClickListener classReference;
     private int layout;
 
     // data is passed into the constructor
@@ -42,7 +42,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        msgItemListener.onBinding(holder, position);
+        classReference.onBinding(holder, position);
     }
 
     // total number of rows
@@ -53,15 +53,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView name, message, date,
+        public TextView name, message, date, date_and_time,
                 time, msgStyle, message_preview,
                 comments, people_going, locationName, red_dot, likes, comments_count,
-                replyButton, likeTextButton;
-        public Button mapButton, interested, coming;
+                replyButton, likeTextButton, description, title, memberCount, location;
+        public TextView mapButton;
+        public Button interested, coming, joinButton;
         public RelativeLayout layout;
         public ImageButton commentsButton, likeButton, followButton;
         public Button commentButton, postCommentButton, who_is_coming;
-        public RelativeLayout newCommentSection;
+        public RelativeLayout relativelayout;
         public LinearLayout commentLayout;
         public Button who_is_interested;
         public ProgressBar progressBar;
@@ -71,40 +72,47 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
             name = itemView.findViewById(R.id.name);
             date = itemView.findViewById(R.id.date);
-            message = itemView.findViewById(R.id.message);
+            message = itemView.findViewById(R.id.description);
             layout = itemView.findViewById(R.id.layout);
             commentsButton = itemView.findViewById(R.id.commentsButton);
-            commentButton = itemView.findViewById(R.id.commentButton);
+            description = itemView.findViewById(R.id.description);
+            location = itemView.findViewById(R.id.location);
+            title = itemView.findViewById(R.id.title);
+      //      commentButton = itemView.findViewById(R.id.commentButton);
             comments_count = itemView.findViewById(R.id.comments);
             likeButton = itemView.findViewById(R.id.likeButton);
             likes = itemView.findViewById(R.id.likes);
             postCommentButton = itemView.findViewById(R.id.postCommentButton);
             comments = itemView.findViewById(R.id.headCommentText);
-            newCommentSection = itemView.findViewById(R.id.newCommentSection);
+            relativelayout = itemView.findViewById(R.id.relativelayout);
             commentLayout = itemView.findViewById(R.id.commentLayout);
-            interested = itemView.findViewById(R.id.interested);
-            coming = itemView.findViewById(R.id.coming);
-            who_is_coming = itemView.findViewById(R.id.who_is_coming);
-            who_is_interested = itemView.findViewById(R.id.who_is_interested);
-            people_going = itemView.findViewById(R.id.people_going);
+            date_and_time = itemView.findViewById(R.id.date_and_time);
+       //     interested = itemView.findViewById(R.id.interested);
+        //    coming = itemView.findViewById(R.id.coming);
+       //     who_is_coming = itemView.findViewById(R.id.who_is_coming);
+       //     who_is_interested = itemView.findViewById(R.id.who_is_interested);
+            people_going = itemView.findViewById(R.id.going_count);
             progressBar = itemView.findViewById(R.id.progressBar);
-            mapButton = itemView.findViewById(R.id.mapButton);
-            locationName = itemView.findViewById(R.id.locationName);
+            mapButton = itemView.findViewById(R.id.map_button);
+            memberCount = itemView.findViewById(R.id.memberCount);
+        //    locationName = itemView.findViewById(R.id.locationName);
             red_dot = itemView.findViewById(R.id.red_dot);
             followButton = itemView.findViewById(R.id.followButton);
             replyButton = itemView.findViewById(R.id.replyButton);
             likeTextButton = itemView.findViewById(R.id.likeTextButton);
+            joinButton = itemView.findViewById(R.id.joinButton);
 
             time = itemView.findViewById(R.id.time);
             msgStyle = itemView.findViewById(R.id.msgStyle);
             // start_conversation = itemView.findViewById(R.id.start_conversation);
             message_preview = itemView.findViewById(R.id.message_preview);
+
         }
 
         @Override
         public void onClick(View view) {
-            if (msgItemListener != null)
-                msgItemListener.onItemClick(view, getAdapterPosition());
+            if (classReference != null)
+                classReference.onItemClick(view, getAdapterPosition());
         }
 
         public void fresh() {
@@ -119,7 +127,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // allows click events to be caught
     public void setClassReference(Object itemClickListener) {
-        this.msgItemListener = (ItemClickListener) itemClickListener;
+        this.classReference = (ItemClickListener) itemClickListener;
     }
 
     // parent activity will implement this method to respond to click events

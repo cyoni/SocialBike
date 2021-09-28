@@ -1,15 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/home"
-        android:enabled="true"
-        android:icon="@drawable/ic_android_black_24dp"
-        android:title="Home"/>
-
-    <item
         android:id="@+id/events"
         android:enabled="true"
         android:icon="@drawable/ic_android_black_24dp"
         android:title="Events"/>
+
+    <item
+        android:id="@+id/groups"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="Groups"/>
 
     <item
         android:id="@+id/chat"

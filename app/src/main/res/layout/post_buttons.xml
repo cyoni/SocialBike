@@ -12,7 +12,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:padding="2dp"
-        android:text="?" />
+        android:text="-" />
 
     <TextView
         android:id="@+id/likes_word"
@@ -48,28 +48,26 @@
         android:text="Comments" />
 
 
-
-
     <ImageButton
         android:id="@+id/followButton"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginStart="10dp"
         android:layout_below="@id/likes"
+        android:layout_marginStart="10dp"
         android:layout_toEndOf="@+id/share_button"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/ic_baseline_group_24" />
+        android:src="@drawable/ic_baseline_group_24" />
 
     <ImageButton
         android:id="@+id/share_button"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginLeft="10dp"
         android:layout_below="@id/likes"
+        android:layout_marginLeft="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/ic_share" />
+        android:src="@drawable/ic_share" />
 
 
     <ImageButton
@@ -81,20 +79,20 @@
         android:layout_toLeftOf="@id/likeButton"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/ic_comment" />
+        android:src="@drawable/ic_comment" />
 
 
     <ImageButton
         android:id="@+id/likeButton"
         android:layout_width="20dp"
         android:layout_height="20dp"
+        android:layout_below="@id/likes"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="5dp"
-        android:layout_below="@id/likes"
-        android:layout_marginBottom="5dp"
         android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/ic_like" />
+        android:src="@drawable/ic_like" />
 
 </RelativeLayout>

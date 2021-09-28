@@ -30,7 +30,9 @@ public class SetNicknameFragment extends Fragment {
     private void startListening() {
         continueButton.setOnClickListener(view -> {
             String name = nickname_txt.getText().toString();
-            if (ConnectedUser.getName().toLowerCase().equals(name.toLowerCase())) {
+            if (MainActivity.isUserConnected &&
+                    (ConnectedUser.getName() == null ||
+                            ConnectedUser.getName().toLowerCase().equals(name.toLowerCase()))) {
                 proceedToNextFragment();
             } else if (isNameValid(name)) {
                 setNickname();
@@ -45,6 +47,7 @@ public class SetNicknameFragment extends Fragment {
     }
 
     private void proceedToNextFragment() {
+        Utils.hideKeyboard(getActivity());
         nav.navigate(R.id.action_se2tNicknameFragment_to_setProfileFragment);
     }
 
@@ -76,6 +79,7 @@ public class SetNicknameFragment extends Fragment {
                             changeButtonText();
                             break;
                         default:
+                            MainActivity.isUserConnected = true;
                             ConnectedUser.setNickname(answer);
                             MyPreferences.setSharedPreference(getActivity(), MyPreferences.USER_FOLDER, "nickname", answer);
                             proceedToNextFragment();
@@ -97,6 +101,8 @@ public class SetNicknameFragment extends Fragment {
         nickname_txt = root.findViewById(R.id.nickname);
         continueButton = root.findViewById(R.id.continue_button);
         startListening();
+        nickname_txt.requestFocus();
+        Utils.showKeyboard(getActivity());
         return root;
     }
 }

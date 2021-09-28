@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/posts"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="Posts" />
+
+    <item
+        android:id="@+id/events"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="Events" />
+
+    <item
+        android:id="@+id/members"
+        android:enabled="true"
+        android:icon="@drawable/ic_android_black_24dp"
+        android:title="Members" />
+</menu>

@@ -1,12 +1,17 @@
 package com.example.socialbike;
 
 import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
+import android.app.MediaRouteButton;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 
@@ -24,23 +29,29 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
+import com.google.maps.GeocodingApiRequest;
+import com.google.maps.errors.ApiException;
 import com.google.maps.model.GeocodingResult;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import static com.example.socialbike.MainActivity.geoApiContext;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
     private LinearLayout search_layout;
     private Position position = null;
+    private EditText search_bar;
     private Button set_button;
-    private boolean wasPlacesUsed = false;
+    Toolbar toolbar;
+    private ImageView pin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,25 +59,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
         search_layout = findViewById(R.id.search_layout);
+        search_bar = findViewById(R.id.search_bar);
+        search_bar.setOnClickListener(view -> openSearchBar());
+
 
         Button search_button = findViewById(R.id.search_button);
         set_button = findViewById(R.id.set_button);
 
-        showOnlyLayout(search_layout);
+        pin = findViewById(R.id.pin);
 
-        search_button.setOnClickListener(view -> search());
+        showOnlyLayout(search_layout);
         set_button.setOnClickListener(view -> set());
 
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
     }
 
-
-    private void search() {
+    private void openSearchBar() {
         // Create a new PlacesClient instance
         PlacesClient placesClient = Places.createClient(this);
         // Set the fields to specify which types of place data to
@@ -78,13 +95,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivityForResult(intent, 1);
     }
 
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
-                setMarker(new Position(place.getLatLng(), place.getName(), place.getAddress()));
-                wasPlacesUsed = true;
+                //setMarker(new Position(place.getLatLng(), place.getName(), place.getAddress()));
+                if (place.getLatLng() != null) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15));
+                    position = new Position(place.getLatLng(), null, null);
+                }
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
                 System.out.println(status.getStatusMessage());
@@ -95,16 +116,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void set() {
-        if (position == null)
-            MainActivity.toast(this, "Please choose a place on the map.", true);
-        else {
-            if (!wasPlacesUsed) {
-                set_button.setText("Setting...");
-                getAddressByCoordinates(position.getLatLng());
-            }
-            sendDataToActivity();
-            finish();
-        }
+        sendDataToActivity();
+        finish();
     }
 
     private void getAddressByCoordinates(LatLng latLng) {
@@ -130,17 +143,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void sendDataToActivity() {
         Intent intent = new Intent();
-        intent.putExtra("lat", position.getLatLng().latitude);
-        intent.putExtra("lng", position.getLatLng().longitude);
-        intent.putExtra("name", position.getLocationName());
-        intent.putExtra("address", position.getAddress());
-        System.out.println("Passing data: " + position.getAddress() + ", " + position.getLocationName() + ", " + position.getLatLng().toString());
+        intent.putExtra("lat", mMap.getCameraPosition().target.latitude);
+        intent.putExtra("lng", mMap.getCameraPosition().target.longitude);
         setResult(RESULT_OK, intent);
     }
 
     private void showOnlyLayout(LinearLayout layout) {
-        search_layout.setVisibility(View.GONE);
-        layout.setVisibility(View.VISIBLE);
+//        search_layout.setVisibility(View.GONE);
+        //  layout.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -158,27 +168,63 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Bundle data = getIntent().getExtras();
 
-        double lat = data.getDouble("lat");
-        double lng = data.getDouble("lng");
-        String name = data.getString("name");
-        String address = data.getString("address");
-        LatLng latLng = new LatLng(lat, lng);
+        double lat = data.getDouble("lat", 32.078436);
+        double lng = data.getDouble("lng", 34.802066);
+        boolean isForDisplayOnly = data.getBoolean("isForDisplayOnly", false);
+        LatLng latLng;
 
-        if (lat != 0 || lng != 0) {
-            setMarker(new Position(latLng, name, address));
+        if (isForDisplayOnly){
+            position = new Position(lat, lng);
         }
 
-        googleMap.setOnMapClickListener(tmpLatLng -> {
-            setMarker(new Position(tmpLatLng, name, address));
-            wasPlacesUsed = false;
-        });
+       // setMarker(new Position(latLng, null, null));
+
+      //  if (position == null){
+            String country = Utils.getUserCountry(this);
+            if (country != null){
+                latLng = getLatLngOfString(country + " country");
+                if (latLng != null)
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 1));
+            }
+     //   }
+
+        if (isForDisplayOnly){
+            toolbar.setVisibility(View.GONE);
+            search_bar.setVisibility(View.GONE);
+            pin.setVisibility(View.GONE);
+            ImageButton return_button = findViewById(R.id.return_button);
+            return_button.setVisibility(View.VISIBLE);
+            return_button.setOnClickListener(view -> finish());
+            if (!(position == null || position.getLatLng() == null)) {
+                mMap.addMarker(new MarkerOptions()
+                        .position(position.getLatLng()));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position.getLatLng(), 15));
+            }
+        }
+    }
+
+    public LatLng getLatLngOfString(String address){
+        GeocodingResult[] request = new GeocodingResult[0];
+        try {
+            request = GeocodingApi.newRequest(geoApiContext).address(address).await();
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (request.length == 0)
+            return null;
+        com.google.maps.model.LatLng location = request[0].geometry.location;
+        return new LatLng(location.lat, location.lng);
     }
 
     private void setMarker(Position position) {
-        mMap.clear();
+     //   mMap.clear();
         this.position = position;
-        mMap.addMarker(new MarkerOptions()
-                .position(position.getLatLng()));
+       // mMap.addMarker(new MarkerOptions()
+       //         .position(position.getLatLng()));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position.getLatLng(), 15));
     }
 }

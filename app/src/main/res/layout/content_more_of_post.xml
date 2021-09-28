@@ -65,7 +65,6 @@
         android:layout_height="match_parent"
         android:layout_below="@id/newComment"
         android:scrollbars="vertical"
-        android:visibility="invisible"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 
 </RelativeLayout>

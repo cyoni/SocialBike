@@ -111,4 +111,9 @@
     <string name="hello_world">Hello Square World!</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_conversation_chat">conversationChat</string>
+    <string name="title_activity_create_group">CreateGroupActivity</string>
+    <string name="title_activity_group">GroupActivity</string>
+    <string name="title_activity_host">HostActivity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
 </resources>

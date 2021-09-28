@@ -1,5 +1,6 @@
 package com.example.socialbike;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,19 +14,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.socialbike.room_database.Member;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.firebase.functions.HttpsCallableResult;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static com.example.socialbike.Post.POSTS_CONTAINER_CODE;
 
 public class PostActivity extends AppCompatActivity
         implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
@@ -40,6 +41,7 @@ public class PostActivity extends AppCompatActivity
     private EditText newComment;
     private Button sendComment;
     private ProgressBar progressBar;
+    private String groupId, eventId;
 
     private void initAdapter() {
         recyclerViewAdapter = new RecyclerViewAdapter(this, R.layout.item_comment, commentsContainer);
@@ -68,8 +70,7 @@ public class PostActivity extends AppCompatActivity
         getPost();
         loadInit();
 
-
-        new PostButtons(this, post);
+        new PostButtons(this, post, groupId, eventId);
 
         setToolBarTitle();
         printPost();
@@ -92,7 +93,15 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void getComments() {
-        post.getComments()
+        System.out.println("Getting comments for post #" + post.getPostId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("postId", post.getPostId());
+        data.put("groupId", groupId);
+        data.put("eventId", eventId);
+
+        MainActivity.mFunctions
+                .getHttpsCallable("getComments")
+                .call(data)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);
@@ -104,78 +113,26 @@ public class PostActivity extends AppCompatActivity
                 });
     }
 
-    private void parseMessages(String rawComments) {
-        System.out.println(rawComments);
+    private void parseMessages(String response) {
+        System.out.println(response);
 
-        String tmp_category;
-        try {
-            JSONObject obj = new JSONObject(rawComments);
-            JSONArray messages_array = obj.getJSONArray("posts");
-
-/*            if (obj.has("upNext")) {
-                upNext = obj.getString("upNext");
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                CommentDTO commentDTO = objectMapper.readValue(response, CommentDTO.class);
+                setFieldsFromParentNode(commentDTO.getComments());
+                commentsContainer.addAll(commentDTO.getComments());
+                onFinishedUpdating();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            else
-                upNext = DEFAULT_END_OF_LIST;*/
+    }
 
-            for (int i = 0; i < messages_array.length(); i++) {
-                int likes = 0, comments = 0;
-                boolean doILike = false, isAuthor = false, has_profile_img = false;
-
-                String publicKey = messages_array.getJSONObject(i).getString("publicKey");
-                String message = messages_array.getJSONObject(i).getString("message");
-                String name = messages_array.getJSONObject(i).getString("name");
-                String time = messages_array.getJSONObject(i).getString("timestamp");
-                String commentId = messages_array.getJSONObject(i).getString("commentId");
-
-                JSONArray subCommentsArray = messages_array.getJSONObject(i).getJSONArray("subComments");
-
-                if (messages_array.getJSONObject(i).has("likes_count")) {
-                    likes = Integer.parseInt(messages_array.getJSONObject(i).getString("likes_count"));
-                }
-                if (messages_array.getJSONObject(i).has("comments_count")) {
-                    comments = Integer.parseInt(messages_array.getJSONObject(i).getString("comments_count"));
-                }
-                if (messages_array.getJSONObject(i).has("doILike")) {
-                    doILike = messages_array.getJSONObject(i).getBoolean("doILike");
-                }
-                if (messages_array.getJSONObject(i).has("isauthor")) {
-                    isAuthor = messages_array.getJSONObject(i).getBoolean("isauthor");
-                }
-                if (messages_array.getJSONObject(i).has("has_p_img")) {
-                    has_profile_img = messages_array.getJSONObject(i).getBoolean("has_p_img");
-                }
-
-                Comment comment = new Comment(POSTS_CONTAINER_CODE, post.getPostId(), commentId, publicKey, name, 8888, message);
-
-                for (int j = 0; j < subCommentsArray.length(); j++) {
-                    String subCommentMessage = subCommentsArray.getJSONObject(j).getString("comment");
-                    String subCommentName = subCommentsArray.getJSONObject(j).getString("name");
-                    String subCommentId = subCommentsArray.getJSONObject(j).getString("subCommentId");
-                    String subCommentSenderPublicKey = subCommentsArray.getJSONObject(j).getString("senderPublicKey");
-                    int subCommentTimestamp = subCommentsArray.getJSONObject(j).getInt("timestamp");
-
-                    System.out.println("Got subComment: " + subCommentsArray.getJSONObject(j).getString("commentId"));
-                    SubComment subComment = new SubComment(
-                            POSTS_CONTAINER_CODE,
-                            post.getPostId(),
-                            commentId,
-                            subCommentId,
-                            subCommentSenderPublicKey,
-                            subCommentName,
-                            subCommentTimestamp,
-                            subCommentMessage
-                    );
-
-                    comment.addSubComment(subComment);
-                }
-
-                updater.add(comment);
-
-                System.out.println("msg " + i + " " + message);
+    private void setFieldsFromParentNode(List<Comment> comments) {
+        for (Comment comment : comments){
+            for (SubComment subComment : comment.getSubComments()){
+                subComment.setCommentKey(comment.commentKey);
+                subComment.setPostId(comment.getPostId());
             }
-        } catch (Exception e) {
-            System.out.println("Error caught in message fetcher: " + e.getMessage());
         }
     }
 
@@ -191,8 +148,8 @@ public class PostActivity extends AppCompatActivity
         Map<String, Object> data = new HashMap<>();
         data.put("comment", comment);
         data.put("postId", post.getPostId());
-        data.put("replyTo", "");
-        data.put("container", "global_posts");
+        data.put("eventId", eventId);
+        data.put("groupId", groupId);
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendComment")
@@ -202,14 +159,15 @@ public class PostActivity extends AppCompatActivity
                     System.out.println("response: " + postIdFromServer);
                     sendComment.setText("Send");
                     commentsContainer.add(0, new Comment(
-                            POSTS_CONTAINER_CODE,
                             post.getPostId(),
                             postIdFromServer,
                             ConnectedUser.getPublicKey(),
                             ConnectedUser.getName(),
-                            121221,
+                            DateUtils.getTimeInMiliSecs(),
                             comment));
                     recyclerViewAdapter.notifyItemInserted(0);
+                    recyclerViewAdapter.notifyItemRangeChanged(0, commentsContainer.size() - 1);
+
                     newComment.setText("");
                     sendComment.setEnabled(true);
                     Utils.hideKeyboard(this);
@@ -221,10 +179,6 @@ public class PostActivity extends AppCompatActivity
     private void setToolBarTitle() {
         CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.title);
         collapsingToolbarLayout.setTitle(post.getName());
-        /*      if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(post.getName() + " says");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }*/
     }
 
     private void printPost() {
@@ -232,31 +186,38 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void getPost() {
-        post = (Post) getIntent().getSerializableExtra("post");
-        post.DatabaseContainer = POSTS_CONTAINER_CODE;
+        Intent intent = getIntent();
+        post = (Post) intent.getSerializableExtra("post");
+        groupId = intent.getStringExtra("groupId");
+        eventId = intent.getStringExtra("eventId");
     }
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        Post post = commentsContainer.get(position);
-        holder.message.setText(post.getMsg());
-        holder.name.setText(post.getName());
+        Post comment = commentsContainer.get(position);
+        holder.message.setText(comment.getMsg());
+        Member.fetchAndSetName(holder, comment.getName(), comment.getPublicKey());
         holder.replyButton.setOnClickListener(view -> addNewComment(holder, position));
-        holder.likeTextButton.setOnClickListener(view -> likeComment(holder, position));
-        holder.newCommentSection.setVisibility(View.GONE);
+        holder.likeTextButton.setOnClickListener(view -> likeComment(holder.likeTextButton, comment));
+        if (comment.getIsLiked())
+            changeLikeButtonStyle(holder.likeTextButton, comment);
+        holder.relativelayout.setVisibility(View.GONE);
         handleSubComments(holder, position);
     }
 
 
-    private void likeComment(RecyclerViewAdapter.ViewHolder holder, int position) {
-        Comment comment = commentsContainer.get(position);
-        if (comment.getIsLiked()) {
-            holder.likeTextButton.setTextColor(getResources().getColor(R.color.default_black));
-            comment.registerLike(false);
-        } else {
-            holder.likeTextButton.setTextColor(getResources().getColor(R.color.black));
-            comment.registerLike(true);
-        }
+    private void likeComment(TextView reference, Post comment) {
+        comment.setIsLiked(!comment.getIsLiked());
+        changeLikeButtonStyle(reference, comment);
+        Utils.registerLike(comment, groupId, eventId);
+    }
+
+    private void changeLikeButtonStyle(TextView reference, Post comment) {
+        if (comment.getIsLiked())
+            reference.setTextColor(getResources().getColor(R.color.black));
+         else
+            reference.setTextColor(getResources().getColor(R.color.default_black));
+
     }
 
     private void handleSubComments(RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -277,14 +238,28 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void showOrHideNewCommentSection(RecyclerViewAdapter.ViewHolder holder) {
-        if (holder.newCommentSection.getVisibility() == View.VISIBLE) {
+        if (holder.relativelayout.getVisibility() == View.VISIBLE) {
             Utils.hideKeyboard(this);
-            holder.newCommentSection.setVisibility(View.GONE);
+            holder.relativelayout.setVisibility(View.GONE);
         } else {
-            holder.newCommentSection.setVisibility(View.VISIBLE);
+            holder.relativelayout.setVisibility(View.VISIBLE);
             holder.comments.requestFocus();
             Utils.showKeyboard(this);
         }
+    }
+
+    public Task<HttpsCallableResult> sendSubComment(Comment comment){
+            System.out.println("sending comment: " + comment.getMessage());
+            Map<String, Object> data = new HashMap<>();
+            data.put("comment", comment.getMessage());
+            data.put("postId", comment.getPostId());
+            data.put("replyTo", comment.getCommentKey());
+            data.put("groupId", groupId);
+            data.put("eventId", eventId);
+
+            return MainActivity.mFunctions
+                    .getHttpsCallable("sendComment")
+                    .call(data);
     }
 
     private void sendSubComment(RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -294,14 +269,23 @@ public class PostActivity extends AppCompatActivity
             return;
         Utils.hideKeyboard(this);
         holder.postCommentButton.setText("Sending");
-        commentsContainer.get(position).sendSubComment(comment).continueWith(task -> {
+
+        SubComment subComment = new SubComment(
+                post.getPostId(),
+                commentsContainer.get(position).getCommentKey(),
+                null,
+                ConnectedUser.getPublicKey(),
+                ConnectedUser.getName(),
+                DateUtils.getTimeInMiliSecs(),
+                comment);
+
+        sendSubComment(subComment).continueWith(task -> {
 
             String postIdFromServer = String.valueOf(task.getResult().getData());
             System.out.println("response: " + postIdFromServer);
             holder.postCommentButton.setText("Send");
 
-            SubComment subComment = new SubComment(POSTS_CONTAINER_CODE,
-                    "TO DO", "TO DO", postIdFromServer, ConnectedUser.getPublicKey(), ConnectedUser.getName(),0, comment);
+            subComment.setSubCommentId(postIdFromServer);
 
             commentsContainer.get(position).addSubComment(subComment);
             addSubCommentToLayout(subComment, holder);
@@ -325,18 +309,26 @@ public class PostActivity extends AppCompatActivity
         LinearLayout commentLayout = holder.commentLayout;
         LinearLayout relativeLayout = (LinearLayout) View.inflate(this, R.layout.item_sub_comment, null);
 
-        relativeLayout.findViewById(R.id.replyButton).setOnClickListener(view -> quoteMember(holder));
-        //relativeLayout.findViewById(R.id.LikeButton).setOnClickListener(view -> LikeSubComment(holder));
+        TextView holderName = relativeLayout.findViewById(R.id.name);
+        String name = holderName.getText().toString();
+        Member.fetchAndSetName(holderName, name, subComment.getPublicKey());
+        relativeLayout.findViewById(R.id.replyButton).setOnClickListener(view -> quoteMember(holder, name));
+        TextView likeTextButton = relativeLayout.findViewById(R.id.likeTextButton);
 
-        TextView commentText = relativeLayout.findViewById(R.id.message);
+        if (subComment.getIsLiked())
+            changeLikeButtonStyle(likeTextButton, subComment);
+        likeTextButton.setOnClickListener(view -> likeComment((TextView) view, subComment));
+
+        TextView commentText = relativeLayout.findViewById(R.id.description);
         commentText.setText(subComment.getMsg());
 
         commentLayout.addView(relativeLayout);
     }
 
-    private void quoteMember(RecyclerViewAdapter.ViewHolder holder) {
+
+    private void quoteMember(RecyclerViewAdapter.ViewHolder holder, String name) {
         showOrHideNewCommentSection(holder);
-        String str = "@TOOD ";
+        String str = "@" + name + " ";
         holder.comments.setText(str);
         holder.comments.requestFocus();
     }
@@ -348,7 +340,7 @@ public class PostActivity extends AppCompatActivity
 
 
     @Override
-    public void onFinishedTakingNewMessages() {
-        System.out.println("Finished!!!");
+    public void onFinishedUpdating() {
+        recyclerViewAdapter.notifyDataSetChanged();
     }
 }

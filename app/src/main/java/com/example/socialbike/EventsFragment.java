@@ -1,20 +1,18 @@
 package com.example.socialbike;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -22,10 +20,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,40 +30,25 @@ import java.util.Map;
 import static android.app.Activity.RESULT_OK;
 
 public class EventsFragment extends Fragment
-        implements RecyclerViewAdapter.ItemClickListener,
-        Updater.IUpdate,
-        SeekBar.OnSeekBarChangeListener {
+        implements SeekBar.OnSeekBarChangeListener, Updater.IUpdate {
 
-    private final int NEW_EVENT_CODE = 100;
     static EventsFragment eventsFragment = null;
-    private RecyclerView recyclerView;
-    protected final ArrayList<Event> container = new ArrayList<>();
-    private RecyclerViewAdapter recyclerViewAdapter;
-    private Updater updater;
-    private ProgressBar progressBar;
-    private final String MOST_RECENT_CODE = "MOST_RECENT";
-    private final String TRADING_CODE = "TRADING";
-    private String dataType = MOST_RECENT_CODE;
     private SeekBar seekBar;
-    private TextView rangeText, cityText, no_events_text;
-    private final EventsCommentsExtension eventsCommentsExtension;
-    private int range = 10;
-    private Position position;
+    private TextView cityText, no_events_text;
+    private Position position = new Position();
     private View root;
-
-    public EventsFragment() {
-        eventsCommentsExtension = new EventsCommentsExtension(this);
-    }
-
-    private void initAdapter() {
-        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_events, container);
-        recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerViewAdapter.setClassReference(this);
-    }
+    private EventsManager eventsManager;
+    protected ArrayList<Event> container;
+    Updater.IUpdate update = this;
+    private int lastRange = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    public EventsFragment() {
+
     }
 
     public static EventsFragment getInstance() {
@@ -79,170 +58,130 @@ public class EventsFragment extends Fragment
         return eventsFragment;
     }
 
-    public void getEvents() {
-
-        showProgressbar();
-        System.out.println("getting Events...");
-        no_events_text.setVisibility(View.GONE);
-        container.clear();
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("dataType", dataType);
-        data.put("range", range);
-        data.put("country", position.getCountry());
-        data.put("state", position.getState());
-        data.put("lat", position.getLatLng().latitude);
-        data.put("lng", position.getLatLng().longitude);
-
-        MainActivity.mFunctions
-                .getHttpsCallable("getEvents")
-                .call(data)
-                .continueWith(task -> {
-
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-
-                    if (!response.isEmpty()) {
-                        parseMessages(response);
-                    }
-                    return "";
-                });
-
-    }
-
-    public void parseMessages(String rawData) {
-        JSONArray data = null;
-        JSONObject obj;
-        try {
-            obj = new JSONObject(rawData);
-            data = obj.getJSONArray("events");
-        } catch (Exception e) {
-            System.out.println("An error was caught in message fetcher: " + e.getMessage());
-        }
-        if (data == null || data.length() == 0) {
-            no_events_text.setVisibility(View.VISIBLE);
-            onFinishedTakingNewMessages();
-            return;
-        }
-
-        if (container.size() > 0 && data.length() > 0) {
-            container.clear();
-            recyclerViewAdapter.notifyDataSetChanged();
-        }
-
-        for (int i = 0; i < data.length(); i++) {
-
-            String userPublicKey = null;
-            try {
-                userPublicKey = data.getJSONObject(i).getString("userPublicKey");
-                String eventDetails = data.getJSONObject(i).getString("eventDetails");
-                String name = data.getJSONObject(i).getString("name");
-                String dateOfEvent = data.getJSONObject(i).getString("eventDate");
-                String timeOfEvent = data.getJSONObject(i).getString("eventTime");
-                String createdEventTime = data.getJSONObject(i).getString("createdEventTime");
-                String eventId = data.getJSONObject(i).getString("eventId");
-                String numOfInterestedMembers = data.getJSONObject(i).getString("numOfInterestedMembers");
-                String locationName = data.getJSONObject(i).getString("locationName");
-                String locationAddress = data.getJSONObject(i).getString("locationAddress");
-                double lat = data.getJSONObject(i).getDouble("lat");
-                double lng = data.getJSONObject(i).getDouble("lng");
-                int commentsNumber = data.getJSONObject(i).getInt("commentsNumber");
-
-                int numberOfParticipants = 0;
-                if (data.getJSONObject(i).has("numberOfParticipants") && data.getJSONObject(i).get("numberOfParticipants") instanceof Integer)
-                    numberOfParticipants = data.getJSONObject(i).getInt("numberOfParticipants");
-
-                Position position = new Position(new LatLng(lat, lng), locationName, locationAddress);
-                Event event = new Event(
-                        eventId, userPublicKey, name,
-                        dateOfEvent, timeOfEvent, createdEventTime,
-                        numOfInterestedMembers, numberOfParticipants,
-                        position, eventDetails, commentsNumber
-                );
-
-                updater.add(event);
-
-                System.out.println("event  " + i + " " + eventDetails);
-            } catch (JSONException e) {
-                System.out.println("An error was caught in message fetcher: " + e.getMessage());
-            }
-        }
-        onFinishedTakingNewMessages();
-
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_events, container, false);
+            eventsManager = new EventsManager(getActivity(), getContext(), update);
+            this.container = eventsManager.container;
             initiateScreen(root);
+            eventsManager.showProgressbar();
+            setSwipeLayout();
         }
         return root;
     }
 
+    private void setSwipeLayout() {
+        eventsManager.swipe_refresh.setOnRefreshListener(this::getEvents);
+
+        eventsManager.swipe_refresh.setColorSchemeColors(
+                getResources().getColor(android.R.color.holo_blue_bright),
+                getResources().getColor(android.R.color.holo_green_light),
+                getResources().getColor(android.R.color.holo_orange_light),
+                getResources().getColor(android.R.color.holo_red_light)
+        );
+    }
+
+
     private void initiateScreen(View root) {
-        recyclerView = root.findViewById(R.id.recyclerview);
-        initAdapter();
-        progressBar = root.findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.INVISIBLE);
-        rangeText = root.findViewById(R.id.rangeText);
+        eventsManager.init(root);
+        eventsManager.rangeText = root.findViewById(R.id.rangeText);
         cityText = root.findViewById(R.id.city);
         no_events_text = root.findViewById(R.id.no_events_text);
         no_events_text.setVisibility(View.GONE);
-        position = new Position(new LatLng(32.074022, 34.775507), "Tel Aviv", "Israel", "Tel Aviv District");
 
-        setCityTextView("Tel Aviv");
         setSeekBar(root);
 
-        updater = new Updater(this, this.container, recyclerViewAdapter);
+        initPreferredLocation();
+        updateCityTextView();
+
         setListeners(root);
 
-        showProgressbar();
+        eventsManager.showProgressbar();
         getEvents();
+    }
+
+
+    private void initPreferredLocation() {
+        String lat = Utils.getPreference(getActivity(), "data", "lat");
+        String lng = Utils.getPreference(getActivity(), "data", "lng");
+        String preferredCity = Utils.getPreference(getActivity(), "data", "city");
+        String preferredCountry = Utils.getPreference(getActivity(), "data", "country");
+
+        if (lat != null && lng != null && preferredCity != null){
+            this.position = new Position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)), preferredCity, preferredCountry);
+        } else {
+            String userCountry = Utils.getUserCountry(getContext());
+            if (userCountry != null) {
+                preferredCity = userCountry.toUpperCase();
+                this.position = Utils.getLatLngOfString(preferredCity + " country");
+                savePosition();
+            }
+        }
+    }
+
+    private void getEvents() {
+        no_events_text.setVisibility(View.GONE);
+        container.clear();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("range", eventsManager.range);
+        data.put("country", position.getCountry());
+        data.put("city", position.getCity());
+        data.put("lat", position.getLatLng().latitude);
+        data.put("lng", position.getLatLng().longitude);
+        System.out.println( position.getLatLng().latitude + "," +  position.getLatLng().longitude);
+        eventsManager.getEvents(data);
     }
 
     private void setListeners(View root) {
 
         Button addEvent = root.findViewById(R.id.add_new_event_button);
 
-
         addEvent.setOnClickListener(view -> {
             Intent intent = new Intent(getContext(), AddNewEventActivity.class);
-            startActivityForResult(intent, NEW_EVENT_CODE);
+            startActivityForResult(intent, eventsManager.NEW_EVENT_CODE);
         });
 
         Button sortButton = root.findViewById(R.id.sort_button);
         sortButton.setOnClickListener(view -> {
-
-            if (sortButton.getText().equals("Treading")) {
-                changeTypeOfSearch(MOST_RECENT_CODE);
-                sortButton.setText("Recent Activity");
+            //openLoginActivity();
+            if (sortButton.getText().equals("Trending")) {
+                eventsManager.changeTypeOfSearch(eventsManager.MOST_RECENT_CODE);
+                sortButton.setText("Recent");
             } else {
-                changeTypeOfSearch(TRADING_CODE);
-                sortButton.setText("Treading");
+                eventsManager.changeTypeOfSearch(eventsManager.TRADING_CODE);
+                sortButton.setText("Trending");
             }
-
+            eventsManager.showProgressbar();
+            getEvents();
         });
 
     }
 
-    private void changeTypeOfSearch(String type) {
-        dataType = type;
-        getEvents();
+    private void openLoginActivity() {
+        Intent intent = new Intent(getContext(), LogInActivity.class);
+        startActivity(intent);
     }
 
 
-    private void setCityTextView(String city) {
+    private void updateCityTextView() {
+        String location;
+        if (seekBar.getProgress() == seekBar.getMax()){
+            location = position.getCountry();
+        } else
+            location = position.getCity();
+
         cityText.setOnClickListener(view -> openCitiesAutoComplete());
         cityText.setText(HtmlCompat.fromHtml
-                ("<u><b>" + city + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                ("<u><b>" + location + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == NEW_EVENT_CODE) {
+        if (requestCode == eventsManager.NEW_EVENT_CODE) {
             if (resultCode == RESULT_OK) {
-                changeTypeOfSearch(MOST_RECENT_CODE);
+                eventsManager.changeTypeOfSearch(eventsManager.MOST_RECENT_CODE);
             }
         } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
@@ -259,14 +198,21 @@ public class EventsFragment extends Fragment
                 } else
                     country = "DEFAULT";
 
-                position = new Position(place.getLatLng(), place.getName(), country, state);
-                System.out.println(position.toString());
-                setCityTextView(position.getLocationName());
+                position = new Position(place.getLatLng(), place.getName(), country);
+                savePosition();
+                updateCityTextView();
                 getEvents();
             }
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void savePosition() {
+        Utils.savePreference(getActivity(), "data", "lat", String.valueOf(position.getLatLng().latitude));
+        Utils.savePreference(getActivity(), "data", "lng", String.valueOf(position.getLatLng().longitude));
+        Utils.savePreference(getActivity(), "data", "city", position.getCity());
+        Utils.savePreference(getActivity(), "data", "country", position.getCountry());
     }
 
     private void openCitiesAutoComplete() {
@@ -283,17 +229,7 @@ public class EventsFragment extends Fragment
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             seekBar.setMin(10);
         }
-    }
-
-
-    private void showProgressbar() {
-        recyclerView.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressbar() {
-        recyclerView.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.GONE);
+        eventsManager.updateSearchText();
     }
 
     @Override
@@ -301,15 +237,14 @@ public class EventsFragment extends Fragment
         int stepSize = 10;
         progress = (seekBar.getProgress() / stepSize) * stepSize;
         seekBar.setProgress(progress);
-        System.out.println(progress);
-        updateSearchText();
+
+        if (progress < 100)
+            eventsManager.rangeText.setText("Release to find events within " + progress + " km of");
+        else
+            eventsManager.rangeText.setText("Release to find events in");
+        updateCityTextView();
     }
 
-    private void updateSearchText() {
-        range = seekBar.getProgress();
-        String str = "Finds " + container.size() + " events within " + range + " km of";
-        rangeText.setText(str);
-    }
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
@@ -317,90 +252,25 @@ public class EventsFragment extends Fragment
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        getEvents();
+        eventsManager.range = seekBar.getProgress();
+        if (lastRange != eventsManager.range) {
+            eventsManager.showProgressbar();
+            lastRange = eventsManager.range;
+            eventsManager.rangeText.setText("Loading...");
+            cityText.setVisibility(View.INVISIBLE);
+            getEvents();
+        }
     }
 
+
+    @SuppressLint("NotifyDataSetChanged")
     @Override
-    public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.message.setText(container.get(position).getMsg());
-        holder.locationName.setText(container.get(position).getPosition().getLocationName());
-        holder.time.setText(container.get(position).getTimeOfEvent());
-        holder.date.setText(container.get(position).getDateOfEvent());
-        holder.name.setText(container.get(position).getName());
-        holder.people_going.setText(container.get(position).getNumberOfParticipants() + " people going");
-        holder.interested.setOnClickListener(view -> markAsInterested(holder, position));
-        holder.coming.setOnClickListener(view -> markAsGoing(holder, position));
-        holder.who_is_coming.setOnClickListener(view -> showWhoIsGoing(holder, position));
-        holder.who_is_interested.setOnClickListener(view -> showWhoIsInterested(holder, position));
-        holder.commentButton.setOnClickListener(view -> eventsCommentsExtension.commentButton(holder, position));
-        holder.mapButton.setOnClickListener(view -> openMap(container.get(position).getLatLng()));
-
-        // holder.amountOfInterestedPeople.setText(container.get(position).getAmountOfInterestedPeople());
+    public void onFinishedUpdating() {
+        eventsManager.recyclerViewAdapter.notifyDataSetChanged();
+        cityText.setVisibility(View.VISIBLE);
+        eventsManager.updateSearchText();
+        eventsManager.hideProgressbar();
+        if (eventsManager.container.isEmpty())
+            no_events_text.setVisibility(View.VISIBLE);
     }
-
-    private void openMap(LatLng latLng) {
-        Intent intent = new Intent(getContext(), Maps.class);
-        intent.putExtra("lat", latLng.latitude);
-        intent.putExtra("lng", latLng.longitude);
-        startActivity(intent);
-    }
-
-    private void showWhoIsGoing(RecyclerViewAdapter.ViewHolder holder, int position) {
-        MembersList membersList = new MembersList(getActivity(), container.get(position).getEventId(), "going");
-        membersList.show();
-    }
-
-    private void showWhoIsInterested(RecyclerViewAdapter.ViewHolder holder, int position) {
-        MembersList membersList = new MembersList(getActivity(), container.get(position).getEventId(), "interested");
-        membersList.show();
-    }
-
-    private void markAsGoing(RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.coming.setEnabled(false);
-
-        System.out.println(container.get(position).getEventId());
-        Map<String, Object> data = new HashMap<>();
-        data.put("eventId", container.get(position).getEventId());
-
-        MainActivity.mFunctions
-                .getHttpsCallable("going")
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    holder.coming.setEnabled(true);
-                    return "";
-                });
-    }
-
-    private void markAsInterested(RecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.interested.setEnabled(false);
-
-        System.out.println(container.get(position).getEventId());
-        Map<String, Object> data = new HashMap<>();
-        data.put("eventId", container.get(position).getEventId());
-
-        MainActivity.mFunctions
-                .getHttpsCallable("interested")
-                .call(data)
-                .continueWith(task -> {
-
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    holder.interested.setEnabled(true);
-                    return "";
-                });
-    }
-
-    @Override
-    public void onItemClick(@NonNull View holder, int position) {
-
-    }
-
-    @Override
-    public void onFinishedTakingNewMessages() {
-        updateSearchText();
-        hideProgressbar();
-    }
-
 }

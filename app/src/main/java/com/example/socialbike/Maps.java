@@ -1,7 +1,10 @@
 package com.example.socialbike;
 
+import static com.example.socialbike.Constants.ADDRESS_FROM_MAPS_CODE;
+
 import androidx.fragment.app.FragmentActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -47,5 +50,16 @@ public class Maps extends FragmentActivity implements OnMapReadyCallback {
             mMap.addMarker(new MarkerOptions().position(location));
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
         }
+    }
+
+    public static void openMap(Activity activity, Position position, boolean isForDisplayOnly) {
+        Intent intent = new Intent(activity, MapsActivity.class);
+        if (position != null) {
+            intent.putExtra("lng", position.getLatLng().longitude);
+            intent.putExtra("lat", position.getLatLng().latitude);
+        }
+        intent.putExtra("name", "");
+        intent.putExtra("isForDisplayOnly", isForDisplayOnly);
+        activity.startActivityForResult(intent, ADDRESS_FROM_MAPS_CODE);
     }
 }

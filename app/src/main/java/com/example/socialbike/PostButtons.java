@@ -6,18 +6,22 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.arch.core.internal.SafeIterableMap;
 import androidx.core.widget.NestedScrollView;
+
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
 
 public class PostButtons {
 
+    String groupId, eventId;
     ImageButton likeButton, commentsButton;
     TextView likes, comments;
     Post post;
     Activity activity;
 
-    public PostButtons(Activity activity, Post post) {
+    public PostButtons(Activity activity, Post post, String groupId, String eventId) {
         this.activity = activity;
         this.post = post;
         likes = activity.findViewById(R.id.likes);
@@ -25,15 +29,19 @@ public class PostButtons {
         likeButton = activity.findViewById(R.id.likeButton);
         commentsButton = activity.findViewById(R.id.commentsButton);
         init();
+        this.groupId = groupId;
+        this.eventId = eventId;
     }
 
-    public PostButtons(Activity activity, RecyclerViewAdapter.ViewHolder holder, Post post) {
+    public PostButtons(Activity activity, RecyclerViewAdapter.ViewHolder holder, Post post, String groupId, String eventId) {
         this.activity = activity;
         commentsButton = holder.commentsButton;
         likeButton = holder.likeButton;
         likes = holder.likes;
         comments = holder.comments_count;
         this.post = post;
+        this.groupId = groupId;
+        this.eventId = eventId;
         init();
     }
 
@@ -49,21 +57,21 @@ public class PostButtons {
     public void likeButtonClick() {
         if (post.getIsLiked()) {
             post.setIsLiked(false);
-            registerLike(post, false);
             post.decrementLike();
         } else {
             post.setIsLiked(true);
-            registerLike(post, true);
             post.incrementLike();
         }
+        Utils.registerLike(post, groupId, eventId);
         setLikeButton();
         likes.setText("" + post.getLikesCount());
     }
 
     public void commentsButtonClick() {
-     //   if (!activity.getClass().getSimpleName().equals("PostButtons")) {
-            openPost();
-    //    }
+        //   if (!activity.getClass().getSimpleName().equals("PostButtons")) {
+
+        openPost();
+        //    }
     /*
         NestedScrollView nestedScrollView = activity.findViewById(R.id.nested_scroll_view);
         EditText commentTextBox = activity.findViewById(R.id.newComment);
@@ -78,13 +86,6 @@ public class PostButtons {
             likeButton.setImageResource(R.drawable.ic_like);
     }
 
-    private void registerLike(Post post, boolean state) {
-        if (state)
-            MainActivity.mDatabase.child("global_posts").child(post.getPostId()).child("likes").child(ConnectedUser.getPublicKey()).setValue("ok");
-        else
-            MainActivity.mDatabase.child("global_posts").child(post.getPostId()).child("likes").child(ConnectedUser.getPublicKey()).removeValue();
-    }
-
     public void followUser(ArrayList<Post> container, RecyclerViewAdapter.ViewHolder holder, int position) {
         System.out.println("todo");
     }
@@ -92,6 +93,8 @@ public class PostButtons {
     public void openPost() {
         Intent intent = new Intent(activity.getApplicationContext(), PostActivity.class);
         intent.putExtra("post", post);
+        intent.putExtra("groupId", groupId);
+        intent.putExtra("eventId", eventId);
         activity.startActivity(intent);
     }
 }

@@ -130,6 +130,7 @@ public class LogInActivity extends AppCompatActivity {
                        // toast.showMsg(getContext(), "Could not log in");
                         }
                     else {
+                        MainActivity.isUserConnected = true;
                         savePublicKeyOnDevice(publicKey);
                         ConnectedUser.setPublicKey(publicKey);
                         getNicknameFromDBAndSave();

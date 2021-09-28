@@ -8,8 +8,6 @@
     android:padding="5dp"
     tools:context=".EventsFragment">
 
-
-
     <RelativeLayout
         android:id="@+id/topMenu"
         android:layout_width="match_parent"
@@ -28,8 +26,9 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="170dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
             android:layout_alignParentEnd="true"
+            android:layout_marginLeft="5dp"
+            app:icon="@drawable/ic_baseline_arrow_drop_down_24"
             android:text="Treading" />
 
 
@@ -37,8 +36,7 @@
             android:id="@+id/searchSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/sort_button"
-            >
+            android:layout_below="@id/sort_button">
 
             <TextView
                 android:id="@+id/rangeText"
@@ -63,7 +61,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_below="@id/rangeText" />
-
 
 
         </RelativeLayout>
@@ -91,9 +88,13 @@
         android:layout_marginTop="50dp"
         android:layout_marginStart="30dp"
         android:layout_marginEnd="30dp"
-        android:text="No events were found in this area. Try to adjust your search." />
+        android:text="No events were found in this area." />
 
-
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
@@ -101,6 +102,6 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
-
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </LinearLayout>
