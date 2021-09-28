@@ -25,6 +25,7 @@ import com.google.firebase.functions.HttpsCallableResult;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PostActivity extends AppCompatActivity
@@ -118,11 +119,21 @@ public class PostActivity extends AppCompatActivity
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 CommentDTO commentDTO = objectMapper.readValue(response, CommentDTO.class);
+                setFieldsFromParentNode(commentDTO.getComments());
                 commentsContainer.addAll(commentDTO.getComments());
                 onFinishedUpdating();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+    }
+
+    private void setFieldsFromParentNode(List<Comment> comments) {
+        for (Comment comment : comments){
+            for (SubComment subComment : comment.getSubComments()){
+                subComment.setCommentKey(comment.commentKey);
+                subComment.setPostId(comment.getPostId());
+            }
+        }
     }
 
 
@@ -183,23 +194,30 @@ public class PostActivity extends AppCompatActivity
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        Post post = commentsContainer.get(position);
-        holder.message.setText(post.getMsg());
-        Member.fetchAndSetName(holder, post.getName(), post.getPublicKey());
+        Post comment = commentsContainer.get(position);
+        holder.message.setText(comment.getMsg());
+        Member.fetchAndSetName(holder, comment.getName(), comment.getPublicKey());
         holder.replyButton.setOnClickListener(view -> addNewComment(holder, position));
-        holder.likeTextButton.setOnClickListener(view -> likeComment(holder.likeTextButton, post));
+        holder.likeTextButton.setOnClickListener(view -> likeComment(holder.likeTextButton, comment));
+        if (comment.getIsLiked())
+            changeLikeButtonStyle(holder.likeTextButton, comment);
         holder.relativelayout.setVisibility(View.GONE);
         handleSubComments(holder, position);
     }
 
 
     private void likeComment(TextView reference, Post comment) {
-        if (comment.getIsLiked()) {
-            reference.setTextColor(getResources().getColor(R.color.default_black));
-        } else {
-            reference.setTextColor(getResources().getColor(R.color.black));
-        }
+        comment.setIsLiked(!comment.getIsLiked());
+        changeLikeButtonStyle(reference, comment);
         Utils.registerLike(comment, groupId, eventId);
+    }
+
+    private void changeLikeButtonStyle(TextView reference, Post comment) {
+        if (comment.getIsLiked())
+            reference.setTextColor(getResources().getColor(R.color.black));
+         else
+            reference.setTextColor(getResources().getColor(R.color.default_black));
+
     }
 
     private void handleSubComments(RecyclerViewAdapter.ViewHolder holder, int position) {
@@ -295,7 +313,11 @@ public class PostActivity extends AppCompatActivity
         String name = holderName.getText().toString();
         Member.fetchAndSetName(holderName, name, subComment.getPublicKey());
         relativeLayout.findViewById(R.id.replyButton).setOnClickListener(view -> quoteMember(holder, name));
-        relativeLayout.findViewById(R.id.likeTextButton).setOnClickListener(view -> likeComment((TextView) view, subComment));
+        TextView likeTextButton = relativeLayout.findViewById(R.id.likeTextButton);
+
+        if (subComment.getIsLiked())
+            changeLikeButtonStyle(likeTextButton, subComment);
+        likeTextButton.setOnClickListener(view -> likeComment((TextView) view, subComment));
 
         TextView commentText = relativeLayout.findViewById(R.id.description);
         commentText.setText(subComment.getMsg());

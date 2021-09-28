@@ -3,12 +3,13 @@ package com.example.socialbike;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -70,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
 
         loadUser();
         startListeningBottomMenu();
+
+
         changeFragment(EventsFragment.getInstance());
 
         database = Room.databaseBuilder(getApplicationContext(),
@@ -138,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @SuppressLint("NonConstantResourceId")
     private void startListeningBottomMenu() {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
@@ -157,16 +161,6 @@ public class MainActivity extends AppCompatActivity {
                     changeFragment(ProfileFragment.getInstance());
                     break;
             }
-
-         /*   if (item.getItemId() == R.id.home){
-                changeFragment(HomeFragment.getInstance());
-            }  else if (item.getItemId() == R.id.events)
-                changeFragment(EventsFragment.getInstance());
-            else if (item.getItemId() == R.id.chat)
-                changeFragment(ContainerForChat.getInstance());
-            else if (item.getItemId() == R.id.profile)
-                changeFragment(ProfileFragment.getInstance());*/
-
             return true;
         });
     }
@@ -177,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.contentFragment, (Fragment) fragment);
         transaction.commit();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {

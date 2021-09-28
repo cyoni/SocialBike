@@ -37,6 +37,10 @@ public class Comment extends Post {
         subComments.add(0, subComment);
     }
 
+    public void setCommentKey(String commentKey){
+        this.commentKey = commentKey;
+    }
+
     public ArrayList<SubComment> getSubComments() {
         return subComments;
     }

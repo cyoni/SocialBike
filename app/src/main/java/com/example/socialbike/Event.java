@@ -219,14 +219,10 @@ public class Event extends Post implements Serializable {
     }
 
     public void setIsInterested(boolean state){
-        int inc = state ? 1 : -1;
-        this.setNumInterestedMembers(getNumInterestedMembers() + inc);
         this.isInterested = state;
     }
 
     public void setIsGoing(boolean state){
-        int inc = state ? 1 : -1;
-        this.setNumParticipants(getNumParticipants() + inc);
         this.isGoing = state;
     }
 

@@ -192,7 +192,7 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 
             if (raw_post.child('likes_count').exists()) {
                 post['likes_count'] = raw_post.child('likes_count').val()
-                post['doesUserLikeThePost'] = raw_post.child('likes').child(userPublicId).exists()
+                post['isLiked'] = raw_post.child('likes').child(userPublicId).exists()
             }
 
             data['posts'].push(post)
@@ -202,6 +202,9 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 })
 
 exports.getComments = functions.https.onCall(async (request, context) => {
+
+    const account = await verifyUser(context.auth.uid)
+    const userPublicId = account.publicKey
 
     const postId = request.postId
     const groupId = request.groupId
@@ -233,7 +236,12 @@ exports.getComments = functions.https.onCall(async (request, context) => {
                 message: raw_post.child('comment').val(),
                 timestamp: raw_post.child('timestamp').val(),
                 comments_count: raw_post.child('comments_count').val(),
-                likes_count: raw_post.child('likes').numChildren()
+            }
+
+            if (raw_post.child('likes').exists()) {
+                commentData['likes_count'] = raw_post.child('likes').numChildren()
+                if (userPublicId !== null)
+                    commentData['isLiked'] = raw_post.child('likes').child(userPublicId).exists()
             }
 
             commentData['subComments'] = []
@@ -242,12 +250,17 @@ exports.getComments = functions.https.onCall(async (request, context) => {
                 raw_post.child('comments').forEach(subComment => {
                     var subCommentToInsert = {
                         subCommentId: subComment.key,
-                        postId: postId,
                         publicKey: subComment.child('publicKey').val(),
                         message: subComment.child('comment').val(),
                         timestamp: subComment.child('timestamp').val(),
-                        likes_count: raw_post.child('likes').numChildren()
                     }
+
+                    if (raw_post.child('likes').exists()) {
+                        subCommentToInsert['likes_count'] = subComment.child('likes').numChildren()
+                        if (userPublicId !== null)
+                            subCommentToInsert['isLiked'] = subComment.child('likes').child(userPublicId).exists()
+                    }
+
                     commentData.subComments.push(subCommentToInsert)
                 })
                 commentData.subComments = commentData.subComments.reverse()
@@ -327,8 +340,8 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                     created_event_time: raw_data.child('created_event_time').val(),
                     start: raw_data.child('start').val(),
                     end: raw_data.child('end').val(),
-                    num_interested_members: raw_data.child('num_interested_members').val(),
-                    num_participants: raw_data.child('num_participants').val(),
+                    num_interested_members: raw_data.child('interested').numChildren(),
+                    num_participants: raw_data.child('going').numChildren(),
                     lat: raw_data.child('lat').val(),
                     lng: raw_data.child('lng').val(),
                     title: raw_data.child('title').val(),
@@ -901,51 +914,6 @@ exports.RegisterLike = functions.https.onCall(async (request, context) => {
 })
 
 
-// deprecated
-exports.GetGroupPosts = functions.https.onCall(async (request, context) => {
-
-    const account = await verifyUser(context.auth.uid);
-    if (account === null)
-        return "AUTH_FAILED"
-
-    const groupId = request.groupId
-    const eventId = request.eventId || null
-
-    var data = {}
-    data['posts'] = []
-
-    var route = admin.database().ref('groups').child(groupId)
-
-    if (eventId !== null) {
-        route = route.child('events').child(eventId)
-    }
-
-    return route.child('posts').once('value').then(snapshot => {
-        snapshot.forEach(raw_post => {
-
-            var dataOfUser = ({
-                postId: raw_post.key,
-                publicKey: raw_post.child('user_public_key').val(),
-                name: "...",
-                message: raw_post.child('message').val(),
-                timestamp: raw_post.child('timestamp').val(),
-            })
-
-            if (raw_post.child('comments_count').exists()) {
-                dataOfUser['comments_count'] =
-                    raw_post.child('comments_count').val()
-            }
-
-            if (raw_post.child('likes_count').exists()) {
-                dataOfUser['likes_count'] = raw_post.child('likes_count').val()
-                dataOfUser['doesUserLikeThePost'] = raw_post.child('likes').child(userPublicId).exists()
-            }
-
-            data['posts'].push(dataOfUser)
-        })
-        return JSON.stringify(data)
-    })
-})
  /*
  exports.recountlikes = functions.database.ref('global_posts/{postid}/likes_count').onDelete(async (snap) => {
    const counterRef = snap.ref;

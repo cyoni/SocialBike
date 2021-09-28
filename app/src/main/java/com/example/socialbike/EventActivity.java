@@ -8,6 +8,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -70,7 +71,18 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
 
         long diff = event.getEnd() - event.getStart();
         long hours = TimeUnit.MILLISECONDS.toHours(diff);
-        duration.setText("Duration: " + hours + " hrs");
+        if (hours >= 1 && hours < 24)
+            duration.setText("Duration: " + hours + " hrs");
+        else if (hours < 0.5){
+            duration.setVisibility(View.GONE);
+        } else if (hours >= 24 && hours <= 24*7){
+            long days = TimeUnit.MILLISECONDS.toDays(diff);
+            duration.setText("Duration: " + days + " days");
+        }
+        else if (hours >= 0.5){
+            long mins = TimeUnit.MILLISECONDS.toMinutes(diff);
+            duration.setText("Duration: " + mins + " mins");
+        }
 
         TextView location = findViewById(R.id.location);
         location.setText(event.getAddress());
@@ -99,8 +111,8 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         setPressed(interested, event.getIsInterested());
         setPressed(save, getIsEventSavedInLocal());
 
-        going_count.setText(String.valueOf(event.getNumParticipants()));
-        interested_count.setText(String.valueOf(event.getNumInterestedMembers()));
+        going_count.setText(String.valueOf(Math.max(0, event.getNumParticipants())));
+        interested_count.setText(String.valueOf(Math.max(0, event.getNumInterestedMembers())));
     }
 
     private boolean getIsEventSavedInLocal() {
@@ -128,7 +140,10 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     }
 
     private void interested() {
+        int inc = !event.getIsInterested() ? 1 : -1;
+        event.setNumInterestedMembers(event.getNumInterestedMembers() + inc);
         event.setIsInterested(!event.getIsInterested());
+
         interested_count.setText(String.valueOf(event.getNumInterestedMembers()));
         Map<String, Object> data = new HashMap<>();
         data.put("eventId", event.getEventId());
@@ -155,6 +170,8 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     }
 
     private void go() {
+        int inc = !event.getIsGoing() ? 1 : -1;
+        event.setNumParticipants(event.getNumParticipants() + inc);
         event.setIsGoing(!event.getIsGoing());
         setPressed(going, event.getIsGoing());
         going_count.setText(String.valueOf(event.getNumParticipants()));
