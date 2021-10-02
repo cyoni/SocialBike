@@ -2,6 +2,8 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const util = require('util');
+const { getgroups } = require("process");
+const { group } = require("console");
 
 admin.initializeApp();
 
@@ -155,7 +157,9 @@ exports.updateProfile = functions.https.onCall(async (request, context) => {
 exports.getPosts = functions.https.onCall(async (request, context) => {
 
     const account = await verifyUser(context.auth.uid)
-    const userPublicId = account.publicKey
+    var userPublicId
+    if (account !== null)
+        userPublicId = account.publicKey
 
     var data = {}
     data['posts'] = []
@@ -192,7 +196,8 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 
             if (raw_post.child('likes_count').exists()) {
                 post['likes_count'] = raw_post.child('likes_count').val()
-                post['isLiked'] = raw_post.child('likes').child(userPublicId).exists()
+                if (userPublicId !== null)
+                    post['isLiked'] = raw_post.child('likes').child(userPublicId).exists()
             }
 
             data['posts'].push(post)
@@ -303,13 +308,45 @@ function distanceFromMe(lat1, lon1, lat2, lon2) {
     return R * c
 }
 
+function makeEventObject(raw_data, groupId, publicKey="_"){
+    var dataOfEvent = {
+        event_id: raw_data.key,
+        user_public_key: raw_data.child('user_public_key').val(),
+        details: raw_data.child('details').val(),
+        created_event_time: raw_data.child('created_event_time').val(),
+        start: raw_data.child('start').val(),
+        end: raw_data.child('end').val(),
+        num_interested_members: raw_data.child('interested').numChildren(),
+        num_participants: raw_data.child('going').numChildren(),
+        lat: raw_data.child('lat').val(),
+        lng: raw_data.child('lng').val(),
+        title: raw_data.child('title').val(),
+        address: raw_data.child('address').val(),
+        comments_num: raw_data.child('comments').numChildren(),
+        isGoing: raw_data.child('going').child(publicKey).exists(),
+        isInterested: raw_data.child('interested').child(publicKey).exists(),
+    }
+
+    if (groupId !== null)
+        dataOfEvent["group_id"] = groupId
+
+    const score = 2 * dataOfEvent.num_participants + dataOfEvent.num_interested_members
+    dataOfEvent['elementScore'] = score
+    return dataOfEvent
+}
+
+
 exports.getEvents = functions.https.onCall(async (request, context) => {
 
     const account = await verifyUser(context.auth.uid)
+    var publicKey = "_"
+    if (account !== null)
+        publicKey = account.publicKey
 
     const dataType = request.dataType
     var data = {}
     data['events'] = []
+    data['extra_events'] = []
 
     const lat = request.lat
     const lng = request.lng
@@ -333,35 +370,42 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 range === 100 && raw_data.child('country').val() === country
             ) {
 
-                var dataOfEvent = {
-                    event_id: raw_data.key,
-                    user_public_key: raw_data.child('user_public_key').val(),
-                    details: raw_data.child('details').val(),
-                    created_event_time: raw_data.child('created_event_time').val(),
-                    start: raw_data.child('start').val(),
-                    end: raw_data.child('end').val(),
-                    num_interested_members: raw_data.child('interested').numChildren(),
-                    num_participants: raw_data.child('going').numChildren(),
-                    lat: raw_data.child('lat').val(),
-                    lng: raw_data.child('lng').val(),
-                    title: raw_data.child('title').val(),
-                    address: raw_data.child('address').val(),
-                    comments_num: raw_data.child('comments').numChildren(),
-                    isGoing: raw_data.child('going').child(account.publicKey).exists(),
-                    isInterested: raw_data.child('interested').child(account.publicKey).exists(),
-                }
-
-                if (groupId !== null)
-                    dataOfEvent["group_id"] = groupId
-
-                const score = 2 * dataOfEvent.num_participants + dataOfEvent.num_interested_members
-                dataOfEvent['elementScore'] = score
-
-                data['events'].push(dataOfEvent)
+                data['events'].push(makeEventObject(raw_data, groupId, publicKey))
             }
         })
 
-        if (dataType === "TRADING") {
+        return admin.database().ref('groups').once('value')
+
+    }).then(snapshot => { // get events from groups 
+
+        // take my groups
+        // take their events
+        // sort everything
+
+        if (groupId === null){
+            
+            var my_extra_events = []
+            
+            snapshot.forEach(raw_data => {
+                if (raw_data.child('members').child(publicKey).exists()){
+                    var groupEvents = raw_data.child('events')
+                    if (groupEvents.exists()){
+                        groupEvents.forEach(current => {
+                            // if current is active
+                            my_extra_events.push( makeEventObject(current, current.key, publicKey)  )
+                        })
+                    }
+                }
+            })
+
+            my_extra_events.forEach(current => {
+                data['extra_events'].push(current)
+            })
+      
+        }
+
+
+        if (dataType === "TRENDING") {
             data.events = data.events.sort(compare)
         }
 
@@ -806,12 +850,14 @@ function getGroupData(snapshot) {
         groupId: snapshot.key,
         title: snapshot.child('title'),
         description: snapshot.child('description'),
-        memberCount: snapshot.child('members').numChildren()
-    })
+        memberCount: snapshot.child('members').numChildren(),
+        })
 }
 
 
 exports.GetAllGroups = functions.https.onCall(async (request, context) => {
+    const account = await verifyUser(context.auth.uid);
+
     var data = {}
     data['groups'] = []
 
@@ -819,6 +865,10 @@ exports.GetAllGroups = functions.https.onCall(async (request, context) => {
         snapshot.forEach(raw_post => {
             var group = []
             group = getGroupData(raw_post)
+            if (account !== null){
+                console.log(account.publicKey + ", " + raw_post.key  + ", " + raw_post.child('members').child(account.publicKey).exists())
+                group['isMember'] = raw_post.child('members').child(account.publicKey).exists()
+            }
             data['groups'].push(group)
         })
         return JSON.stringify(data)

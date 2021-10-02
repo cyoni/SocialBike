@@ -8,7 +8,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -39,7 +42,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
     private final GroupContainer groupContainer;
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
-    private final ArrayList<Group> container = new ArrayList<>();
+    private ArrayList<Group> container = new ArrayList<>();
     private ProgressBar progressBar;
     private View root;
     private SwipeRefreshLayout swipeLayout;
@@ -109,24 +112,49 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
             container.addAll(groupDTO.getGroups());
             for (Group group : container)
                 groupIds.add(group.getGroupId());
+            if (isExplore) {
+                sortContainer();
+            }
             onFinishedUpdating();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private void sortContainer() {
+        ArrayList<Group> tmpContainer = new ArrayList<>();
+        for (int i = 0; i < container.size(); i++) {
+            Group group = container.get(i);
+            if (!group.getIsMember()) {
+                tmpContainer.add(group);
+                container.remove(group);
+                i--;
+            }
+        }
+        tmpContainer.addAll(container);
+
+        container.clear();
+        container.addAll(tmpContainer);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(Menu.NONE, R.id.leave_group, Menu.NONE, "Menu A");
+    }
 
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Group current = container.get(position);
+
+        registerForContextMenu(holder.layout);
         if (isExplore) {
             holder.joinButton.setVisibility(View.VISIBLE);
             holder.joinButton.setOnClickListener(view -> joinOrLeaveGroup(holder, position));
-        }
-        else
+        } else
             holder.joinButton.setVisibility(View.GONE);
 
-        if (isExplore && getIndex(groupContainer.groupsThatImInFragment.container, current.getGroupId()) != -1)
+        if (isExplore && current.getIsMember())
             holder.joinButton.setText("Joined");
         else
             holder.joinButton.setText("Join");

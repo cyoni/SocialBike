@@ -15,7 +15,8 @@
         android:theme="@style/Theme.SocialBike" >
         <activity
             android:name=".EventActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/Theme.SocialBike.NoActionBar"/>
         <activity
             android:name=".groups.group.GroupActivity"
             android:exported="true"
@@ -44,9 +45,11 @@
 
         <activity
             android:name=".Maps"
+            android:theme="@style/Theme.SocialBike.NoActionBar"
             android:label="@string/title_activity_maps" />
         <activity
             android:name=".MapsActivity"
+            android:theme="@style/Theme.SocialBike.NoActionBar"
             android:label="@string/title_activity_maps" />
         <!--
                Set to true if your app is Standalone, that is, it does not require the handheld
@@ -58,6 +61,7 @@
 
         <activity
             android:name=".PostActivity"
+            android:theme="@style/Theme.SocialBike.NoActionBar"
             android:label="@string/title_activity_post" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

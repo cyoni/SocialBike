@@ -215,7 +215,7 @@ public class AddNewEventActivity extends AppCompatActivity {
 
         MainActivity.toast(this, "SENDING", true);
 
-/*
+
         submitButton.setText("posting...");
         Map<String, Object> data = new HashMap<>();
         data.put("groupId", groupId);
@@ -248,7 +248,7 @@ public class AddNewEventActivity extends AppCompatActivity {
                         submitButton.setText("Post");
                     }
                     return "";
-                });*/
+                });
 
     }
 

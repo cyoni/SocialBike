@@ -34,14 +34,33 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // inflates the row layout from xml when needed
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(layout, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        RecyclerView.ViewHolder viewHolder = null;
+        View view;
+
+        switch (viewType){
+            case 0:
+                viewHolder = new ViewHolderOne(mInflater.inflate(layout, parent, false), viewType);
+
+            case 1:
+                viewHolder = new ViewHolder2(mInflater.inflate(R.layout.event_more_devider, parent, false), viewType);
+        }
+        return viewHolder;
+    }
+
+    @Override
+    public int getItemViewType(int position)
+    {
+        if(position == 0)
+            return layout;
+        else
+            return R.layout.event_more_devider;
     }
 
     // binds the data to the TextView in each row
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         classReference.onBinding(holder, position);
     }
 
@@ -52,7 +71,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     // stores and recycles views as they are scrolled off screen
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+    public class ViewHolder2 extends RecyclerView.ViewHolder {
+
+        public ViewHolder2(@NonNull View itemView, int xxx) {
+            super(itemView);
+        }
+    }
+
+    public class ViewHolderOne extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView name, message, date, date_and_time,
                 time, msgStyle, message_preview,
                 comments, people_going, locationName, red_dot, likes, comments_count,
@@ -67,7 +94,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public Button who_is_interested;
         public ProgressBar progressBar;
 
-        ViewHolder(View itemView) {
+        ViewHolderOne(View itemView, int xx) {
             super(itemView);
 
             name = itemView.findViewById(R.id.name);

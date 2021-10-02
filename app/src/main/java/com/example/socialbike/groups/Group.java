@@ -6,6 +6,7 @@ public class Group {
     private String title;
     private String description;
     private int memberCount;
+    private boolean isMember;
 
     public Group(){} // do not remove!
 
@@ -13,6 +14,10 @@ public class Group {
         this.groupId = groupId;
         this.title = title;
         this.description = description;
+    }
+
+    public boolean getIsMember(){
+        return isMember;
     }
 
     public String getGroupId() {
