@@ -14,6 +14,10 @@ public class EventDTO {
         return events;
     }
 
+    public List<Event> getExtraEvents() {
+        return extra_events;
+    }
+
     public void setEvents(List<Event> events) {
         this.events = events;
     }

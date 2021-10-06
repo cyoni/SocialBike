@@ -11,11 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.socialbike.groups.group.MusicAdapter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
@@ -28,6 +30,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     Updater.IUpdate update;
     String dataType = MOST_RECENT_CODE;
     public ArrayList<Event> container = new ArrayList<>();
+    // public ArrayList<Event> extraEvents = new ArrayList<>();
     RecyclerView recyclerView;
     public RecyclerViewAdapter recyclerViewAdapter;
     public ProgressBar progressBar;
@@ -45,7 +48,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         eventsCommentsExtension = new EventsCommentsExtension(this);
     }
 
-    public Context getContext(){
+    public Context getContext() {
         return context;
     }
 
@@ -58,6 +61,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     public void getEvents(Map<String, Object> data) {
         System.out.println("getting Events...");
         container.clear();
+        //  extraEvents.clear();
         data.put("dataType", dataType);
         MainActivity.mFunctions
                 .getHttpsCallable("getEvents")
@@ -82,6 +86,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
         if (container.size() > 0) {
             container.clear();
+//         //   extraEvents.clear();
             recyclerViewAdapter.notifyDataSetChanged();
         }
 
@@ -89,6 +94,11 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         try {
             EventDTO eventDTO = objectMapper.readValue(data, EventDTO.class);
             container.addAll(eventDTO.getEvents());
+            if (!eventDTO.getExtraEvents().isEmpty()) {
+                container.add(null);
+                container.addAll(eventDTO.getExtraEvents());
+            }
+
             update.onFinishedUpdating();
         } catch (IOException e) {
             e.printStackTrace();
@@ -115,25 +125,31 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Event event = container.get(position);
-        holder.title.setText(event.getTitle());
-        String start = DateUtils.convertMiliToDateTime(event.getStart(), Consts.FULL_DATE_TIME);
-        holder.date_and_time.setText(start);
-        if (event.getNumParticipants() > 1) {
-            holder.people_going.setVisibility(View.VISIBLE);
-            holder.people_going.setText(event.getNumParticipants() + " people going");
-        }
-        else
-            holder.people_going.setVisibility(View.GONE);
-        if (event.getAddress() == null)
-            holder.location.setVisibility(View.GONE);
-        else
-            holder.location.setText(event.getAddress());
+        if (event != null) {
+            holder.title.setText(event.getTitle());
+            String start = DateUtils.convertMiliToDateTime(event.getStart(), Consts.FULL_DATE_TIME);
+            holder.date_and_time.setText(start);
+            if (event.getNumParticipants() > 1) {
+                holder.people_going.setVisibility(View.VISIBLE);
+                holder.people_going.setText(event.getNumParticipants() + " people going");
+            } else
+                holder. people_going.setVisibility(View.GONE);
+            if (event.getAddress() == null)
+                holder.location.setVisibility(View.GONE);
+            else
+                holder.location.setText(event.getAddress());
 
-        holder.relativelayout.setOnClickListener(view -> {
-            Intent intent = new Intent(getContext(), EventActivity.class);
-            intent.putExtra("event", container.get(position));
-            getContext().startActivity(intent);
-        });
+            holder.relativelayout.setOnClickListener(view -> {
+                Intent intent = new Intent(getContext(), EventActivity.class);
+                intent.putExtra("event", container.get(position));
+                getContext().startActivity(intent);
+            });
+        }
+    }
+
+    @Override
+    public void onItemClick(@NonNull View holder, int position) {
+
     }
 
     private void openMap(LatLng latLng) {
@@ -143,15 +159,15 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         activity.startActivity(intent);
     }
 
-    @Override
+    /*@Override
     public void onItemClick(@NonNull View holder, int position) {
 
-    }
+    }*/
 
     protected void updateSearchText() {
         if (rangeText != null) {
             String str;
-            if (range == 100){
+            if (range == 100) {
                 str = "Shows " + container.size() + " events in";
             } else
                 str = "Shows " + container.size() + " events within " + range + " km of";

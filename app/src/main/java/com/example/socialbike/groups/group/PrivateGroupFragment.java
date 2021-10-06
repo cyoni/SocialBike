@@ -130,6 +130,7 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
         holder.followButton.setOnClickListener(view -> postButtons.followUser(container, holder, position));
     }
 
+
     @Override
     public void onItemClick(@NonNull View holder, int position) {
 
