@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -37,6 +38,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     LinearLayout interestedLayOut, goingLayout;
     TextView interested_count, going_count, duration;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +51,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         ViewPager viewPager = findViewById(R.id.view_pager);
         tabLayout = findViewById(R.id.tabs);
         duration = findViewById(R.id.duration);
+
 
         Intent intent = getIntent();
         event = (Event) intent.getSerializableExtra("event");
@@ -113,6 +116,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
 
         going_count.setText(String.valueOf(Math.max(0, event.getNumParticipants())));
         interested_count.setText(String.valueOf(Math.max(0, event.getNumInterestedMembers())));
+
     }
 
     private boolean getIsEventSavedInLocal() {

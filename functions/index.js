@@ -311,7 +311,7 @@ function distanceFromMe(lat1, lon1, lat2, lon2) {
 function makeEventObject(raw_data, groupId, publicKey="_"){
     var dataOfEvent = {
         event_id: raw_data.key,
-        user_public_key: raw_data.child('user_public_key').val(),
+        publicKey: raw_data.child('user_public_key').val(),
         details: raw_data.child('details').val(),
         created_event_time: raw_data.child('created_event_time').val(),
         start: raw_data.child('start').val(),

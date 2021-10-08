@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class Post_Basic implements Serializable {
 
-    private String publicKey, name, msg;
+    public String publicKey, name, msg;
     private boolean isLiked = false;
     private long timestamp;
     private int comments_count;

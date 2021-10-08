@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.socialbike.groups.group.MusicAdapter;
+import com.example.socialbike.room_database.Member;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -127,6 +128,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         Event event = container.get(position);
         if (event != null) {
             holder.title.setText(event.getTitle());
+            Member.fetchAndSetName(holder.name, holder.name.getText().toString(), event.getPublicKey());
             String start = DateUtils.convertMiliToDateTime(event.getStart(), Consts.FULL_DATE_TIME);
             holder.date_and_time.setText(start);
             if (event.getNumParticipants() > 1) {

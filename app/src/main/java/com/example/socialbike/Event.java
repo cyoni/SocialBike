@@ -3,16 +3,13 @@ package com.example.socialbike;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.Serializable;
-
-public class Event extends Post implements Serializable {
+public class Event extends Post {
 
     @JsonProperty("event_id")
     private String eventId;
     @JsonProperty("group_id")
     private String groupId;
     private String name;
-    private String user_public_key;
     private String details;
     private String created_event_time;
     private long start;
@@ -43,7 +40,7 @@ public class Event extends Post implements Serializable {
 
         this.DatabaseContainer = Consts.EVENTS_CONTAINER_CODE;
         this.eventId = eventId;
-        this.user_public_key = userPublicKey;
+        this.publicKey = userPublicKey;
         this.name = name;
         this.start = start;
         this.end = end;
@@ -82,16 +79,6 @@ public class Event extends Post implements Serializable {
     @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
-    }
-
-    @JsonProperty("user_public_key")
-    public String getUser_public_key() {
-        return user_public_key;
-    }
-
-    @JsonProperty("user_public_key")
-    public void setUser_public_key(String user_public_key) {
-        this.user_public_key = user_public_key;
     }
 
     @JsonProperty("details")

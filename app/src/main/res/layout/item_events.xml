@@ -40,7 +40,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="15dp"
             android:layout_toRightOf="@id/profile_image"
-            android:text="Yoni"
+            android:text="..."
             android:textSize="15sp"
             android:textStyle="bold" />
 

@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
@@ -24,6 +25,8 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +40,9 @@ public class AddNewEventActivity extends AppCompatActivity {
     private Position position;
     private String groupId;
     private CheckBox end_time_checkbox;
+    ImageView imageHeader;
+    public final int PICK_IMAGE = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,14 @@ public class AddNewEventActivity extends AppCompatActivity {
         date2 = findViewById(R.id.date2);
         time2 = findViewById(R.id.time2);
         end_time_checkbox = findViewById(R.id.end_time_checkbox);
+
+        imageHeader = findViewById(R.id.image_header);
+        imageHeader.setOnClickListener(view -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+        });
 
         date.setText(DateUtils.convertDateToDay(DateUtils.getDate()));
         date2.setText(date.getText().toString());
@@ -81,6 +95,19 @@ public class AddNewEventActivity extends AppCompatActivity {
             }
             return;
         }
+
+        if (requestCode == PICK_IMAGE) {
+            //TODO: action
+            System.out.println("!!");
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(data.getData());
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
