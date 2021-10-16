@@ -486,7 +486,7 @@ exports.AddNewEvent = functions.https.onCall(async (request, context) => {
     const newKey = ref.push().key
     await ref.child(newKey).set(data)
 
-    return "OK"
+    return newKey
 })
 
 exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
@@ -962,6 +962,69 @@ exports.RegisterLike = functions.https.onCall(async (request, context) => {
     return "OK"
 
 })
+
+
+
+/////////////////////////////////////////// firebase storage functions:
+
+
+
+const mkdirp = require('mkdirp');
+const path = require('path');
+const os = require('os');
+const fs = require('fs');
+
+exports.StorageInspector = functions.storage.object().onFinalize(async (object) => {
+    const fileBucket = object.bucket; // The Storage bucket that contains the file.
+    const filePath = object.name; // File path in the bucket.
+    const contentType = object.contentType; // File content type.
+    const metageneration = object.metageneration; // Number of times metadata has been generated. New objects have a value of 1.
+    const fileName = path.basename(filePath);
+
+
+   // if (fileName !== 'profile') { // fire only when you're uploading
+   console.log(filePath + "######" + fileName)
+   
+       const account = await verifyUser(fileName);
+
+
+
+        if (account === null || !contentType.startsWith('image/')) { // auth failed, remove uploaded picture
+            const file_to_remove = bucket.file(filePath); // get a reference to the file
+            await file_to_remove.delete();  // Delete the file
+            return console.log("auth failed")
+        }
+        else {
+            const publicKey = account.publicKey;
+            console.log("public key " + publicKey)
+            const bucket = admin.storage().bucket(object.bucket);
+            const file = bucket.file(filePath);
+            const tempFilePath = path.join(os.tmpdir(), fileName);
+
+            const metadata = {
+                contentType: contentType,
+            };
+            await bucket.file(filePath).download({ destination: tempFilePath });
+            console.log('Image downloaded locally to', tempFilePath);
+            const path_to_profile_dir = "users/" + publicKey;
+
+            await bucket.upload(tempFilePath, {
+                destination: path.join(path_to_profile_dir, "profile"),
+                metadata: metadata,
+            });
+            fs.unlinkSync(tempFilePath); //delete tmp pic
+            const file_to_remove = bucket.file(filePath); // Get a reference to the storage service, which is used to create references in your storage bucket
+            await file_to_remove.delete(); // Delete uploaded file in 'tmp'
+
+            await admin.database().ref('user_public').child(publicKey).child('profile').child('profileImage').set('t');
+
+            return "OK";
+        }
+   // }
+   // else {
+   //     console.log("already done")
+  //  }
+});
 
 
  /*

@@ -3,13 +3,17 @@ package com.example.socialbike;
 import static com.example.socialbike.Constants.ADDRESS_FROM_MAPS_CODE;
 import static com.example.socialbike.MainActivity.geoApiContext;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -18,15 +22,17 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.firebase.functions.HttpsCallableResult;
+import com.google.firebase.storage.StorageReference;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -40,9 +46,10 @@ public class AddNewEventActivity extends AppCompatActivity {
     private Position position;
     private String groupId;
     private CheckBox end_time_checkbox;
-    ImageView imageHeader;
-    public final int PICK_IMAGE = 1;
-
+    ImageView headerPicture;
+    public final int SELECT_PICTURE_CODE = 1;
+    ImageManager imageManager = new ImageManager();
+    Bitmap compressImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +67,10 @@ public class AddNewEventActivity extends AppCompatActivity {
         time2 = findViewById(R.id.time2);
         end_time_checkbox = findViewById(R.id.end_time_checkbox);
 
-        imageHeader = findViewById(R.id.image_header);
-        imageHeader.setOnClickListener(view -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+        headerPicture = findViewById(R.id.image_header);
+        headerPicture.setOnClickListener(view -> {
+            loadPictureFromGallery();
+
         });
 
         date.setText(DateUtils.convertDateToDay(DateUtils.getDate()));
@@ -96,20 +101,46 @@ public class AddNewEventActivity extends AppCompatActivity {
             return;
         }
 
-        if (requestCode == PICK_IMAGE) {
-            //TODO: action
-            System.out.println("!!");
+        if (requestCode == SELECT_PICTURE_CODE && resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
             try {
-                InputStream inputStream = getContentResolver().openInputStream(data.getData());
-
-            } catch (FileNotFoundException e) {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                compressImage = imageManager.compressImage(bitmap);
+                imageManager.setImage(compressImage, headerPicture);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
+            super.onActivityResult(requestCode, resultCode, data);
         }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
+
+    private void loadPictureFromGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE_CODE);
+    }
+
+
+/*    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SELECT_PICTURE_CODE && resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Bitmap out = imageManager.compressImage(bitmap);
+                imageManager.uploadImage(this, out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            Bitmap image = (Bitmap) data.getExtras().get("data");
+            Bitmap out = imageManager.compressImage(image);
+            imageManager.uploadImage(this, out);
+        }
+    }*/
 
     private void getAddressAndSetBox() {
         GeocodingResult[] results = null;
@@ -128,8 +159,7 @@ public class AddNewEventActivity extends AppCompatActivity {
             position.setCity(city);
             position.setCountry(country);
             position.setAddress(address);
-        }
-        else{
+        } else {
             mapButton.setText("");
         }
     }
@@ -175,11 +205,10 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void enableOrDisableEndDate() {
-        if (end_time_checkbox.isChecked()){
+        if (end_time_checkbox.isChecked()) {
             date2.setEnabled(true);
             time2.setEnabled(true);
-        }
-        else{
+        } else {
             date2.setEnabled(false);
             time2.setEnabled(false);
         }
@@ -230,20 +259,61 @@ public class AddNewEventActivity extends AppCompatActivity {
         if (submitButton.getText().toString().equals("posting..."))
             return;
 
+        submitButton.setText("posting...");
+
         String pattern = "EEE, d MMM yyyy h:m a";
         String dateTime1 = date.getText().toString() + " " + time.getText().toString();
         String dateTime2 = date2.getText().toString() + " " + time2.getText().toString();
         long start = DateUtils.convertTimes(dateTime1, pattern);
         long end = DateUtils.convertTimes(dateTime2, pattern);
-        if (start > end){
+        if (start > end) {
             MainActivity.toast(this, "Please correct the dates.", true);
             return;
         }
-
         MainActivity.toast(this, "SENDING", true);
+        uploadPost(start, end).continueWith(task -> {
+            String response = String.valueOf(task.getResult().getData());
+            System.out.println("add new event -> response:" + response);
+
+            System.out.println("Uploading Image...");
+            StorageReference ref;
+            if (groupId == null){
+                ref = MainActivity.storageRef.
+                        child("events").
+                        child(response).
+                        child("header");
+            }
+            else
+                ref = MainActivity.storageRef.child("groups").
+                        child(groupId).child("events").
+                        child(response).
+                        child("header");
+            imageManager.uploadImage(compressImage, ref)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        System.out.println("Picture was uploaded successfully.");
+                        submitButton.setText("Success");
+                        MainActivity.toast(getApplicationContext(), "Your event is live.", true);
+                        Intent intent = new Intent();
+                        intent.putExtra("status", "newEvent");
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }).addOnFailureListener(e -> {
+                // progressDialog.dismiss();
+                System.out.println("Failed uploading the picture.");
+            });
 
 
-        submitButton.setText("posting...");
+            if (response.equals("NOT_OK")) {
+                submitButton.setText("Post");
+            }
+            return "";
+        });
+
+    }
+
+    private Task<HttpsCallableResult> uploadPost(long start, long end) {
+        System.out.println("Uploading Post...");
+
         Map<String, Object> data = new HashMap<>();
         data.put("groupId", groupId);
         data.put("lat", position.getLatLng().latitude);
@@ -258,25 +328,9 @@ public class AddNewEventActivity extends AppCompatActivity {
         data.put("city", position.getCity());
         data.put("title", title.getText().toString());
 
-        MainActivity.mFunctions
-                .getHttpsCallable("AddNewEvent")
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("add new event -> response:" + response);
-                    submitButton.setText("Success");
-                    MainActivity.toast(getApplicationContext(), "Your event is live.", true);
-                    Intent intent = new Intent();
-                    intent.putExtra("status", "newEvent");
-                    setResult(RESULT_OK, intent);
-                    finish();
-
-                    if (response.equals("NOT_OK")) {
-                        submitButton.setText("Post");
-                    }
-                    return "";
-                });
-
+        return
+                MainActivity.mFunctions
+                .getHttpsCallable("AddNewEvent").call(data);
     }
 
     public void setDate(String date) {

@@ -15,6 +15,8 @@ import com.example.socialbike.groups.group.MusicAdapter;
 import com.example.socialbike.room_database.Member;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -140,6 +142,13 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
                 holder.location.setVisibility(View.GONE);
             else
                 holder.location.setText(event.getAddress());
+
+            if (event.hasHeaderImage()){
+                downloadImage();
+
+
+
+            }
 
             holder.relativelayout.setOnClickListener(view -> {
                 Intent intent = new Intent(getContext(), EventActivity.class);
