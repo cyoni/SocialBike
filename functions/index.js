@@ -994,16 +994,31 @@ exports.StorageInspector = functions.storage.object().onFinalize(async (object) 
             await file_to_remove.delete();  // Delete the file
             return console.log("auth failed")
         }
-        else {
+      //  else {
             const publicKey = account.publicKey;
             console.log("public key " + publicKey)
             const bucket = admin.storage().bucket(object.bucket);
             const file = bucket.file(filePath);
             const tempFilePath = path.join(os.tmpdir(), fileName);
 
+            
+
+            var groupId, eventId
+
+            if (filePath.includes("groups") && filePath.includes("events")){
+                groupId = "123"
+            } else if (filePath.includes("events")){
+                eventId = "444"
+            }
+
+
+            return admin.database().ref("groups/../events/../has_header_picture" + event.uid).set(true);
+
+            /*
             const metadata = {
                 contentType: contentType,
             };
+
             await bucket.file(filePath).download({ destination: tempFilePath });
             console.log('Image downloaded locally to', tempFilePath);
             const path_to_profile_dir = "users/" + publicKey;
@@ -1017,9 +1032,10 @@ exports.StorageInspector = functions.storage.object().onFinalize(async (object) 
             await file_to_remove.delete(); // Delete uploaded file in 'tmp'
 
             await admin.database().ref('user_public').child(publicKey).child('profile').child('profileImage').set('t');
+            */
 
-            return "OK";
-        }
+           // return "OK";
+        
    // }
    // else {
    //     console.log("already done")
