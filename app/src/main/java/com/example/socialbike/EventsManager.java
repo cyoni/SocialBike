@@ -3,6 +3,8 @@ package com.example.socialbike;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -15,9 +17,13 @@ import com.example.socialbike.groups.group.MusicAdapter;
 import com.example.socialbike.room_database.Member;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +48,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     Activity activity;
     TextView rangeText;
     public SwipeRefreshLayout swipe_refresh;
+    ImageManager imageManager;
 
 
     public EventsManager(Activity activity, Context context, Updater.IUpdate update) {
@@ -49,6 +56,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         this.activity = activity;
         this.context = context;
         eventsCommentsExtension = new EventsCommentsExtension(this);
+        imageManager = new ImageManager(activity);
     }
 
     public Context getContext() {
@@ -129,6 +137,9 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Event event = container.get(position);
         if (event != null) {
+            holder.event_picture_layout.setVisibility(View.VISIBLE);
+            holder.image.setImageBitmap(null);
+
             holder.title.setText(event.getTitle());
             Member.fetchAndSetName(holder.name, holder.name.getText().toString(), event.getPublicKey());
             String start = DateUtils.convertMiliToDateTime(event.getStart(), Consts.FULL_DATE_TIME);
@@ -143,12 +154,24 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
             else
                 holder.location.setText(event.getAddress());
 
-            if (event.hasHeaderImage()){
-                downloadImage();
+            if (event.hasHeaderPicture()){
 
+                if (imageManager.doesPictureExistLocally("event_picture_headers", event.getEventId())){
+                    imageManager.setImage(imageManager.loadPictureLocally("event_picture_headers", event.getEventId()), holder.image);
+                }
+                else {
 
-
+                    StorageReference ref = getPath(event.getGroupId(), event.getEventId());
+                    imageManager.downloadPicture(ref).addOnSuccessListener(bytes -> {
+                        Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        imageManager.setImage(bmp, holder.image);
+                        imageManager.locallySavePicture(bmp, "event_picture_headers", event.getEventId());
+                        holder.event_picture_layout.setVisibility(View.VISIBLE);
+                    });
+                }
             }
+            else
+                holder.event_picture_layout.setVisibility(View.GONE);
 
             holder.relativelayout.setOnClickListener(view -> {
                 Intent intent = new Intent(getContext(), EventActivity.class);
@@ -156,6 +179,18 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
                 getContext().startActivity(intent);
             });
         }
+    }
+
+
+
+    private StorageReference getPath(String groupId, String eventId) {
+        StorageReference ref = MainActivity.storageRef;
+        if (groupId != null && eventId != null)
+            ref = ref.child("groups").child(groupId).child("events").child(eventId);
+        else if (groupId == null && eventId != null)
+            ref = ref.child("events").child(eventId);
+        ref = ref.child("header");
+        return ref;
     }
 
     @Override

@@ -9,46 +9,18 @@ public class Event extends Post {
     private String eventId;
     @JsonProperty("group_id")
     private String groupId;
-    private String name;
-    private String details;
-    private String created_event_time;
-    private long start;
-    private long end;
+    private String name, details, created_event_time;
+    private long start, end;
     @JsonProperty("num_interested_members")
     private int numInterestedMembers;
     @JsonProperty("num_participants")
     private int numParticipants;
-    private double lat;
-    private double lng;
-    private String title;
-    private String address;
+    private double lat, lng;
+    private String title, address;
     @JsonProperty("comments_num")
-    private String commentsNum;
-    private String elementScore;
+    private String commentsNum, elementScore;
     private Position position;
-    private boolean isInterested, isGoing;
-
-    public Event(){
-        super();
-    }
-    public Event(String eventId, String userPublicKey, String name,
-                 long start, long end, String createdEventTime,
-                 int amountOfInterestedPeople, int numberOfParticipants,
-                 Position position, String message, int commentsNumber) {
-
-        super(eventId, userPublicKey, name, DateUtils.getTimeInMiliSecs(), message, 0, commentsNumber, false);
-
-        this.DatabaseContainer = Consts.EVENTS_CONTAINER_CODE;
-        this.eventId = eventId;
-        this.publicKey = userPublicKey;
-        this.name = name;
-        this.start = start;
-        this.end = end;
-        this.created_event_time = createdEventTime;
-        this.numInterestedMembers = amountOfInterestedPeople;
-        this.numParticipants = numberOfParticipants;
-        this.position = position;
-    }
+    private boolean isInterested, isGoing, hasHeaderPicture;
 
     @JsonProperty("event_id")
     public String getEventId() {
@@ -198,9 +170,20 @@ public class Event extends Post {
         this.elementScore = elementScore;
     }
 
+    @JsonProperty("has_header_picture")
+    public boolean hasHeaderPicture() {
+        return hasHeaderPicture;
+    }
+
+    @JsonProperty("has_header_picture")
+    public void setHasHeaderPicture(boolean hasHeaderPicture) {
+        this.hasHeaderPicture = hasHeaderPicture;
+    }
+
     public boolean getIsInterested(){
         return this.isInterested;
     }
+
     public boolean getIsGoing(){
         return this.isGoing;
     }

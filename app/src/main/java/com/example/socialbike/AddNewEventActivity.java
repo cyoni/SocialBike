@@ -1,6 +1,7 @@
 package com.example.socialbike;
 
 import static com.example.socialbike.Constants.ADDRESS_FROM_MAPS_CODE;
+import static com.example.socialbike.ImageManager.SELECT_PICTURE_CODE;
 import static com.example.socialbike.MainActivity.geoApiContext;
 
 import android.app.Activity;
@@ -27,6 +28,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.functions.HttpsCallableResult;
 import com.google.firebase.storage.StorageReference;
 import com.google.maps.GeocodingApi;
@@ -47,8 +49,7 @@ public class AddNewEventActivity extends AppCompatActivity {
     private String groupId;
     private CheckBox end_time_checkbox;
     ImageView headerPicture;
-    public final int SELECT_PICTURE_CODE = 1;
-    ImageManager imageManager = new ImageManager();
+    ImageManager imageManager;
     Bitmap compressImage;
 
     @Override
@@ -59,6 +60,7 @@ public class AddNewEventActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.flexible_example_toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
+        imageManager = new ImageManager(this);
         groupId = getIntent().getStringExtra("groupId");
 
         time = findViewById(R.id.time);
@@ -68,10 +70,7 @@ public class AddNewEventActivity extends AppCompatActivity {
         end_time_checkbox = findViewById(R.id.end_time_checkbox);
 
         headerPicture = findViewById(R.id.image_header);
-        headerPicture.setOnClickListener(view -> {
-            loadPictureFromGallery();
-
-        });
+        headerPicture.setOnClickListener(view -> openSheet());
 
         date.setText(DateUtils.convertDateToDay(DateUtils.getDate()));
         date2.setText(date.getText().toString());
@@ -82,6 +81,31 @@ public class AddNewEventActivity extends AppCompatActivity {
         mapButton = findViewById(R.id.map_button);
         title = findViewById(R.id.title);
         setButtonListeners();
+    }
+
+    private void openSheet() {
+        if (compressImage == null){
+            imageManager.loadPictureFromGallery(this);
+        }
+        else {
+            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+            bottomSheetDialog.setContentView(R.layout.activity_profile_bottom_sheet);
+
+            Button button2 = bottomSheetDialog.findViewById(R.id.picture_locally);
+            Button button3 = bottomSheetDialog.findViewById(R.id.button_remove_picture);
+
+            button2.setOnClickListener(v -> {
+                imageManager.loadPictureFromGallery(this);
+                bottomSheetDialog.dismiss();
+            });
+
+            button3.setOnClickListener(v -> {
+                compressImage = null;
+                bottomSheetDialog.dismiss();
+            });
+
+            bottomSheetDialog.show();
+        }
     }
 
     @Override
@@ -113,13 +137,6 @@ public class AddNewEventActivity extends AppCompatActivity {
 
             super.onActivityResult(requestCode, resultCode, data);
         }
-    }
-
-    private void loadPictureFromGallery() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE_CODE);
     }
 
 
@@ -270,45 +287,58 @@ public class AddNewEventActivity extends AppCompatActivity {
             MainActivity.toast(this, "Please correct the dates.", true);
             return;
         }
-        MainActivity.toast(this, "SENDING", true);
+        MainActivity.toast(this, "Uploading event...", true);
         uploadPost(start, end).continueWith(task -> {
+
             String response = String.valueOf(task.getResult().getData());
             System.out.println("add new event -> response:" + response);
 
-            System.out.println("Uploading Image...");
-            StorageReference ref;
-            if (groupId == null){
-                ref = MainActivity.storageRef.
-                        child("events").
-                        child(response).
-                        child("header");
+            if (compressImage == null) {
+                onFinishPosting();
+            } else {
+                uploadHeaderPicture(response);
             }
-            else
-                ref = MainActivity.storageRef.child("groups").
-                        child(groupId).child("events").
-                        child(response).
-                        child("header");
-            imageManager.uploadImage(compressImage, ref)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        System.out.println("Picture was uploaded successfully.");
-                        submitButton.setText("Success");
-                        MainActivity.toast(getApplicationContext(), "Your event is live.", true);
-                        Intent intent = new Intent();
-                        intent.putExtra("status", "newEvent");
-                        setResult(RESULT_OK, intent);
-                        finish();
-                    }).addOnFailureListener(e -> {
-                // progressDialog.dismiss();
-                System.out.println("Failed uploading the picture.");
-            });
-
-
-            if (response.equals("NOT_OK")) {
-                submitButton.setText("Post");
-            }
-            return "";
+            return null;
         });
 
+    }
+
+    private void uploadHeaderPicture(String response) {
+        MainActivity.toast(this, "Uploading Image...", true);
+        System.out.println("Uploading Image...");
+        StorageReference ref;
+        if (groupId == null) {
+            ref = MainActivity.storageRef.
+                    child("events").
+                    child(response).
+                    child("header");
+        } else
+            ref = MainActivity.storageRef.child("groups").
+                    child(groupId).child("events").
+                    child(response).
+                    child("header");
+        imageManager.uploadImage(compressImage, ref)
+                .addOnSuccessListener(taskSnapshot -> {
+                    System.out.println("Picture was uploaded successfully.");
+                    onFinishPosting();
+                }).addOnFailureListener(e -> {
+            // progressDialog.dismiss();
+            System.out.println("Failed uploading the picture.");
+        });
+
+
+        if (response.equals("NOT_OK")) {
+            submitButton.setText("Post");
+        }
+    }
+
+    private void onFinishPosting() {
+        submitButton.setText("Success");
+        MainActivity.toast(getApplicationContext(), "Your event is live.", true);
+        Intent intent = new Intent();
+        intent.putExtra("status", "newEvent");
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     private Task<HttpsCallableResult> uploadPost(long start, long end) {
@@ -330,7 +360,7 @@ public class AddNewEventActivity extends AppCompatActivity {
 
         return
                 MainActivity.mFunctions
-                .getHttpsCallable("AddNewEvent").call(data);
+                        .getHttpsCallable("AddNewEvent").call(data);
     }
 
     public void setDate(String date) {

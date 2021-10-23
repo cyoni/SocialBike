@@ -20,6 +20,7 @@ import com.example.socialbike.groups.SectionsPagerAdapter;
 import com.example.socialbike.groups.TabManager;
 import com.example.socialbike.groups.group.PrivateGroupFragment;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.HashMap;
@@ -27,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class EventActivity extends AppCompatActivity implements IPageAdapter {
+public class EventActivity extends AppCompatActivity implements IPageAdapter, pictureSheetDialog.BottomSheetListener {
 
     String[] tabTitles = {"Details", "Discussion"};
     public TabLayout tabLayout;
@@ -37,6 +38,8 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     Button save, interested, going;
     LinearLayout interestedLayOut, goingLayout;
     TextView interested_count, going_count, duration;
+    private ImageManager imageManager;
+    ImageView headerPicture;
 
 
     @Override
@@ -52,9 +55,15 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         tabLayout = findViewById(R.id.tabs);
         duration = findViewById(R.id.duration);
 
+        imageManager = new ImageManager(this);
+
+        headerPicture = findViewById(R.id.header_picture);
 
         Intent intent = getIntent();
         event = (Event) intent.getSerializableExtra("event");
+
+        if (event.getPublicKey().equals(ConnectedUser.getPublicKey()))
+            headerPicture.setOnClickListener(view -> openSheet());
 
         TabManager tabManager = new TabManager(viewPager, tabLayout, tabTitles);
         tabManager.init();
@@ -65,6 +74,21 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         eventDetails = new EventDetails(event.getDetails());
 
         setAllFields();
+    }
+
+    private void openSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.activity_profile_bottom_sheet);
+
+        Button button2 = bottomSheetDialog.findViewById(R.id.picture_locally);
+        Button button3 = bottomSheetDialog.findViewById(R.id.button_remove_picture);
+
+        ImageManager imageManager = new ImageManager(this);
+        button2.setOnClickListener(v -> imageManager.loadPictureFromGallery(this));
+        button3.setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+
+        bottomSheetDialog.show();
     }
 
     private void setAllFields() {
@@ -117,6 +141,14 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         going_count.setText(String.valueOf(Math.max(0, event.getNumParticipants())));
         interested_count.setText(String.valueOf(Math.max(0, event.getNumInterestedMembers())));
 
+        setHeaderPictureIfExists();
+
+    }
+
+    private void setHeaderPictureIfExists() {
+        if (event.hasHeaderPicture() && imageManager.doesPictureExistLocally("event_picture_headers", event.getEventId())){
+            imageManager.setImage(imageManager.loadPictureLocally("event_picture_headers", event.getEventId()), headerPicture);
+        }
     }
 
     private boolean getIsEventSavedInLocal() {
@@ -216,5 +248,10 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     @Override
     public int getCount() {
         return tabTitles.length;
+    }
+
+    @Override
+    public void onButtonClicked(String text) {
+        System.out.println(text);
     }
 }

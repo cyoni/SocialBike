@@ -325,6 +325,7 @@ function makeEventObject(raw_data, groupId, publicKey="_"){
         comments_num: raw_data.child('comments').numChildren(),
         isGoing: raw_data.child('going').child(publicKey).exists(),
         isInterested: raw_data.child('interested').child(publicKey).exists(),
+        has_header_picture: raw_data.child('has_header_picture').val() === true ? true : false, 
     }
 
     if (groupId !== null)
@@ -983,36 +984,41 @@ exports.StorageInspector = functions.storage.object().onFinalize(async (object) 
 
 
    // if (fileName !== 'profile') { // fire only when you're uploading
-   console.log(filePath + "######" + fileName)
+  // console.log(filePath + "######" + fileName)
    
-       const account = await verifyUser(fileName);
+      // const account = await verifyUser(fileName);
 
 
 
-        if (account === null || !contentType.startsWith('image/')) { // auth failed, remove uploaded picture
+        if (!contentType.startsWith('image/')) { // auth failed, remove uploaded picture
             const file_to_remove = bucket.file(filePath); // get a reference to the file
             await file_to_remove.delete();  // Delete the file
             return console.log("auth failed")
         }
       //  else {
-            const publicKey = account.publicKey;
-            console.log("public key " + publicKey)
+          //  const publicKey = account.publicKey;
+           
             const bucket = admin.storage().bucket(object.bucket);
             const file = bucket.file(filePath);
             const tempFilePath = path.join(os.tmpdir(), fileName);
 
-            
-
             var groupId, eventId
+            var splitRef = filePath.split("/")
 
             if (filePath.includes("groups") && filePath.includes("events")){
-                groupId = "123"
+                groupId = splitRef[1]
+                eventId = splitRef[3]
             } else if (filePath.includes("events")){
-                eventId = "444"
+                eventId = splitRef[1]
             }
 
-
-            return admin.database().ref("groups/../events/../has_header_picture" + event.uid).set(true);
+            var ref
+            if (groupId && !eventId)
+                ref = admin.database().ref("groups").child(groupId).child("events").child(eventId)
+            else 
+                ref = admin.database().ref("events").child(eventId)
+            
+            return ref.child("has_header_picture").set(true)
 
             /*
             const metadata = {

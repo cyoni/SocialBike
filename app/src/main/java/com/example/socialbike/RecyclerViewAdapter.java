@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -80,13 +81,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 replyButton, likeTextButton, description, title, memberCount, location;
         public TextView mapButton;
         public Button interested, coming, joinButton;
-        public RelativeLayout layout;
+        public RelativeLayout layout, event_picture_layout;
         public ImageButton commentsButton, likeButton, followButton;
         public Button commentButton, postCommentButton, who_is_coming;
         public RelativeLayout relativelayout;
         public LinearLayout commentLayout;
         public Button who_is_interested;
         public ProgressBar progressBar;
+        public ImageView image;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -127,6 +129,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             msgStyle = itemView.findViewById(R.id.msgStyle);
             // start_conversation = itemView.findViewById(R.id.start_conversation);
             message_preview = itemView.findViewById(R.id.message_preview);
+            image = itemView.findViewById(R.id.image);
+            event_picture_layout = itemView.findViewById(R.id.event_picture_layout);
 
         }
 
