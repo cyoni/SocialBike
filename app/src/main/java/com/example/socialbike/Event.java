@@ -3,6 +3,8 @@ package com.example.socialbike;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class Event extends Post {
 
     @JsonProperty("event_id")
@@ -20,7 +22,16 @@ public class Event extends Post {
     @JsonProperty("comments_num")
     private String commentsNum, elementScore;
     private Position position;
-    private boolean isInterested, isGoing, hasHeaderPicture;
+    private boolean isInterested, isGoing;
+    @JsonProperty("picture_header_created")
+    private long created;
+    @JsonProperty("has_header_picture")
+    private boolean hasHeaderPicture;
+    public boolean getHasHeaderPicture(){
+        return hasHeaderPicture;
+    }
+    public long getCreated(){return created;}
+    public void setCreated(long created){this.created = created;}
 
     @JsonProperty("event_id")
     public String getEventId() {
@@ -41,7 +52,6 @@ public class Event extends Post {
     public void setEventId(String eventId) {
         this.eventId = eventId;
     }
-
 
     @JsonProperty("name")
     public String getName() {
@@ -170,16 +180,6 @@ public class Event extends Post {
         this.elementScore = elementScore;
     }
 
-    @JsonProperty("has_header_picture")
-    public boolean hasHeaderPicture() {
-        return hasHeaderPicture;
-    }
-
-    @JsonProperty("has_header_picture")
-    public void setHasHeaderPicture(boolean hasHeaderPicture) {
-        this.hasHeaderPicture = hasHeaderPicture;
-    }
-
     public boolean getIsInterested(){
         return this.isInterested;
     }
@@ -199,4 +199,6 @@ public class Event extends Post {
     public Position getPosition() {
         return new Position(getLat(), getLng());
     }
+
 }
+

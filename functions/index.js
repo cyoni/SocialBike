@@ -325,8 +325,12 @@ function makeEventObject(raw_data, groupId, publicKey="_"){
         comments_num: raw_data.child('comments').numChildren(),
         isGoing: raw_data.child('going').child(publicKey).exists(),
         isInterested: raw_data.child('interested').child(publicKey).exists(),
-        has_header_picture: raw_data.child('has_header_picture').val() === true ? true : false, 
     }
+
+   if (raw_data.child('header_picture').child('has_header_picture').exists()){
+        dataOfEvent['has_header_picture'] = raw_data.child('header_picture').child('has_header_picture').val() === true ? true : false
+        dataOfEvent['picture_header_created'] = raw_data.child('header_picture').child('created').val() !== null ? raw_data.child('header_picture').child('created').val() : 0
+   }
 
     if (groupId !== null)
         dataOfEvent["group_id"] = groupId
@@ -974,6 +978,7 @@ const mkdirp = require('mkdirp');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { triggerAsyncId } = require("async_hooks");
 
 exports.StorageInspector = functions.storage.object().onFinalize(async (object) => {
     const fileBucket = object.bucket; // The Storage bucket that contains the file.
@@ -1018,7 +1023,10 @@ exports.StorageInspector = functions.storage.object().onFinalize(async (object) 
             else 
                 ref = admin.database().ref("events").child(eventId)
             
-            return ref.child("has_header_picture").set(true)
+            return ref.child("header_picture").set({
+                has_header_picture: true,
+                created: Date.now()
+            })
 
             /*
             const metadata = {

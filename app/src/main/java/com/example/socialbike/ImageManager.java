@@ -8,7 +8,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -67,7 +72,7 @@ public class ImageManager {
     public Task<byte[]> downloadPicture(StorageReference islandRef) {
         System.out.println("Downloading " + islandRef.getPath() + "...");
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference();
+       // StorageReference storageRef = storage.getReference();
         //StorageReference islandRef = storageRef.child(address);
         final long ONE_MEGABYTE = 1024 * 1024;
         return islandRef.getBytes(ONE_MEGABYTE);
@@ -91,6 +96,10 @@ public class ImageManager {
 
     }
 
+    public void removePictureLocally(Context context, String folder, String filename){
+        Files.removeFile(folder, filename, context);
+    }
+
     public boolean doesPictureExistLocally(String folder, String fileName) {
         return Files.doesExist(activity, folder, fileName);
     }
@@ -103,5 +112,21 @@ public class ImageManager {
             //dest.setImageBitmap(myBitmap);
         }
         return myBitmap;
+    }
+
+    public Task<Void> removePictureRemotely(StorageReference islandRef, String path) {
+        return islandRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                System.out.println("success");
+                MainActivity.mDatabase.child(path).child("header_picture").removeValue();
+                }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                System.out.println("failue");
+
+            }
+        });
     }
 }

@@ -154,7 +154,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
             else
                 holder.location.setText(event.getAddress());
 
-            if (event.hasHeaderPicture()){
+            if (event.getHasHeaderPicture()){
 
                 if (imageManager.doesPictureExistLocally("event_picture_headers", event.getEventId())){
                     imageManager.setImage(imageManager.loadPictureLocally("event_picture_headers", event.getEventId()), holder.image);

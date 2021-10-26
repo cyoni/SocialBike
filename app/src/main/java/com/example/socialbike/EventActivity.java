@@ -1,13 +1,21 @@
 package com.example.socialbike;
 
+import static com.example.socialbike.Constants.ADDRESS_FROM_MAPS_CODE;
+import static com.example.socialbike.ImageManager.SELECT_PICTURE_CODE;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,10 +27,16 @@ import com.example.socialbike.groups.IPageAdapter;
 import com.example.socialbike.groups.SectionsPagerAdapter;
 import com.example.socialbike.groups.TabManager;
 import com.example.socialbike.groups.group.PrivateGroupFragment;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -76,6 +90,48 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
         setAllFields();
     }
 
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == SELECT_PICTURE_CODE && resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Bitmap compressImage = imageManager.compressImage(bitmap);
+                Bitmap copy = imageManager.compressImage(bitmap);
+                Bitmap copy2 = imageManager.compressImage(bitmap);
+
+                imageManager.setImage(compressImage, headerPicture);
+
+                StorageReference ref = getPath().child("header");;
+
+                MainActivity.toast(this, "Uploading picture...", true);
+                imageManager.uploadImage(copy, ref).addOnSuccessListener(x -> {
+                    imageManager.removePictureLocally(this, "event_picture_headers", event.getEventId());
+                    imageManager.locallySavePicture(copy2, "event_picture_headers", event.getEventId());
+                    MainActivity.toast(this, "Success!", true);
+                } );
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private StorageReference getPath() {
+        StorageReference ref;
+        if (event.getGroupId() == null) {
+            ref = MainActivity.storageRef.
+                    child("events").
+                    child(event.getEventId());
+        } else
+            ref = MainActivity.storageRef.child("groups").
+                    child(event.getGroupId()).child("events").
+                    child(event.getEventId());
+        return ref;
+    }
+
     private void openSheet() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(R.layout.activity_profile_bottom_sheet);
@@ -84,8 +140,15 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
         Button button3 = bottomSheetDialog.findViewById(R.id.button_remove_picture);
 
         ImageManager imageManager = new ImageManager(this);
-        button2.setOnClickListener(v -> imageManager.loadPictureFromGallery(this));
-        button3.setOnClickListener(v -> bottomSheetDialog.dismiss());
+        button2.setOnClickListener(v -> {
+            imageManager.loadPictureFromGallery(this);
+            bottomSheetDialog.dismiss();
+        });
+        button3.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            imageManager.removePictureLocally(this, "event_picture_headers", event.getEventId());
+            imageManager.removePictureRemotely(getPath().child("header"), getPath().getPath());
+        });
 
 
         bottomSheetDialog.show();
@@ -146,7 +209,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
     }
 
     private void setHeaderPictureIfExists() {
-        if (event.hasHeaderPicture() && imageManager.doesPictureExistLocally("event_picture_headers", event.getEventId())){
+        if (event.getHasHeaderPicture() && imageManager.doesPictureExistLocally("event_picture_headers", event.getEventId())){
             imageManager.setImage(imageManager.loadPictureLocally("event_picture_headers", event.getEventId()), headerPicture);
         }
     }
