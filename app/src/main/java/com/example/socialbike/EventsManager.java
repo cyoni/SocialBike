@@ -158,15 +158,16 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
                 if (imageManager.doesPictureExistLocally("event_picture_headers", event.getEventId())){
                     imageManager.setImage(imageManager.loadPictureLocally("event_picture_headers", event.getEventId()), holder.image);
+                    holder.picture_loader.setVisibility(View.GONE);
                 }
                 else {
-
                     StorageReference ref = getPath(event.getGroupId(), event.getEventId());
                     imageManager.downloadPicture(ref).addOnSuccessListener(bytes -> {
                         Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         imageManager.setImage(bmp, holder.image);
                         imageManager.locallySavePicture(bmp, "event_picture_headers", event.getEventId());
                         holder.event_picture_layout.setVisibility(View.VISIBLE);
+                        holder.picture_loader.setVisibility(View.GONE);
                     });
                 }
             }

@@ -147,7 +147,6 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Group current = container.get(position);
 
-        registerForContextMenu(holder.layout);
         if (isExplore) {
             holder.joinButton.setVisibility(View.VISIBLE);
             holder.joinButton.setOnClickListener(view -> joinOrLeaveGroup(holder, position));
@@ -162,6 +161,11 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter.ItemC
         holder.title.setText(current.getTitle());
         holder.description.setText(current.getDescription());
         holder.memberCount.setText(current.getMemberCount() + " members");
+        registerForContextMenu(holder.menu_button);
+        holder.menu_button.setOnClickListener(view -> {
+            //holder.menu_button.;
+        });
+
     }
 
     private void joinOrLeaveGroup(RecyclerViewAdapter.ViewHolder holder, int position) {

@@ -3,6 +3,7 @@ package com.example.socialbike;
 import static com.example.socialbike.Constants.ADDRESS_FROM_MAPS_CODE;
 import static com.example.socialbike.ImageManager.SELECT_PICTURE_CODE;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -11,8 +12,10 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -29,6 +32,7 @@ import com.example.socialbike.groups.TabManager;
 import com.example.socialbike.groups.group.PrivateGroupFragment;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -77,7 +81,14 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
         event = (Event) intent.getSerializableExtra("event");
 
         if (event.getPublicKey().equals(ConnectedUser.getPublicKey()))
-            headerPicture.setOnClickListener(view -> openSheet());
+            headerPicture.setOnClickListener(view -> {
+                BitmapDrawable drawable = (BitmapDrawable) headerPicture.getDrawable();
+                if (drawable == null){
+                    imageManager.loadPictureFromGallery(this);
+                }
+                else
+                    openSheet();
+            });
 
         TabManager tabManager = new TabManager(viewPager, tabLayout, tabTitles);
         tabManager.init();
@@ -105,12 +116,22 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
 
                 StorageReference ref = getPath().child("header");;
 
-                MainActivity.toast(this, "Uploading picture...", true);
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setTitle("Uploading...");
+                progressDialog.setMessage("Uploading image");
+                progressDialog.show();
+
                 imageManager.uploadImage(copy, ref).addOnSuccessListener(x -> {
+                    progressDialog.dismiss();
                     imageManager.removePictureLocally(this, "event_picture_headers", event.getEventId());
                     imageManager.locallySavePicture(copy2, "event_picture_headers", event.getEventId());
                     MainActivity.toast(this, "Success!", true);
-                } );
+                } ).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                    }
+                });
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -148,10 +169,15 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
             bottomSheetDialog.dismiss();
             imageManager.removePictureLocally(this, "event_picture_headers", event.getEventId());
             imageManager.removePictureRemotely(getPath().child("header"), getPath().getPath());
+            resetHeaderPicture();
         });
 
 
         bottomSheetDialog.show();
+    }
+
+    private void resetHeaderPicture() {
+        headerPicture.setImageBitmap(null);
     }
 
     private void setAllFields() {

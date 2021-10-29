@@ -397,7 +397,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                     if (groupEvents.exists()){
                         groupEvents.forEach(current => {
                             // if current is active
-                            my_extra_events.push( makeEventObject(current, current.key, publicKey)  )
+                            my_extra_events.push( makeEventObject(current, raw_data.key, publicKey)  )
                         })
                     }
                 }
@@ -1018,7 +1018,7 @@ exports.StorageInspector = functions.storage.object().onFinalize(async (object) 
             }
 
             var ref
-            if (groupId && !eventId)
+            if (groupId && eventId)
                 ref = admin.database().ref("groups").child(groupId).child("events").child(eventId)
             else 
                 ref = admin.database().ref("events").child(eventId)

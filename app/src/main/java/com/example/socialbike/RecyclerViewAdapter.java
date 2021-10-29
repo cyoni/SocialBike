@@ -82,12 +82,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public TextView mapButton;
         public Button interested, coming, joinButton;
         public RelativeLayout layout, event_picture_layout;
-        public ImageButton commentsButton, likeButton, followButton;
+        public ImageButton commentsButton, likeButton, followButton, menu_button;
         public Button commentButton, postCommentButton, who_is_coming;
         public RelativeLayout relativelayout;
         public LinearLayout commentLayout;
         public Button who_is_interested;
-        public ProgressBar progressBar;
+        public ProgressBar progressBar, picture_loader;
         public ImageView image;
 
         ViewHolder(View itemView) {
@@ -131,6 +131,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             message_preview = itemView.findViewById(R.id.message_preview);
             image = itemView.findViewById(R.id.image);
             event_picture_layout = itemView.findViewById(R.id.event_picture_layout);
+            picture_loader = itemView.findViewById(R.id.picture_loader);
+            menu_button = itemView.findViewById(R.id.menu_button);
 
         }
 

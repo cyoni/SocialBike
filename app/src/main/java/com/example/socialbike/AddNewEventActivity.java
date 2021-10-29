@@ -5,6 +5,7 @@ import static com.example.socialbike.ImageManager.SELECT_PICTURE_CODE;
 import static com.example.socialbike.MainActivity.geoApiContext;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -51,6 +52,7 @@ public class AddNewEventActivity extends AppCompatActivity {
     ImageView headerPicture;
     ImageManager imageManager;
     Bitmap compressImage;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +82,11 @@ public class AddNewEventActivity extends AppCompatActivity {
         details = findViewById(R.id.content);
         mapButton = findViewById(R.id.map_button);
         title = findViewById(R.id.title);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Uploading...");
+        progressDialog.setMessage("Uploading event");
+
         setButtonListeners();
     }
 
@@ -276,7 +283,6 @@ public class AddNewEventActivity extends AppCompatActivity {
         if (submitButton.getText().toString().equals("posting..."))
             return;
 
-        submitButton.setText("posting...");
 
         String pattern = "EEE, d MMM yyyy h:m a";
         String dateTime1 = date.getText().toString() + " " + time.getText().toString();
@@ -287,7 +293,10 @@ public class AddNewEventActivity extends AppCompatActivity {
             MainActivity.toast(this, "Please correct the dates.", true);
             return;
         }
-        MainActivity.toast(this, "Uploading event...", true);
+
+        submitButton.setText("posting...");
+        progressDialog.show();
+
         uploadPost(start, end).continueWith(task -> {
 
             String response = String.valueOf(task.getResult().getData());
@@ -304,7 +313,6 @@ public class AddNewEventActivity extends AppCompatActivity {
     }
 
     private void uploadHeaderPicture(String response) {
-        MainActivity.toast(this, "Uploading Image...", true);
         System.out.println("Uploading Image...");
         StorageReference ref;
         if (groupId == null) {
@@ -317,13 +325,16 @@ public class AddNewEventActivity extends AppCompatActivity {
                     child(groupId).child("events").
                     child(response).
                     child("header");
+
         imageManager.uploadImage(compressImage, ref)
                 .addOnSuccessListener(taskSnapshot -> {
+                    progressDialog.dismiss();
                     System.out.println("Picture was uploaded successfully.");
                     onFinishPosting();
                 }).addOnFailureListener(e -> {
             // progressDialog.dismiss();
             System.out.println("Failed uploading the picture.");
+            progressDialog.dismiss();
         });
 
 
