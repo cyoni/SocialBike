@@ -32,6 +32,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.maps.GeoApiContext;
 
 import java.util.HashMap;
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     public static Map<String, String> membersMap = new HashMap<>();
     public static MemberDao memberDao;
     public static boolean isUserConnected;
+    public static StorageReference storageRef;
 
     public static void toast(Context context, String msg, boolean isLong) {
         int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
@@ -125,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         mFunctions = FirebaseFunctions.getInstance();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
         //mFunctions.useEmulator("127.0.0.1", 5001);
 
     }

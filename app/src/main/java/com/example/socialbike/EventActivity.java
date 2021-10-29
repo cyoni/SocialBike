@@ -1,15 +1,27 @@
 package com.example.socialbike;
 
+import static com.example.socialbike.Constants.ADDRESS_FROM_MAPS_CODE;
+import static com.example.socialbike.ImageManager.SELECT_PICTURE_CODE;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -18,15 +30,23 @@ import com.example.socialbike.groups.IPageAdapter;
 import com.example.socialbike.groups.SectionsPagerAdapter;
 import com.example.socialbike.groups.TabManager;
 import com.example.socialbike.groups.group.PrivateGroupFragment;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class EventActivity extends AppCompatActivity implements IPageAdapter {
+public class EventActivity extends AppCompatActivity implements IPageAdapter, pictureSheetDialog.BottomSheetListener {
 
     String[] tabTitles = {"Details", "Discussion"};
     public TabLayout tabLayout;
@@ -36,6 +56,9 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     Button save, interested, going;
     LinearLayout interestedLayOut, goingLayout;
     TextView interested_count, going_count, duration;
+    private ImageManager imageManager;
+    ImageView headerPicture;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +73,22 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         tabLayout = findViewById(R.id.tabs);
         duration = findViewById(R.id.duration);
 
+        imageManager = new ImageManager(this);
+
+        headerPicture = findViewById(R.id.header_picture);
+
         Intent intent = getIntent();
         event = (Event) intent.getSerializableExtra("event");
+
+        if (event.getPublicKey().equals(ConnectedUser.getPublicKey()))
+            headerPicture.setOnClickListener(view -> {
+                BitmapDrawable drawable = (BitmapDrawable) headerPicture.getDrawable();
+                if (drawable == null){
+                    imageManager.loadPictureFromGallery(this);
+                }
+                else
+                    openSheet();
+            });
 
         TabManager tabManager = new TabManager(viewPager, tabLayout, tabTitles);
         tabManager.init();
@@ -62,6 +99,85 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
         eventDetails = new EventDetails(event.getDetails());
 
         setAllFields();
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == SELECT_PICTURE_CODE && resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Bitmap compressImage = imageManager.compressImage(bitmap);
+                Bitmap copy = imageManager.compressImage(bitmap);
+                Bitmap copy2 = imageManager.compressImage(bitmap);
+
+                imageManager.setImage(compressImage, headerPicture);
+
+                StorageReference ref = getPath().child("header");;
+
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setTitle("Uploading...");
+                progressDialog.setMessage("Uploading image");
+                progressDialog.show();
+
+                imageManager.uploadImage(copy, ref).addOnSuccessListener(x -> {
+                    progressDialog.dismiss();
+                    imageManager.removePictureLocally(this, "event_picture_headers", event.getEventId());
+                    imageManager.locallySavePicture(copy2, "event_picture_headers", event.getEventId());
+                    MainActivity.toast(this, "Success!", true);
+                } ).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                    }
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private StorageReference getPath() {
+        StorageReference ref;
+        if (event.getGroupId() == null) {
+            ref = MainActivity.storageRef.
+                    child("events").
+                    child(event.getEventId());
+        } else
+            ref = MainActivity.storageRef.child("groups").
+                    child(event.getGroupId()).child("events").
+                    child(event.getEventId());
+        return ref;
+    }
+
+    private void openSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.activity_profile_bottom_sheet);
+
+        Button button2 = bottomSheetDialog.findViewById(R.id.picture_locally);
+        Button button3 = bottomSheetDialog.findViewById(R.id.button_remove_picture);
+
+        ImageManager imageManager = new ImageManager(this);
+        button2.setOnClickListener(v -> {
+            imageManager.loadPictureFromGallery(this);
+            bottomSheetDialog.dismiss();
+        });
+        button3.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            imageManager.removePictureLocally(this, "event_picture_headers", event.getEventId());
+            imageManager.removePictureRemotely(getPath().child("header"), getPath().getPath());
+            resetHeaderPicture();
+        });
+
+
+        bottomSheetDialog.show();
+    }
+
+    private void resetHeaderPicture() {
+        headerPicture.setImageBitmap(null);
     }
 
     private void setAllFields() {
@@ -113,6 +229,15 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
 
         going_count.setText(String.valueOf(Math.max(0, event.getNumParticipants())));
         interested_count.setText(String.valueOf(Math.max(0, event.getNumInterestedMembers())));
+
+        setHeaderPictureIfExists();
+
+    }
+
+    private void setHeaderPictureIfExists() {
+        if (event.getHasHeaderPicture() && imageManager.doesPictureExistLocally("event_picture_headers", event.getEventId())){
+            imageManager.setImage(imageManager.loadPictureLocally("event_picture_headers", event.getEventId()), headerPicture);
+        }
     }
 
     private boolean getIsEventSavedInLocal() {
@@ -212,5 +337,10 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter {
     @Override
     public int getCount() {
         return tabTitles.length;
+    }
+
+    @Override
+    public void onButtonClicked(String text) {
+        System.out.println(text);
     }
 }

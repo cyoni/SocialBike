@@ -12,6 +12,7 @@ import java.util.Map;
 public class Post extends Post_Basic {
 
     private String postId;
+    private String publicKey;
 
     public Post(String postId,
                 String publicKey,
@@ -38,5 +39,10 @@ public class Post extends Post_Basic {
     public void setPostId(String postId) {
         this.postId = postId;
     }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
 
 }

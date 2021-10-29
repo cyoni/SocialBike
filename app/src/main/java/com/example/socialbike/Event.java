@@ -3,55 +3,35 @@ package com.example.socialbike;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.Serializable;
+import java.util.List;
 
-public class Event extends Post implements Serializable {
+public class Event extends Post {
 
     @JsonProperty("event_id")
     private String eventId;
     @JsonProperty("group_id")
     private String groupId;
-    private String name;
-    private String user_public_key;
-    private String details;
-    private String created_event_time;
-    private long start;
-    private long end;
+    private String name, details, created_event_time;
+    private long start, end;
     @JsonProperty("num_interested_members")
     private int numInterestedMembers;
     @JsonProperty("num_participants")
     private int numParticipants;
-    private double lat;
-    private double lng;
-    private String title;
-    private String address;
+    private double lat, lng;
+    private String title, address;
     @JsonProperty("comments_num")
-    private String commentsNum;
-    private String elementScore;
+    private String commentsNum, elementScore;
     private Position position;
     private boolean isInterested, isGoing;
-
-    public Event(){
-        super();
+    @JsonProperty("picture_header_created")
+    private long created;
+    @JsonProperty("has_header_picture")
+    private boolean hasHeaderPicture;
+    public boolean getHasHeaderPicture(){
+        return hasHeaderPicture;
     }
-    public Event(String eventId, String userPublicKey, String name,
-                 long start, long end, String createdEventTime,
-                 int amountOfInterestedPeople, int numberOfParticipants,
-                 Position position, String message, int commentsNumber) {
-
-        super(eventId, userPublicKey, name, DateUtils.getTimeInMiliSecs(), message, 0, commentsNumber, false);
-
-        this.DatabaseContainer = Consts.EVENTS_CONTAINER_CODE;
-        this.eventId = eventId;
-        this.user_public_key = userPublicKey;
-        this.name = name;
-        this.start = start;
-        this.end = end;
-        this.created_event_time = createdEventTime;
-        this.numInterestedMembers = amountOfInterestedPeople;
-        this.numParticipants = numberOfParticipants;
-        this.position = position;
-    }
+    public long getCreated(){return created;}
+    public void setCreated(long created){this.created = created;}
 
     @JsonProperty("event_id")
     public String getEventId() {
@@ -73,7 +53,6 @@ public class Event extends Post implements Serializable {
         this.eventId = eventId;
     }
 
-
     @JsonProperty("name")
     public String getName() {
         return name;
@@ -82,16 +61,6 @@ public class Event extends Post implements Serializable {
     @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
-    }
-
-    @JsonProperty("user_public_key")
-    public String getUser_public_key() {
-        return user_public_key;
-    }
-
-    @JsonProperty("user_public_key")
-    public void setUser_public_key(String user_public_key) {
-        this.user_public_key = user_public_key;
     }
 
     @JsonProperty("details")
@@ -214,6 +183,7 @@ public class Event extends Post implements Serializable {
     public boolean getIsInterested(){
         return this.isInterested;
     }
+
     public boolean getIsGoing(){
         return this.isGoing;
     }
@@ -229,4 +199,6 @@ public class Event extends Post implements Serializable {
     public Position getPosition() {
         return new Position(getLat(), getLng());
     }
+
 }
+

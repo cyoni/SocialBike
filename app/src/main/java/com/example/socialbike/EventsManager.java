@@ -3,6 +3,8 @@ package com.example.socialbike;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -11,11 +13,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.socialbike.groups.group.MusicAdapter;
+import com.example.socialbike.room_database.Member;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
@@ -28,6 +39,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     Updater.IUpdate update;
     String dataType = MOST_RECENT_CODE;
     public ArrayList<Event> container = new ArrayList<>();
+    // public ArrayList<Event> extraEvents = new ArrayList<>();
     RecyclerView recyclerView;
     public RecyclerViewAdapter recyclerViewAdapter;
     public ProgressBar progressBar;
@@ -36,6 +48,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     Activity activity;
     TextView rangeText;
     public SwipeRefreshLayout swipe_refresh;
+    ImageManager imageManager;
 
 
     public EventsManager(Activity activity, Context context, Updater.IUpdate update) {
@@ -43,9 +56,10 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         this.activity = activity;
         this.context = context;
         eventsCommentsExtension = new EventsCommentsExtension(this);
+        imageManager = new ImageManager(activity);
     }
 
-    public Context getContext(){
+    public Context getContext() {
         return context;
     }
 
@@ -58,6 +72,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     public void getEvents(Map<String, Object> data) {
         System.out.println("getting Events...");
         container.clear();
+        //  extraEvents.clear();
         data.put("dataType", dataType);
         MainActivity.mFunctions
                 .getHttpsCallable("getEvents")
@@ -82,6 +97,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
         if (container.size() > 0) {
             container.clear();
+//         //   extraEvents.clear();
             recyclerViewAdapter.notifyDataSetChanged();
         }
 
@@ -89,6 +105,11 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         try {
             EventDTO eventDTO = objectMapper.readValue(data, EventDTO.class);
             container.addAll(eventDTO.getEvents());
+            if (!eventDTO.getExtraEvents().isEmpty()) {
+                container.add(null);
+                container.addAll(eventDTO.getExtraEvents());
+            }
+
             update.onFinishedUpdating();
         } catch (IOException e) {
             e.printStackTrace();
@@ -115,25 +136,67 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     @Override
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Event event = container.get(position);
-        holder.title.setText(event.getTitle());
-        String start = DateUtils.convertMiliToDateTime(event.getStart(), Consts.FULL_DATE_TIME);
-        holder.date_and_time.setText(start);
-        if (event.getNumParticipants() > 1) {
-            holder.people_going.setVisibility(View.VISIBLE);
-            holder.people_going.setText(event.getNumParticipants() + " people going");
-        }
-        else
-            holder.people_going.setVisibility(View.GONE);
-        if (event.getAddress() == null)
-            holder.location.setVisibility(View.GONE);
-        else
-            holder.location.setText(event.getAddress());
+        if (event != null) {
+            holder.event_picture_layout.setVisibility(View.VISIBLE);
+            holder.image.setImageBitmap(null);
 
-        holder.relativelayout.setOnClickListener(view -> {
-            Intent intent = new Intent(getContext(), EventActivity.class);
-            intent.putExtra("event", container.get(position));
-            getContext().startActivity(intent);
-        });
+            holder.title.setText(event.getTitle());
+            Member.fetchAndSetName(holder.name, holder.name.getText().toString(), event.getPublicKey());
+            String start = DateUtils.convertMiliToDateTime(event.getStart(), Consts.FULL_DATE_TIME);
+            holder.date_and_time.setText(start);
+            if (event.getNumParticipants() > 1) {
+                holder.people_going.setVisibility(View.VISIBLE);
+                holder.people_going.setText(event.getNumParticipants() + " people going");
+            } else
+                holder. people_going.setVisibility(View.GONE);
+            if (event.getAddress() == null)
+                holder.location.setVisibility(View.GONE);
+            else
+                holder.location.setText(event.getAddress());
+
+            if (event.getHasHeaderPicture()){
+
+                if (imageManager.doesPictureExistLocally("event_picture_headers", event.getEventId())){
+                    imageManager.setImage(imageManager.loadPictureLocally("event_picture_headers", event.getEventId()), holder.image);
+                    holder.picture_loader.setVisibility(View.GONE);
+                }
+                else {
+                    StorageReference ref = getPath(event.getGroupId(), event.getEventId());
+                    imageManager.downloadPicture(ref).addOnSuccessListener(bytes -> {
+                        Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        imageManager.setImage(bmp, holder.image);
+                        imageManager.locallySavePicture(bmp, "event_picture_headers", event.getEventId());
+                        holder.event_picture_layout.setVisibility(View.VISIBLE);
+                        holder.picture_loader.setVisibility(View.GONE);
+                    });
+                }
+            }
+            else
+                holder.event_picture_layout.setVisibility(View.GONE);
+
+            holder.relativelayout.setOnClickListener(view -> {
+                Intent intent = new Intent(getContext(), EventActivity.class);
+                intent.putExtra("event", container.get(position));
+                getContext().startActivity(intent);
+            });
+        }
+    }
+
+
+
+    private StorageReference getPath(String groupId, String eventId) {
+        StorageReference ref = MainActivity.storageRef;
+        if (groupId != null && eventId != null)
+            ref = ref.child("groups").child(groupId).child("events").child(eventId);
+        else if (groupId == null && eventId != null)
+            ref = ref.child("events").child(eventId);
+        ref = ref.child("header");
+        return ref;
+    }
+
+    @Override
+    public void onItemClick(@NonNull View holder, int position) {
+
     }
 
     private void openMap(LatLng latLng) {
@@ -143,15 +206,15 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         activity.startActivity(intent);
     }
 
-    @Override
+    /*@Override
     public void onItemClick(@NonNull View holder, int position) {
 
-    }
+    }*/
 
     protected void updateSearchText() {
         if (rangeText != null) {
             String str;
-            if (range == 100){
+            if (range == 100) {
                 str = "Shows " + container.size() + " events in";
             } else
                 str = "Shows " + container.size() + " events within " + range + " km of";

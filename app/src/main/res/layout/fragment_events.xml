@@ -29,7 +29,7 @@
             android:layout_alignParentEnd="true"
             android:layout_marginLeft="5dp"
             app:icon="@drawable/ic_baseline_arrow_drop_down_24"
-            android:text="Treading" />
+            android:text="@string/trending" />
 
 
         <RelativeLayout

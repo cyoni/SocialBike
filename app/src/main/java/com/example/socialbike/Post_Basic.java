@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class Post_Basic implements Serializable {
 
-    private String publicKey, name, msg;
+    public String name, msg;
     private boolean isLiked = false;
     private long timestamp;
     private int comments_count;
@@ -27,23 +27,12 @@ public class Post_Basic implements Serializable {
                 int comments,
                 boolean doesUserLikeThePost) {
 
-        this.publicKey = publicKey;
         this.name = name;
         this.timestamp = time;
         this.msg = msg;
         this.likesCount = likes;
         this.comments_count = comments;
         this.isLiked = doesUserLikeThePost;
-    }
-
-    @JsonProperty("publicKey")
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    @JsonProperty("publicKey")
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
     }
 
     @JsonProperty("name")

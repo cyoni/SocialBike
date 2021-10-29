@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -16,13 +17,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
-    private ViewHolder viewHolder;
+    //private ViewHolder viewHolder;
     private List mData; // reference
     private LayoutInflater mInflater;
     private ItemClickListener classReference;
     private int layout;
+    private static final int DIVIDER_LAYOUT = 0;
+    private static final int EVENT_LAYOUT = 1;
 
     // data is passed into the constructor
     public RecyclerViewAdapter(Context context, int layout, List mData) {
@@ -31,18 +34,37 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.layout = layout;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (mData.get(position) == null)
+            return DIVIDER_LAYOUT;
+        else
+            return EVENT_LAYOUT;
+    }
+
+
     // inflates the row layout from xml when needed
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(layout, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = null;
+        RecyclerView.ViewHolder viewHolder = null;
+
+        if (viewType == DIVIDER_LAYOUT) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.event_more_devider, parent, false);
+            viewHolder = new ViewHolder(view);
+        } else {
+            view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
+            viewHolder = new ViewHolder(view);
+        }
+
+        return viewHolder;
     }
 
     // binds the data to the TextView in each row
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        classReference.onBinding(holder, position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        classReference.onBinding((ViewHolder) holder, position);
     }
 
     // total number of rows
@@ -59,13 +81,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 replyButton, likeTextButton, description, title, memberCount, location;
         public TextView mapButton;
         public Button interested, coming, joinButton;
-        public RelativeLayout layout;
-        public ImageButton commentsButton, likeButton, followButton;
+        public RelativeLayout layout, event_picture_layout;
+        public ImageButton commentsButton, likeButton, followButton, menu_button;
         public Button commentButton, postCommentButton, who_is_coming;
         public RelativeLayout relativelayout;
         public LinearLayout commentLayout;
         public Button who_is_interested;
-        public ProgressBar progressBar;
+        public ProgressBar progressBar, picture_loader;
+        public ImageView image;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -78,7 +101,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             description = itemView.findViewById(R.id.description);
             location = itemView.findViewById(R.id.location);
             title = itemView.findViewById(R.id.title);
-      //      commentButton = itemView.findViewById(R.id.commentButton);
+            //      commentButton = itemView.findViewById(R.id.commentButton);
             comments_count = itemView.findViewById(R.id.comments);
             likeButton = itemView.findViewById(R.id.likeButton);
             likes = itemView.findViewById(R.id.likes);
@@ -87,15 +110,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             relativelayout = itemView.findViewById(R.id.relativelayout);
             commentLayout = itemView.findViewById(R.id.commentLayout);
             date_and_time = itemView.findViewById(R.id.date_and_time);
-       //     interested = itemView.findViewById(R.id.interested);
-        //    coming = itemView.findViewById(R.id.coming);
-       //     who_is_coming = itemView.findViewById(R.id.who_is_coming);
-       //     who_is_interested = itemView.findViewById(R.id.who_is_interested);
+            //     interested = itemView.findViewById(R.id.interested);
+            //    coming = itemView.findViewById(R.id.coming);
+            //     who_is_coming = itemView.findViewById(R.id.who_is_coming);
+            //     who_is_interested = itemView.findViewById(R.id.who_is_interested);
             people_going = itemView.findViewById(R.id.going_count);
             progressBar = itemView.findViewById(R.id.progressBar);
             mapButton = itemView.findViewById(R.id.map_button);
             memberCount = itemView.findViewById(R.id.memberCount);
-        //    locationName = itemView.findViewById(R.id.locationName);
+            //    locationName = itemView.findViewById(R.id.locationName);
             red_dot = itemView.findViewById(R.id.red_dot);
             followButton = itemView.findViewById(R.id.followButton);
             replyButton = itemView.findViewById(R.id.replyButton);
@@ -106,6 +129,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             msgStyle = itemView.findViewById(R.id.msgStyle);
             // start_conversation = itemView.findViewById(R.id.start_conversation);
             message_preview = itemView.findViewById(R.id.message_preview);
+            image = itemView.findViewById(R.id.image);
+            event_picture_layout = itemView.findViewById(R.id.event_picture_layout);
+            picture_loader = itemView.findViewById(R.id.picture_loader);
+            menu_button = itemView.findViewById(R.id.menu_button);
 
         }
 
@@ -120,6 +147,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
+    class second extends RecyclerView.ViewHolder{
+
+        public second(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+
     // convenience method for getting data at click position
     //Item getItem(int id) {
     //   return mData.get(id);
@@ -132,7 +167,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
-        void onBinding(@NonNull ViewHolder holder, int position);
+        void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position);
 
         void onItemClick(@NonNull View holder, int position);
     }
