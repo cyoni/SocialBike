@@ -30,7 +30,7 @@ import java.util.Map;
 import static android.app.Activity.RESULT_OK;
 
 public class EventsFragment extends Fragment
-        implements SeekBar.OnSeekBarChangeListener, Updater.IUpdate {
+        implements Updater.IUpdate {
 
     static EventsFragment eventsFragment = null;
     private SeekBar seekBar;
@@ -40,7 +40,6 @@ public class EventsFragment extends Fragment
     private EventsManager eventsManager;
     protected ArrayList<Event> container;
     Updater.IUpdate update = this;
-    private int lastRange = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -90,8 +89,6 @@ public class EventsFragment extends Fragment
         no_events_text = root.findViewById(R.id.no_events_text);
         no_events_text.setVisibility(View.GONE);
 
-        setSeekBar(root);
-
         initPreferredLocation();
         updateCityTextView();
 
@@ -125,7 +122,6 @@ public class EventsFragment extends Fragment
         container.clear();
 
         Map<String, Object> data = new HashMap<>();
-        data.put("range", eventsManager.range);
         data.put("country", position.getCountry());
         data.put("city", position.getCity());
         data.put("lat", position.getLatLng().latitude);
@@ -166,11 +162,7 @@ public class EventsFragment extends Fragment
 
 
     private void updateCityTextView() {
-        String location;
-        if (seekBar.getProgress() == seekBar.getMax()){
-            location = position.getCountry();
-        } else
-            location = position.getCity();
+        String location = position.getCity();
 
         cityText.setOnClickListener(view -> openCitiesAutoComplete());
         cityText.setText(HtmlCompat.fromHtml
@@ -220,46 +212,6 @@ public class EventsFragment extends Fragment
         Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
                 .build(getContext());
         startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
-    }
-
-    private void setSeekBar(View root) {
-        seekBar = root.findViewById(R.id.seekBar);
-        seekBar.setOnSeekBarChangeListener(this);
-        seekBar.setMax(100);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            seekBar.setMin(10);
-        }
-        eventsManager.updateSearchText();
-    }
-
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        int stepSize = 10;
-        progress = (seekBar.getProgress() / stepSize) * stepSize;
-        seekBar.setProgress(progress);
-
-        if (progress < 100)
-            eventsManager.rangeText.setText("Release to find events within " + progress + " km of");
-        else
-            eventsManager.rangeText.setText("Release to find events in");
-        updateCityTextView();
-    }
-
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        eventsManager.range = seekBar.getProgress();
-        if (lastRange != eventsManager.range) {
-            eventsManager.showProgressbar();
-            lastRange = eventsManager.range;
-            eventsManager.rangeText.setText("Loading...");
-            cityText.setVisibility(View.INVISIBLE);
-            getEvents();
-        }
     }
 
 

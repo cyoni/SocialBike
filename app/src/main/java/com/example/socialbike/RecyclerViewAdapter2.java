@@ -17,18 +17,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
+public class RecyclerViewAdapter2 extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
     //private ViewHolder viewHolder;
     private List mData; // reference
     private LayoutInflater mInflater;
     private ItemClickListener classReference;
     private int layout;
-    private static final int DIVIDER_LAYOUT = 0;
-    private static final int EVENT_LAYOUT = 1;
+
 
     // data is passed into the constructor
-    public RecyclerViewAdapter(Context context, int layout, List mData) {
+    public RecyclerViewAdapter2(Context context, int layout, List mData) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = mData;
         this.layout = layout;
@@ -36,10 +35,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemViewType(int position) {
-        if (mData.get(position) == null)
-            return DIVIDER_LAYOUT;
-        else
-            return EVENT_LAYOUT;
+        return classReference.getItemViewType(position);
+    }
+
+    public RecyclerViewAdapter2.ViewHolder getLayoutView(View view){
+        return new ViewHolder(view);
     }
 
 
@@ -47,23 +47,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = null;
-        RecyclerView.ViewHolder viewHolder = null;
-
-        if (viewType == DIVIDER_LAYOUT) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.event_more_devider, parent, false);
-        } else {
-            view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
-        }
-        viewHolder = new ViewHolder(view);
-
-        return viewHolder;
+        return classReference.OnCreateViewHolder(parent, viewType);
     }
 
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        classReference.onBinding((ViewHolder) holder, position);
+        classReference.onBinding( holder, position);
     }
 
     // total number of rows
@@ -89,7 +79,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public ProgressBar progressBar, picture_loader;
         public ImageView image;
 
-        ViewHolder(View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
 
             name = itemView.findViewById(R.id.name);
@@ -140,10 +130,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             if (classReference != null)
                 classReference.onItemClick(view, getAdapterPosition());
         }
-
-      //  public void fresh() {
-      //      comments = itemView.findViewById(R.id.headCommentText);
-      //  }
     }
 
     class second extends RecyclerView.ViewHolder{
@@ -153,12 +139,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-
-    // convenience method for getting data at click position
-    //Item getItem(int id) {
-    //   return mData.get(id);
-    //  }
-
     // allows click events to be caught
     public void setClassReference(Object itemClickListener) {
         this.classReference = (ItemClickListener) itemClickListener;
@@ -166,8 +146,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
-        void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position);
-
+        void onBinding(@NonNull RecyclerView.ViewHolder holder, int position);
         void onItemClick(@NonNull View holder, int position);
+        int getItemViewType(int position);
+        RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType);
     }
 }

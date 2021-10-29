@@ -355,7 +355,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
 
     const lat = request.lat
     const lng = request.lng
-    const range = request.range
+    const range = 100
     const country = request.country || null
     const groupId = request.groupId || null
 
@@ -371,8 +371,8 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
 
             if (
                 groupId !== null ||
-                distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range ||
-                range === 100 && raw_data.child('country').val() === country
+                distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range 
+                     && raw_data.child('country').val() === country
             ) {
 
                 data['events'].push(makeEventObject(raw_data, groupId, publicKey))

@@ -28,21 +28,21 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_marginLeft="5dp"
-            app:icon="@drawable/ic_baseline_arrow_drop_down_24"
-            android:text="@string/trending" />
+            android:text="@string/trending"
+            app:icon="@drawable/ic_baseline_arrow_drop_down_24" />
 
 
         <RelativeLayout
             android:id="@+id/searchSection"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="20dp"
             android:layout_below="@id/sort_button">
 
             <TextView
                 android:id="@+id/rangeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Finds events within XX KM of" />
+                android:text="Finds events near" />
 
             <TextView
                 android:id="@+id/city"
@@ -54,13 +54,6 @@
                 android:textColor="@color/blue"
 
                 />
-
-
-            <SeekBar
-                android:id="@+id/seekBar"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_below="@id/rangeText" />
 
 
         </RelativeLayout>

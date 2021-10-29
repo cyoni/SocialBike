@@ -43,7 +43,6 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     RecyclerView recyclerView;
     public RecyclerViewAdapter recyclerViewAdapter;
     public ProgressBar progressBar;
-    int range = 10;
     Context context;
     Activity activity;
     TextView rangeText;
@@ -213,11 +212,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
     protected void updateSearchText() {
         if (rangeText != null) {
-            String str;
-            if (range == 100) {
-                str = "Shows " + container.size() + " events in";
-            } else
-                str = "Shows " + container.size() + " events within " + range + " km of";
+            String str = "Shows " + container.size() + " events near";
             rangeText.setText(str);
         }
     }

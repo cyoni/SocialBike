@@ -54,6 +54,8 @@ public class GroupContainer extends Fragment implements IPageAdapter {
             SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getParentFragmentManager(), this);
             viewPager.setAdapter(sectionsPagerAdapter);
 
+         //   tabLayout.getTabAt(0).getOrCreateBadge().setNumber(3);
+
         }
         return root;
     }

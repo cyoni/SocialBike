@@ -36,6 +36,8 @@ public class Member {
 
     public static void fetchName(TextView reference, String publicKey) {
         System.out.println("Getting name of " + publicKey + " from database...");
+        if (publicKey == null)
+            return;
         MainActivity.mDatabase.child("public").child(publicKey).child("profile").child("nickname")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
