@@ -47,13 +47,12 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class GroupFragment extends Fragment implements RecyclerViewAdapter2.ItemClickListener, Updater.IUpdate {
+public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapter2.ItemClickListener, Updater.IUpdate {
 
-    private final boolean isExplore;
     private final GroupContainer groupContainer;
     private RecyclerView recyclerView;
-    public RecyclerViewAdapter2 recyclerViewAdapter;
-    public ArrayList<Group> container = new ArrayList<>();
+    private RecyclerViewAdapter2 recyclerViewAdapter;
+    private ArrayList<Group> container = new ArrayList<>();
     private ProgressBar progressBar;
     private View root;
     private SwipeRefreshLayout swipeLayout;
@@ -64,8 +63,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
     private String location = "xxx";
     private Position position = new Position();
 
-    public GroupFragment(GroupContainer groupContainer, boolean isExplore) {
-        this.isExplore = isExplore;
+    public ExploreGroupsFragment(GroupContainer groupContainer) {
         this.groupContainer = groupContainer;
     }
 
@@ -89,12 +87,11 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
             progressBar = root.findViewById(R.id.progressBar);
             swipeLayout = root.findViewById(R.id.swipe_refresh);
             progressBar.setVisibility(View.VISIBLE);
-            preferredLocation.initPreferredLocation();
 
             setSwipeLayout();
             initAdapter();
-
         }
+
         return root;
     }
 
@@ -109,9 +106,10 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
         container.clear();
 
         Map<String, Object> data = new HashMap<>();
-
+        //   data.put("lat", position.getLatLng().latitude);
+        //   data.put("lng", position.getLatLng().longitude);
         MainActivity.mFunctions
-                .getHttpsCallable(isExplore ? "GetAllGroups" : "GetMyGroups")
+                .getHttpsCallable(Methods.GetAllGroups)
                 .call(data)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
@@ -130,7 +128,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
             container.addAll(groupDTO.getGroups());
             for (Group group : container)
                 groupIds.add(group.getGroupId());
-
+            sortContainer();
             onFinishedUpdating();
         } catch (IOException e) {
             e.printStackTrace();
@@ -156,9 +154,16 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
 
     @Override
     public void onBinding(@NonNull RecyclerView.ViewHolder holder, int position) {
+
         RecyclerViewAdapter2.ViewHolder _holder = (RecyclerViewAdapter2.ViewHolder) holder;
         Group current = container.get(position);
-            _holder.joinButton.setVisibility(View.GONE);
+        _holder.joinButton.setVisibility(View.VISIBLE);
+        _holder.joinButton.setOnClickListener(view -> joinOrLeaveGroup(_holder, position));
+
+        if (current.getIsMember())
+            _holder.joinButton.setText("Joined");
+        else
+            _holder.joinButton.setText("Join");
 
         _holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle()));
         _holder.title.setText(current.getTitle());
@@ -184,10 +189,15 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
                 } else
                     country = "DEFAULT";
 
-                //  position = new Position(place.getLatLng(), place.getName(), country);
-                //  savePosition();
-                updateCityTextView(address.split(",")[0]);
-                // getEvents();
+                position.setLatLng(place.getLatLng());
+                position.setCity(place.getName());
+                position.setCountry(country);
+                preferredLocation.savePosition();
+                //
+                // = new Position(place.getLatLng(), place.getName(), country);
+                //
+                updateCityTextView(position.getCountry());
+                //getEvents();
             }
             return;
         }
@@ -293,6 +303,23 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
                 });
     }
 
+
+    @Override
+    public void onItemClick(@NonNull View holder, int position) {
+        System.out.println(position);
+    }
+
+    @Override
+    public RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_group, parent, false);
+        return recyclerViewAdapter.getLayoutView(view);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return EVENT_LAYOUT;
+    }
+
     private void setSwipeLayout() {
         swipeLayout.setOnRefreshListener(this::getGroups);
 
@@ -313,22 +340,14 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
         progressBar.setVisibility(View.GONE);
     }
 
+    class EmptyView extends RecyclerView.ViewHolder {
 
-    @Override
-    public void onItemClick(@NonNull View holder, int position) {
-        System.out.println(position);
+        TextView location;
+
+        public EmptyView(View itemView) {
+            super(itemView);
+            location = itemView.findViewById(R.id.location);
+        }
+
     }
-
-    @Override
-    public RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) {
-        View view;
-        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_group, parent, false);
-        return recyclerViewAdapter.getLayoutView(view);
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return EVENT_LAYOUT;
-    }
-
 }

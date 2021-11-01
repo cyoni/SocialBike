@@ -225,4 +225,12 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         swipe_refresh = root.findViewById(R.id.swipe_refresh);
         progressBar.setVisibility(View.INVISIBLE);
     }
+
+    public void init() {
+        recyclerView = activity.findViewById(R.id.recyclerview);
+        initAdapter();
+        progressBar = activity.findViewById(R.id.progressBar);
+        swipe_refresh = activity.findViewById(R.id.swipe_refresh);
+        progressBar.setVisibility(View.INVISIBLE);
+    }
 }

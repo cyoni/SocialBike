@@ -2,30 +2,22 @@ package com.example.socialbike.groups.group;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 
 import com.example.socialbike.MainActivity;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.socialbike.R;
-import com.example.socialbike.groups.IPageAdapter;
-import com.example.socialbike.groups.SectionsPagerAdapter;
-import com.example.socialbike.groups.TabManager;
-import com.google.android.material.tabs.TabLayout;
 
-public class GroupActivity extends FragmentActivity implements IPageAdapter {
+public class GroupActivity extends AppCompatActivity {
 
     private static GroupActivity groupContainer;
-    public TabLayout tabs;
     public MainActivity mainActivity;
     private String groupId;
-    private PrivateGroupFragment privateGroupFragment;
-
-    String[] tabTitles = {"Posts", "Events", "Members"};
+    Button events_button;
 
     public static GroupActivity getInstance() {
         if (groupContainer == null) {
@@ -37,7 +29,7 @@ public class GroupActivity extends FragmentActivity implements IPageAdapter {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_group_container2);
+        setContentView(R.layout.group_activity);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
@@ -46,44 +38,23 @@ public class GroupActivity extends FragmentActivity implements IPageAdapter {
         String groupName = intent.getStringExtra("groupName");
         groupId = intent.getStringExtra("groupId");
 
+        events_button = findViewById(R.id.events_button);
+        events_button.setOnClickListener(view -> {
+            Intent intent1 = new Intent(this, GroupEvents.class);
+            intent1.putExtra("groupId", groupId);
+            startActivity(intent1);
+        });
         toolbar.setTitle(groupName);
 
-        ViewPager viewPager = findViewById(R.id.view_pager);
-        tabs = findViewById(R.id.tabs);
-
-        privateGroupFragment = new PrivateGroupFragment(groupId);
-
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
-        viewPager.setAdapter(sectionsPagerAdapter);
-
-        TabManager tabManager = new TabManager(viewPager, tabs, tabTitles);
-        tabManager.init();
     }
+
+    public GroupActivity(){}
 
     @Override
     public void onBackPressed(){
-        GroupEvents.groupFragment = null;
         MembersGroupFragment.groupFragment = null;
         finish();
     }
 
-    @Override
-    public int getCount() {
-        return tabTitles.length;
-    }
-
-    @Override
-    public Fragment createFragment(int position) {
-        switch (position) {
-            case 0:
-                return privateGroupFragment;
-            case 1:
-                return GroupEvents.getInstance(groupId);
-            case 2:
-                return MembersGroupFragment.getInstance(groupId);
-            default:
-                return null;
-        }
-    }
 
 }

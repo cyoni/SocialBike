@@ -25,7 +25,7 @@ public class GroupContainer extends Fragment implements IPageAdapter {
     String[] tabTitles = {"My Groups", "Explore"};
     private View root;
     protected final GroupFragment groupsThatImInFragment = new GroupFragment(this, false);
-    protected final GroupFragment exploreFragment = new GroupFragment(this, true);
+    protected final ExploreGroupsFragment exploreFragment = new ExploreGroupsFragment(this);
 
     public static GroupContainer getInstance() {
         if (groupContainer == null) {

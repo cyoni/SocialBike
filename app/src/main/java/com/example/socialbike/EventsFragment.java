@@ -39,11 +39,13 @@ public class EventsFragment extends Fragment
     private View root;
     private EventsManager eventsManager;
     protected ArrayList<Event> container;
+    private PreferredLocation preferredLocation;
     Updater.IUpdate update = this;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.preferredLocation = new PreferredLocation(getActivity(), position);
     }
 
     public EventsFragment() {
@@ -59,6 +61,9 @@ public class EventsFragment extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        preferredLocation.initPreferredLocation();
+
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_events, container, false);
             eventsManager = new EventsManager(getActivity(), getContext(), update);
@@ -67,6 +72,9 @@ public class EventsFragment extends Fragment
             eventsManager.showProgressbar();
             setSwipeLayout();
         }
+
+        updateCityTextView();
+
         return root;
     }
 
@@ -89,8 +97,8 @@ public class EventsFragment extends Fragment
         no_events_text = root.findViewById(R.id.no_events_text);
         no_events_text.setVisibility(View.GONE);
 
-        initPreferredLocation();
-        updateCityTextView();
+        cityText.setOnClickListener(view -> openCitiesAutoComplete());
+
 
         setListeners(root);
 
@@ -99,23 +107,7 @@ public class EventsFragment extends Fragment
     }
 
 
-    private void initPreferredLocation() {
-        String lat = Utils.getPreference(getActivity(), "data", "lat");
-        String lng = Utils.getPreference(getActivity(), "data", "lng");
-        String preferredCity = Utils.getPreference(getActivity(), "data", "city");
-        String preferredCountry = Utils.getPreference(getActivity(), "data", "country");
 
-        if (lat != null && lng != null && preferredCity != null){
-            this.position = new Position(new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)), preferredCity, preferredCountry);
-        } else {
-            String userCountry = Utils.getUserCountry(getContext());
-            if (userCountry != null) {
-                preferredCity = userCountry.toUpperCase();
-                this.position = Utils.getLatLngOfString(preferredCity + " country");
-                savePosition();
-            }
-        }
-    }
 
     private void getEvents() {
         no_events_text.setVisibility(View.GONE);
@@ -162,11 +154,11 @@ public class EventsFragment extends Fragment
 
 
     private void updateCityTextView() {
-        String location = position.getCity();
+      //  String location = position.getCity();
 
-        cityText.setOnClickListener(view -> openCitiesAutoComplete());
-        cityText.setText(HtmlCompat.fromHtml
-                ("<u><b>" + location + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+     //   cityText.setText(HtmlCompat.fromHtml
+       //         ("<u><b>" + location + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+        preferredLocation.setLocationText(cityText);
     }
 
     @Override
@@ -190,8 +182,10 @@ public class EventsFragment extends Fragment
                 } else
                     country = "DEFAULT";
 
-                position = new Position(place.getLatLng(), place.getName(), country);
-                savePosition();
+                position.setLatLng(place.getLatLng());// = new Position(place.getLatLng(), place.getName(), country);
+                position.setCity(place.getName());
+                position.setCountry(country);
+                preferredLocation.savePosition();
                 updateCityTextView();
                 getEvents();
             }
@@ -200,12 +194,9 @@ public class EventsFragment extends Fragment
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void savePosition() {
-        Utils.savePreference(getActivity(), "data", "lat", String.valueOf(position.getLatLng().latitude));
-        Utils.savePreference(getActivity(), "data", "lng", String.valueOf(position.getLatLng().longitude));
-        Utils.savePreference(getActivity(), "data", "city", position.getCity());
-        Utils.savePreference(getActivity(), "data", "country", position.getCountry());
-    }
+
+
+
 
     private void openCitiesAutoComplete() {
         List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);

@@ -1,5 +1,6 @@
 package com.example.socialbike.groups.group;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,7 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -27,33 +30,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class GroupEvents extends Fragment implements Updater.IUpdate {
+public class GroupEvents extends FragmentActivity implements Updater.IUpdate {
 
-    public static GroupEvents groupFragment;
-    private final String groupId;
-    private View root;
+    private String groupId;
     private SwipeRefreshLayout swipeLayout;
     private EventsManager eventsManager;
     Updater.IUpdate update = this;
 
-    public GroupEvents(String groupId) {
-        this.groupId = groupId;
-    }
 
-    public static GroupEvents getInstance(String groupId) {
-        if (groupFragment == null) {
-            groupFragment = new GroupEvents(groupId);
-        }
-        return groupFragment;
-    }
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_group_events);
+
+        this.groupId = getIntent().getStringExtra("groupId");
+
+        eventsManager = new EventsManager(this, this, update);
+        initiateScreen();
+        setSwipeLayout();
+        ExtendedFloatingActionButton extendedFloatingActionButton = findViewById(R.id.extended_fab);
+        extendedFloatingActionButton.setOnClickListener(view -> {
+            Intent intent = new Intent(this, AddNewEventActivity.class);
+            intent.putExtra("groupId", groupId);
+            startActivity(intent);
+        });
+
+
     }
 
+    public GroupEvents(){}
+
+
     private void setSwipeLayout() {
+        swipeLayout = findViewById(R.id.swipe_refresh);
         swipeLayout.setOnRefreshListener(this::getEvents);
 
         swipeLayout.setColorSchemeColors(
@@ -64,27 +75,10 @@ public class GroupEvents extends Fragment implements Updater.IUpdate {
         );
     }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        if (root == null) {
-            root = inflater.inflate(R.layout.fragment_group_events, container, false);
-            groupFragment.eventsManager = new EventsManager(getActivity(), getContext(), update);
-            initiateScreen(root);
-            setSwipeLayout();
-            ExtendedFloatingActionButton extendedFloatingActionButton = root.findViewById(R.id.extended_fab);
-            extendedFloatingActionButton.setOnClickListener(view -> {
-                Intent intent = new Intent(getContext(), AddNewEventActivity.class);
-                intent.putExtra("groupId", groupId);
-                startActivity(intent);
-            });
-        }
-        return root;
-    }
 
-    private void initiateScreen(View root) {
-        eventsManager.init(root);
-        swipeLayout = root.findViewById(R.id.swipe_refresh);
+    private void initiateScreen() {
+        eventsManager.init();
+        swipeLayout = findViewById(R.id.swipe_refresh);
         eventsManager.showProgressbar();
         getEvents();
     }

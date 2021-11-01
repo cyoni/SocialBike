@@ -373,6 +373,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 groupId !== null ||
                 distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range 
                      && raw_data.child('country').val() === country
+                     && raw_data.child("user_public_key").exists() 
             ) {
 
                 data['events'].push(makeEventObject(raw_data, groupId, publicKey))

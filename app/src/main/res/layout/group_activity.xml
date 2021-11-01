@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            style="@style/ToolBarWithNavigationBack"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_collapseMode="pin">
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/app_bar"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/join_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:text="Join group" />
+
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/join_button"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/shaped_corners"
+                android:padding="5dp"
+                android:text="Some text some textSome text some textSome text some textSome text some textSome text some textSome text some textSome text some textSome text some textSome text some textSome text some textSome text some text" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:text="Events"
+                android:textSize="30sp" />
+
+            <include
+                android:id="@+id/event_fragment"
+                layout="@layout/item_events"
+                android:layout_width="match_parent"
+                android:layout_below="@id/title"
+                android:layout_height="wrap_content" />
+
+
+            <Button
+                android:id="@+id/events_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/event_fragment"
+                android:text="Show more" />
+
+            <TextView
+                android:id="@+id/posts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/events_button"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:text="Posts"
+                android:textSize="30sp" />
+
+            <include
+                android:id="@+id/post_fragment"
+                layout="@layout/item_row"
+                android:layout_width="match_parent"
+                android:layout_below="@id/posts"
+                android:layout_height="wrap_content" />
+
+
+            <Button
+                android:id="@+id/posts_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/post_fragment"
+                android:text="Show more" />
+
+
+            <TextView
+                android:id="@+id/members"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/posts_button"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:text="Members"
+                android:textSize="30sp" />
+
+            <Button
+                android:id="@+id/members_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/members"
+                android:text="Show more" />
+
+
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+</RelativeLayout>
+
