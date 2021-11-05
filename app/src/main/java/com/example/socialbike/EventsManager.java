@@ -73,9 +73,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         container.clear();
         //  extraEvents.clear();
         data.put("dataType", dataType);
-        MainActivity.mFunctions
-                .getHttpsCallable("getEvents")
-                .call(data)
+        Utils.PostData(EMethods.getEvents, data)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response:" + response);
@@ -129,7 +127,8 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     public void hideProgressbar() {
         recyclerView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
-        swipe_refresh.setRefreshing(false);
+        if (swipe_refresh != null)
+            swipe_refresh.setRefreshing(false);
     }
 
     @Override

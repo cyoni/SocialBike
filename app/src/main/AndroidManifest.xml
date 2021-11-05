@@ -40,6 +40,13 @@
             android:name=".groups.group.GroupEvents"
             android:label="@string/title_activity_conversation_chat"
             android:theme="@style/Theme.SocialBike.NoActionBar" />
+
+        <activity
+            android:name=".groups.group.PostsOfGroupOrEventActivity"
+            android:label="@string/title_activity_conversation_chat"
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
+
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

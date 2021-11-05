@@ -2,14 +2,8 @@ package com.example.socialbike;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
-import androidx.arch.core.internal.SafeIterableMap;
-import androidx.core.widget.NestedScrollView;
-
-import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
 

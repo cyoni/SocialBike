@@ -35,9 +35,7 @@ public class MessageGetter {
         if (eventId != null)
             data.put("eventId", eventId);
 
-       MainActivity.mFunctions
-                .getHttpsCallable("getPosts")
-                .call(data)
+       Utils.PostData(EMethods.getPosts, data)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);

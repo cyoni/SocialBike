@@ -1,6 +1,5 @@
 package com.example.socialbike;
 
-import static com.example.socialbike.Constants.ADDRESS_FROM_MAPS_CODE;
 import static com.example.socialbike.ImageManager.SELECT_PICTURE_CODE;
 
 import androidx.annotation.NonNull;
@@ -29,12 +28,8 @@ import com.example.socialbike.events.EventDetails;
 import com.example.socialbike.groups.IPageAdapter;
 import com.example.socialbike.groups.SectionsPagerAdapter;
 import com.example.socialbike.groups.TabManager;
-import com.example.socialbike.groups.group.PrivateGroupFragment;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.maps.model.LatLng;
+import com.example.socialbike.groups.group.GroupPostsFragment;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
@@ -51,7 +46,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
     String[] tabTitles = {"Details", "Discussion"};
     public TabLayout tabLayout;
     EventDetails eventDetails;
-    PrivateGroupFragment privateGroupFragment;
+    GroupPostsFragment privateGroupFragment;
     private Event event;
     Button save, interested, going;
     LinearLayout interestedLayOut, goingLayout;
@@ -95,7 +90,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(sectionsPagerAdapter);
 
-        privateGroupFragment = new PrivateGroupFragment(event.getGroupId(), event.getEventId());
+        privateGroupFragment = new GroupPostsFragment(event.getGroupId(), event.getEventId());
         eventDetails = new EventDetails(event.getDetails());
 
         setAllFields();

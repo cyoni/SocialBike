@@ -8,7 +8,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -19,15 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.example.socialbike.Constants;
 import com.example.socialbike.MainActivity;
-import com.example.socialbike.Methods;
+import com.example.socialbike.EMethods;
 import com.example.socialbike.Position;
 import com.example.socialbike.PreferredLocation;
 import com.example.socialbike.R;
-import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.RecyclerViewAdapter2;
 import com.example.socialbike.Updater;
 import com.example.socialbike.groups.group.GroupActivity;
@@ -252,7 +249,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
         Map<String, Object> data = new HashMap<>();
         data.put("groupId", groupId);
         MainActivity.mFunctions
-                .getHttpsCallable(Methods.LeaveGroup)
+                .getHttpsCallable(EMethods.LeaveGroup.name())
                 .call(data)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());

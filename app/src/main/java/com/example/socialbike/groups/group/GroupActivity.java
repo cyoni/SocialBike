@@ -3,21 +3,34 @@ package com.example.socialbike.groups.group;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
 
+import com.example.socialbike.EventsManager;
 import com.example.socialbike.MainActivity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentActivity;
 
+import com.example.socialbike.PostManager;
 import com.example.socialbike.R;
+import com.example.socialbike.Updater;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
-public class GroupActivity extends AppCompatActivity {
+import java.util.HashMap;
+import java.util.Map;
+
+public class GroupActivity extends AppCompatActivity implements Updater.IUpdate {
 
     private static GroupActivity groupContainer;
     public MainActivity mainActivity;
     private String groupId;
     Button events_button;
+    Updater.IUpdate update = this;
+    private EventsManager eventsManager;
+    private PostManager postManager;
 
     public static GroupActivity getInstance() {
         if (groupContainer == null) {
@@ -38,14 +51,66 @@ public class GroupActivity extends AppCompatActivity {
         String groupName = intent.getStringExtra("groupName");
         groupId = intent.getStringExtra("groupId");
 
+        eventsManager = new EventsManager(this, this, update);
+        eventsManager.init();
+        postManager = new PostManager(this, update, groupId, null);
+
+        initButtons();
+        getGroupDescription();
+        getFirstEvent();
+        getFirstPost();
+        toolbar.setTitle(groupName);
+
+    }
+
+    private void getGroupDescription() {
+        MainActivity.mDatabase.child("groups").child(groupId).child("description").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    TextView description = findViewById(R.id.description);
+                    description.setText(snapshot.getValue().toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
+    private void getFirstPost() {
+        //Manager.showProgressbar();
+        Map<String, Object> data = new HashMap<>();
+        data.put("getFirstEvent", true);
+        postManager.getPosts(data);
+    }
+
+    private void initButtons() {
         events_button = findViewById(R.id.events_button);
+        Button posts_button = findViewById(R.id.posts_button);
+
         events_button.setOnClickListener(view -> {
             Intent intent1 = new Intent(this, GroupEvents.class);
             intent1.putExtra("groupId", groupId);
             startActivity(intent1);
         });
-        toolbar.setTitle(groupName);
 
+        posts_button.setOnClickListener(view -> {
+            Intent intent1 = new Intent(this, PostsOfGroupOrEventActivity.class);
+            intent1.putExtra("groupId", groupId);
+            startActivity(intent1);
+        });
+    }
+
+    private void getFirstEvent() {
+        eventsManager.showProgressbar();
+        Map<String, Object> data = new HashMap<>();
+        data.put("groupId", groupId);
+        data.put("getFirstEvent", true);
+        eventsManager.getEvents(data);
     }
 
     public GroupActivity(){}
@@ -57,4 +122,9 @@ public class GroupActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onFinishedUpdating() {
+        eventsManager.hideProgressbar();
+        eventsManager.recyclerViewAdapter.notifyItemRangeChanged(0, eventsManager.container.size());
+    }
 }

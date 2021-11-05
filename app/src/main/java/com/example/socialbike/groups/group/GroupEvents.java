@@ -37,9 +37,6 @@ public class GroupEvents extends FragmentActivity implements Updater.IUpdate {
     private EventsManager eventsManager;
     Updater.IUpdate update = this;
 
-
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

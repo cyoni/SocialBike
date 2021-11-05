@@ -14,6 +14,8 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.example.socialbike.Enums.Place;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.functions.HttpsCallableResult;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.AddressComponent;
@@ -131,6 +133,12 @@ public class Utils {
 
 
 
+    }
+
+    public static Task<HttpsCallableResult> PostData(EMethods method, Map<String, Object> data){
+        return MainActivity.mFunctions
+                .getHttpsCallable(method.name())
+                .call(data);
     }
 
 

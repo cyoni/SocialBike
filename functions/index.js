@@ -166,6 +166,7 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 
     const groupId = request.groupId || null
     const eventId = request.eventId || null
+    const getFirstEvent = request.getFirstEvent || null
 
     var route
 
@@ -178,29 +179,34 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
     else if (groupId === null && eventId !== null)
         route = admin.database().ref('events').child(eventId)
 
+    var stop = false 
 
     return route.child('posts').once('value').then(snapshot => {
         snapshot.forEach(raw_post => {
 
-            var post = []
-            post = ({
-                postId: raw_post.key,
-                publicKey: raw_post.child('user_public_key').val(),
-                name: "...",
-                message: raw_post.child('message').val(),
-                timestamp: raw_post.child('timestamp').val(),
-            })
+            if (!stop){
+                var post = []
+                post = ({
+                    postId: raw_post.key,
+                    publicKey: raw_post.child('user_public_key').val(),
+                    name: "...",
+                    message: raw_post.child('message').val(),
+                    timestamp: raw_post.child('timestamp').val(),
+                })
 
-            if (raw_post.child('comments').exists())
-                post['comments_count'] = raw_post.child('comments').numChildren()
+                if (raw_post.child('comments').exists())
+                    post['comments_count'] = raw_post.child('comments').numChildren()
 
-            if (raw_post.child('likes_count').exists()) {
-                post['likes_count'] = raw_post.child('likes_count').val()
-                if (userPublicId !== null)
-                    post['isLiked'] = raw_post.child('likes').child(userPublicId).exists()
+                if (raw_post.child('likes_count').exists()) {
+                    post['likes_count'] = raw_post.child('likes_count').val()
+                    if (userPublicId !== null)
+                        post['isLiked'] = raw_post.child('likes').child(userPublicId).exists()
+                }
+
+                data['posts'].push(post)
+                if (getFirstEvent)
+                    stop = true
             }
-
-            data['posts'].push(post)
         })
         return JSON.stringify(data)
     })
@@ -358,14 +364,18 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     const range = 100
     const country = request.country || null
     const groupId = request.groupId || null
+    const getFirstEvent = request.getFirstEvent || null
 
     var ref;
+    var stop = false
+
     if (groupId !== null) {
         ref = admin.database().ref('groups').child(groupId).child('events')
     }
     else
         ref = admin.database().ref('events')
 
+        
     return ref.once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
@@ -376,7 +386,11 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                      && raw_data.child("user_public_key").exists() 
             ) {
 
-                data['events'].push(makeEventObject(raw_data, groupId, publicKey))
+                if (!stop)
+                    data['events'].push(makeEventObject(raw_data, groupId, publicKey))
+
+                if (getFirstEvent)
+                    stop = true
             }
         })
 
@@ -420,6 +434,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
 
     })
 })
+
 
 exports.updateNickname = functions.https.onCall(async (data, context) => {
     const privateKey = context.auth.uid;

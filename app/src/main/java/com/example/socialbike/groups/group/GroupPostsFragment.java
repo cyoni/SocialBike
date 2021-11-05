@@ -7,35 +7,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.socialbike.AddPostActivity;
-import com.example.socialbike.ConnectedUser;
-import com.example.socialbike.Consts;
-import com.example.socialbike.LogInActivity;
-import com.example.socialbike.MainActivity;
 import com.example.socialbike.MessageGetter;
 import com.example.socialbike.Post;
-import com.example.socialbike.PostButtons;
 import com.example.socialbike.R;
 import com.example.socialbike.RecyclerViewAdapter;
 import com.example.socialbike.Updater;
-import com.example.socialbike.room_database.Member;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
 
-public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
+public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
 
     private final String groupId;
     private ExtendedFloatingActionButton floatingButton;
@@ -44,22 +33,21 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
     private RecyclerViewAdapter recyclerViewAdapter;
     protected Updater updater;
     private MessageGetter messageManager;
-    private ProgressBar progressBar;
     private View root;
     private SwipeRefreshLayout swipeLayout;
     private String eventId;
 
-    public PrivateGroupFragment(String groupId) {
+    public GroupPostsFragment(String groupId) {
         this.groupId = groupId;
     }
 
-    public PrivateGroupFragment(String groupId, String eventId) {
+    public GroupPostsFragment(String groupId, String eventId) {
         this.groupId = groupId;
         this.eventId = eventId;
     }
 
     private void initAdapter() {
-        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_row, container);
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_post, container);
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerViewAdapter.setClassReference(this);
     }
@@ -69,14 +57,12 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
         super.onCreate(savedInstanceState);
     }
 
-
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_home, container, false);
             floatingButton = root.findViewById(R.id.fab);
-            recyclerView = root.findViewById(R.id.recyclerview);
-            progressBar = root.findViewById(R.id.progressBar);
+            recyclerView = root.findViewById(R.id.post_recyclerView);
             swipeLayout = root.findViewById(R.id.swipe_refresh);
 
             setSwipeLayout();
@@ -85,7 +71,6 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
 
             updater = new Updater(this, this.container, recyclerViewAdapter);
             messageManager = new MessageGetter(updater);
-            progressBar.setVisibility(View.VISIBLE);
             getPosts();
         }
         return root;
@@ -119,31 +104,10 @@ public class PrivateGroupFragment extends Fragment implements RecyclerViewAdapte
     }
 
     @Override
-    public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        Post current = container.get(position);
-        String name = Member.getNameFromLocal(current.getPublicKey());
-        if (name.equals(Consts.DEFAULT_TMP_NAME)) {
-            Member.fetchName(holder.name, current.getPublicKey());
-        }
-        holder.message.setText(current.getMsg());
-        holder.name.setText(name);
-        current.setName(name);
-        PostButtons postButtons = new PostButtons(getActivity(), holder, container.get(position), groupId, eventId);
-        holder.message.setOnClickListener(view -> postButtons.commentsButtonClick());
-        holder.followButton.setOnClickListener(view -> postButtons.followUser(container, holder, position));
-    }
-
-
-    @Override
-    public void onItemClick(@NonNull View holder, int position) {
-
-    }
-
-    @Override
     public void onFinishedUpdating() {
         recyclerViewAdapter.notifyDataSetChanged();
         recyclerView.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.GONE);
         swipeLayout.setRefreshing(false);
+
     }
 }
