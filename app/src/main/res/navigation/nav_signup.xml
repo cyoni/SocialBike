@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/setNicknameFragment"
-        android:name="com.example.socialbike.SetNicknameFragment"
+        android:name="com.example.socialbike.fragment.SetNicknameFragment"
         android:label="fragment_set_nickname"
         tools:layout="@layout/fragment_set_nickname">
 
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/setProfileFragment"
-        android:name="com.example.socialbike.SetProfileFragment"
+        android:name="com.example.socialbike.fragment.SetProfileFragment"
         android:label="fragment_set_profile"
         tools:layout="@layout/fragment_set_profile" />
 </navigation>

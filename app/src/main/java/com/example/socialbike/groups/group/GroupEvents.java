@@ -1,31 +1,18 @@
 package com.example.socialbike.groups.group;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.socialbike.AddNewEventActivity;
-import com.example.socialbike.EventsManager;
-import com.example.socialbike.Position;
+import com.example.socialbike.activities.AddNewEventActivity;
+import com.example.socialbike.events.EventsManager;
 import com.example.socialbike.R;
-import com.example.socialbike.RecyclerViewAdapter;
-import com.example.socialbike.Updater;
-import com.example.socialbike.groups.Group;
-import com.google.android.gms.maps.model.LatLng;
+import com.example.socialbike.utilities.Updater;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

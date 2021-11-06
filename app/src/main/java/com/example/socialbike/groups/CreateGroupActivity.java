@@ -2,22 +2,16 @@ package com.example.socialbike.groups;
 
 import android.os.Bundle;
 
-import com.example.socialbike.MainActivity;
-import com.example.socialbike.Utils;
+import com.example.socialbike.activities.MainActivity;
+import com.example.socialbike.utilities.Utils;
 import com.example.socialbike.databinding.ActivityCreateGroupBinding;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.widget.Toolbar;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 
 
 import com.example.socialbike.R;

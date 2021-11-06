@@ -1,22 +1,23 @@
 package com.example.socialbike.groups.group;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.socialbike.AddPostActivity;
-import com.example.socialbike.MessageGetter;
-import com.example.socialbike.Post;
+import com.example.socialbike.activities.AddPostActivity;
+import com.example.socialbike.post.PostManager;
+import com.example.socialbike.utilities.MessageGetter;
+import com.example.socialbike.post.Post;
 import com.example.socialbike.R;
-import com.example.socialbike.RecyclerViewAdapter;
-import com.example.socialbike.Updater;
+import com.example.socialbike.recyclerview.RecyclerViewAdapter;
+import com.example.socialbike.utilities.Updater;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import org.jetbrains.annotations.NotNull;
@@ -31,8 +32,7 @@ public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
     private final ArrayList<Post> container = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
-    protected Updater updater;
-    private MessageGetter messageManager;
+    private PostManager messageManager;
     private View root;
     private SwipeRefreshLayout swipeLayout;
     private String eventId;
@@ -49,7 +49,6 @@ public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
     private void initAdapter() {
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_post, container);
         recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerViewAdapter.setClassReference(this);
     }
 
     @Override
@@ -69,8 +68,8 @@ public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
             activateFloatingButton();
             initAdapter();
 
-            updater = new Updater(this, this.container, recyclerViewAdapter);
-            messageManager = new MessageGetter(updater);
+            //updater = new Updater(this, this.container, recyclerViewAdapter);
+            messageManager = new PostManager(recyclerView, getActivity(), this, groupId, eventId);
             getPosts();
         }
         return root;
@@ -78,7 +77,7 @@ public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
 
     private void getPosts() {
         container.clear();
-        messageManager.getPosts(groupId, eventId);
+        messageManager.getPosts(null);
     }
 
     private void setSwipeLayout() {

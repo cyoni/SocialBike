@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.socialbike.Event;
+import com.example.socialbike.events.Event;
 import com.example.socialbike.R;
 
 import java.util.ArrayList;

@@ -20,14 +20,14 @@ import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.socialbike.Constants;
-import com.example.socialbike.MainActivity;
-import com.example.socialbike.EMethods;
-import com.example.socialbike.Position;
-import com.example.socialbike.PreferredLocation;
+import com.example.socialbike.utilities.Constants;
+import com.example.socialbike.activities.MainActivity;
+import com.example.socialbike.utilities.EMethods;
+import com.example.socialbike.utilities.Position;
+import com.example.socialbike.utilities.PreferredLocation;
 import com.example.socialbike.R;
-import com.example.socialbike.RecyclerViewAdapter2;
-import com.example.socialbike.Updater;
+import com.example.socialbike.recyclerview.RecyclerViewAdapter2;
+import com.example.socialbike.utilities.Updater;
 import com.example.socialbike.groups.group.GroupActivity;
 import com.example.socialbike.groups.group.GroupDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -152,7 +152,6 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
 
     @Override
     public void onBinding(@NonNull RecyclerView.ViewHolder holder, int position) {
-
         RecyclerViewAdapter2.ViewHolder _holder = (RecyclerViewAdapter2.ViewHolder) holder;
         Group current = container.get(position);
         _holder.joinButton.setVisibility(View.VISIBLE);
@@ -225,7 +224,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
                 public boolean onMenuItemClick(MenuItem item) {
                     switch (item.getItemId()) {
                         case R.id.leave_group:
-                            leaveNow(container.get(position).getGroupId());
+                            container.get(position).exitGroup(getActivity());
                             container.remove(position);
                             recyclerViewAdapter.notifyItemRemoved(position);
                             recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
@@ -251,23 +250,12 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         holder.joinButton.setText("Join");
         String groupId = container.get(position).getGroupId();
         int index = getIndex(groupContainer.groupsThatImInFragment.container, groupId);
+        container.get(position).exitGroup(getActivity());
         groupContainer.groupsThatImInFragment.container.remove(index);
         groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRemoved(index);
-        leaveNow(groupId);
+
     }
 
-    private void leaveNow(String groupId) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("groupId", groupId);
-        MainActivity.mFunctions
-                .getHttpsCallable(EMethods.LeaveGroup.name())
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    return null;
-                });
-    }
 
     private int getIndex(ArrayList<Group> container, String groupId) {
         for (int i = 0; i < container.size(); i++)
@@ -285,20 +273,14 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
 
     private void joinGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
         holder.joinButton.setText("Joining");
-        Map<String, Object> data = new HashMap<>();
-        data.put("groupId", container.get(position).getGroupId());
-
-        MainActivity.mFunctions
-                .getHttpsCallable("JoinGroup")
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    groupContainer.groupsThatImInFragment.container.add(0, container.get(position));
-                    groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRangeChanged(0, groupContainer.groupsThatImInFragment.container.size());
-                    holder.joinButton.setText("Joined");
-                    return null;
-                });
+        container.get(position).joinGroup(getActivity()).continueWith(task -> {
+            String response = task.getResult().toString();
+            System.out.println("response:" + response);
+            groupContainer.groupsThatImInFragment.container.add(0, container.get(position));
+            groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRangeChanged(0, groupContainer.groupsThatImInFragment.container.size());
+            holder.joinButton.setText("Joined");
+            return null;
+        });
     }
 
 

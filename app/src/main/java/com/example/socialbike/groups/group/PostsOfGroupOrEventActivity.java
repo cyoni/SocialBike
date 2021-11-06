@@ -4,11 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
-import com.example.socialbike.PostManager;
+import com.example.socialbike.post.PostManager;
 import com.example.socialbike.R;
-import com.example.socialbike.Updater;
+import com.example.socialbike.utilities.Updater;
 
 public class PostsOfGroupOrEventActivity extends AppCompatActivity implements Updater.IUpdate {
 

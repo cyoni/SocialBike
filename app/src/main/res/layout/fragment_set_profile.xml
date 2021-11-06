@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="5dp"
-    tools:context=".SetProfileFragment">
+    tools:context=".fragment.SetProfileFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/flexible.example.appbar"
@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".WelcomeActivity">
+        tools:context=".activities.WelcomeActivity">
 
 
         <TextView

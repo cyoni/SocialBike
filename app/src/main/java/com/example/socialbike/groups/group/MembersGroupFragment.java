@@ -11,11 +11,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.socialbike.Consts;
-import com.example.socialbike.MainActivity;
+import com.example.socialbike.utilities.Consts;
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.R;
-import com.example.socialbike.RecyclerViewAdapter;
-import com.example.socialbike.Updater;
+import com.example.socialbike.recyclerview.RecyclerViewAdapter;
+import com.example.socialbike.utilities.Updater;
 import com.example.socialbike.room_database.Member;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

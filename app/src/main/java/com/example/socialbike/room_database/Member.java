@@ -7,13 +7,11 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.example.socialbike.MainActivity;
-import com.example.socialbike.RecyclerViewAdapter;
+import com.example.socialbike.activities.MainActivity;
+import com.example.socialbike.recyclerview.RecyclerViewAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.List;
 
 @Entity
 public class Member {

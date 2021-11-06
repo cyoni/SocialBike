@@ -16,11 +16,11 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
-import com.example.socialbike.ConnectedUser;
-import com.example.socialbike.DateUtils;
-import com.example.socialbike.MainActivity;
+import com.example.socialbike.utilities.ConnectedUser;
+import com.example.socialbike.utilities.DateUtils;
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.R;
-import com.example.socialbike.RecyclerViewAdapter;
+import com.example.socialbike.recyclerview.RecyclerViewAdapter;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.functions.HttpsCallableResult;
 

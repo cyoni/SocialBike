@@ -5,16 +5,16 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.socialbike.EventsManager;
-import com.example.socialbike.MainActivity;
+import com.example.socialbike.events.EventsManager;
+import com.example.socialbike.activities.MainActivity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.example.socialbike.PostManager;
+import com.example.socialbike.post.PostManager;
 import com.example.socialbike.R;
-import com.example.socialbike.Updater;
+import com.example.socialbike.utilities.Updater;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;

@@ -64,7 +64,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="1dp"
         android:layout_marginTop="0dp"
-        tools:context=".MapsActivity" />
+        tools:context=".activities.MapsActivity" />
 
     <EditText
         android:id="@+id/search_bar"
