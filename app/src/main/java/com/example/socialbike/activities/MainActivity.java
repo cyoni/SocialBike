@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MenuAction{
 
     public static FirebaseAuth mAuth;
     public static DatabaseReference mDatabase;
@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     public static MemberDao memberDao;
     public static boolean isUserConnected;
     public static StorageReference storageRef;
+    private MenuManager menuManager = new MenuManager();
+    private int currentLayout;
 
     public static void toast(Context context, String msg, boolean isLong) {
         int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         loadUser();
         startListeningBottomMenu();
 
-
+        currentLayout = R.layout.fragment_events;
         changeFragment(EventsFragment.getInstance());
 
         database = Room.databaseBuilder(getApplicationContext(),
@@ -105,6 +107,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        invalidateOptionsMenu();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -121,6 +129,10 @@ public class MainActivity extends AppCompatActivity {
 
     public static void startChat() {
         chatManager.listenForNewMessages();
+    }
+
+    public static void stopChat(){
+        chatManager.endChat();
     }
 
     private void loadUser() {
@@ -141,11 +153,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
+/*    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         return true;
-    }
+    }*/
 
     public void setIsUserConnected() {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
@@ -162,15 +174,19 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.events:
                     changeFragment(EventsFragment.getInstance());
+                    currentLayout = R.layout.fragment_events;
                     break;
                 case R.id.groups:
                     changeFragment(GroupContainer.getInstance());
+                    currentLayout = R.layout.fragment_group;
                     break;
                 case R.id.chat:
                     changeFragment(ChatLobbyFragment.getInstance());
+                    currentLayout = R.layout.fragment_chat_lobby;
                     break;
                 case R.id.profile:
                     changeFragment(ProfileFragment.getInstance());
+                    currentLayout = R.layout.fragment_profile;
                     break;
             }
             return true;
@@ -184,7 +200,20 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menuManager.setMenu(menu, currentLayout);
+        return super.onPrepareOptionsMenu(menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        action(item);
+        return false;
+    }
+
+/*
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -193,9 +222,26 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
-    private void login() {
+    public void login() {
         startActivity(new Intent(this, LogInActivity.class));
     }
+
+    public void myAccount() {
+        startActivity(new Intent(this, MyAccountActivity.class));
+    }
+
+    @Override
+    public void action(MenuItem item) {
+        switch (item.getItemId()){
+            case MenuManager.LOGIN_SIGN_UP:
+                login();
+                break;
+            case MenuManager.MY_ACCOUNT:
+                myAccount();
+                break;
+        }
+    }
 }
+

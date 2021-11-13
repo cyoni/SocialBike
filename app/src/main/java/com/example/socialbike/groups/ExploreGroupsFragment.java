@@ -274,8 +274,6 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     private void joinGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
         holder.joinButton.setText("Joining");
         container.get(position).joinGroup(getActivity()).continueWith(task -> {
-            String response = task.getResult().toString();
-            System.out.println("response:" + response);
             groupContainer.groupsThatImInFragment.container.add(0, container.get(position));
             groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRangeChanged(0, groupContainer.groupsThatImInFragment.container.size());
             holder.joinButton.setText("Joined");

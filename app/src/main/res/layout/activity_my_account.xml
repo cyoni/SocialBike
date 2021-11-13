@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MyAccountActivity">
+
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            style="@style/ToolBarWithNavigationBack"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_collapseMode="pin">
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/app_bar"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profile_image2"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_below="@id/app_bar"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:elevation="8dp"
+                android:src="@drawable/profile_blank" />
+
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/profile_image2"
+                android:layout_centerHorizontal="true"
+                android:text="Yoni"
+                android:textSize="30sp" />
+
+            <LinearLayout
+                android:id="@+id/info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView"
+                android:orientation="vertical"
+                android:padding="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/button7"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.902">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Preferred location"
+                    android:textSize="20dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:layout_editor_absoluteY="219dp" />
+
+                <EditText
+                    android:id="@+id/preferredlocation"
+                    android:layout_width="373dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="12dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.803" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Visible only to you"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:layout_editor_absoluteY="299dp" />
+
+                <TextView
+                    android:id="@+id/textView6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="City"
+                    android:textSize="20dp"
+                    tools:layout_editor_absoluteX="22dp"
+                    tools:layout_editor_absoluteY="520dp" />
+
+                <EditText
+                    android:layout_width="373dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="16dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.544" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Public"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:layout_editor_absoluteY="597dp" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Age"
+                    android:textSize="20dp"
+                    tools:layout_editor_absoluteX="22dp"
+                    tools:layout_editor_absoluteY="344dp" />
+
+                <EditText
+                    android:id="@+id/age"
+                    android:layout_width="373dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="16dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.544" />
+
+                <TextView
+                    android:id="@+id/textView7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Public"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:layout_editor_absoluteY="597dp" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gender"
+                    android:textSize="20dp"
+                    tools:layout_editor_absoluteY="429dp" />
+
+                <Spinner
+                    android:id="@+id/gender"
+                    android:layout_width="377dp"
+                    android:layout_height="50dp"
+                    android:background="@android:drawable/btn_dropdown"
+                    android:spinnerMode="dropdown"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.647"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:layout_editor_absoluteY="456dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Public"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:layout_editor_absoluteY="597dp" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/clean_map_address_button"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="Clean"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/button7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/info"
+                android:layout_marginTop="20dp"
+                android:text="Save" />
+
+
+        </RelativeLayout>
+
+
+    </androidx.core.widget.NestedScrollView>
+
+
+
+
+</RelativeLayout>

@@ -25,12 +25,13 @@ public class ChatManager {
     public ChatLobbyFragment chatLobbyFragment;
     private HistoryDao historyDao;
     public PreviewChatMessageDao previewMessage;
+    private ChildEventListener chatInstance;
 
     public void listenForNewMessages() {
         System.out.println("Chat Manager has started");
         initDatabases();
 
-        MainActivity.mDatabase.child("private_msgs").child(ConnectedUser.getPublicKey()).addChildEventListener(new ChildEventListener() {
+        chatInstance = MainActivity.mDatabase.child("private_msgs").child(ConnectedUser.getPublicKey()).addChildEventListener(new ChildEventListener() {
 
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -67,6 +68,10 @@ public class ChatManager {
                 System.out.println("ERROR CONNECT " + databaseError.getDetails());
             }
         });
+    }
+
+    public void endChat(){
+        MainActivity.mDatabase.removeEventListener(chatInstance);
     }
 
     private void initDatabases() {

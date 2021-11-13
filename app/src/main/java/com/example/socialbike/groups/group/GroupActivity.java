@@ -2,6 +2,7 @@ package com.example.socialbike.groups.group;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -12,9 +13,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.socialbike.groups.Group;
 import com.example.socialbike.post.PostManager;
 import com.example.socialbike.R;
 import com.example.socialbike.utilities.Updater;
+import com.example.socialbike.utilities.Utils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -24,20 +27,13 @@ import java.util.Map;
 
 public class GroupActivity extends AppCompatActivity implements Updater.IUpdate {
 
-    private static GroupActivity groupContainer;
     public MainActivity mainActivity;
     private String groupId;
-    Button events_button;
+    Button events_button, joinButton;
     Updater.IUpdate update = this;
     private EventsManager eventsManager;
     private PostManager postManager;
-
-    public static GroupActivity getInstance() {
-        if (groupContainer == null) {
-            groupContainer = new GroupActivity();
-        }
-        return groupContainer;
-    }
+    private Group group;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,6 +46,7 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         Intent intent = getIntent();
         String groupName = intent.getStringExtra("groupName");
         groupId = intent.getStringExtra("groupId");
+        group = new Group(groupId, "title?", "description?");
 
         eventsManager = new EventsManager(this, this, update);
         eventsManager.init();
@@ -103,6 +100,23 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
             intent1.putExtra("groupId", groupId);
             startActivity(intent1);
         });
+
+        joinButton = findViewById(R.id.join_button);
+        Map<String, ?> allGroups = Utils.getAllPreferences(this, "connected_groups");
+        if (allGroups.containsKey(groupId)){
+            joinButton.setVisibility(View.GONE);
+        }
+        else {
+            joinButton.setVisibility(View.VISIBLE);
+            joinButton.setOnClickListener(view -> {
+                joinButton.setText("Joining...");
+                group.joinGroup(GroupActivity.this).continueWithTask(task -> {
+                    joinButton.setVisibility(View.GONE);
+                    MainActivity.toast(GroupActivity.this, "Welcome to the group!", true);
+                    return null;
+                });
+            });
+        }
     }
 
     private void getFirstEvent() {

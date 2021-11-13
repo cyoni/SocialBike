@@ -386,8 +386,12 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                      && raw_data.child("user_public_key").exists() 
             ) {
 
-                if (!stop)
-                    data['events'].push(makeEventObject(raw_data, groupId, publicKey))
+                if (!stop){
+                    if (raw_data.child('user_public_key').exists()){
+                        var eventObject = makeEventObject(raw_data, groupId, publicKey)
+                        data['events'].push(eventObject)
+                    }
+                }
 
                 if (getFirstEvent)
                     stop = true
@@ -412,7 +416,9 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                     if (groupEvents.exists()){
                         groupEvents.forEach(current => {
                             // if current is active
-                            my_extra_events.push( makeEventObject(current, raw_data.key, publicKey)  )
+                            if (raw_data.child('user_public_key').exists()){
+                                my_extra_events.push( makeEventObject(current, raw_data.key, publicKey)  )
+                            }
                         })
                     }
                 }
