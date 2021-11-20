@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_signup"
-    app:startDestination="@id/setNicknameFragment">
+    app:startDestination="@id/setProfilePictureFragment">
 
     <fragment
         android:id="@+id/setNicknameFragment"
-        android:name="com.example.socialbike.fragment.SetNicknameFragment"
+        android:name="com.example.socialbike.signup.SetNicknameFragment"
         android:label="fragment_set_nickname"
         tools:layout="@layout/fragment_set_nickname">
 
@@ -19,7 +19,16 @@
 
     <fragment
         android:id="@+id/setProfileFragment"
-        android:name="com.example.socialbike.fragment.SetProfileFragment"
+        android:name="com.example.socialbike.signup.SetLocationDuringSignUpFragment"
         android:label="fragment_set_profile"
-        tools:layout="@layout/fragment_set_profile" />
+        tools:layout="@layout/fragment_set_preferred_location" />
+    <fragment
+        android:id="@+id/setProfilePictureFragment"
+        android:name="com.example.socialbike.signup.SetProfilePictureFragment"
+        android:label="fragment_set_profile_picture"
+        tools:layout="@layout/fragment_set_profile_picture" >
+        <action
+            android:id="@+id/action_setProfilePictureFragment_to_setNicknameFragment"
+            app:destination="@id/setNicknameFragment" />
+    </fragment>
 </navigation>

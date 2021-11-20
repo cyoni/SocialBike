@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.socialbike.R;
+import com.example.socialbike.utilities.ConnectedUser;
 import com.example.socialbike.utilities.MyPreferences;
 import com.example.socialbike.utilities.Utils;
 
@@ -55,6 +56,8 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         Utils.removePreference(this, MyPreferences.USER_FOLDER, "user_public_key" );
 
         MainActivity.mAuth.signOut();
+        ConnectedUser.setPublicKey("-");
+
         MainActivity.toast(getApplicationContext(), "You have been logged out successfully.", true);
         finish();
     }

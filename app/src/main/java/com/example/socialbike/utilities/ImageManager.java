@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
 import com.example.socialbike.activities.MainActivity;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -26,10 +27,18 @@ import java.io.FileOutputStream;
 
 public class ImageManager {
     public static final int SELECT_PICTURE_CODE = 1;
-    private final Activity activity;
+    private Activity activity;
+    private Fragment fragment;
+    private Context context;
 
     public ImageManager(Activity activity){
         this.activity = activity;
+        this.context = activity;
+    }
+
+    public ImageManager(Fragment fragment){
+        this.fragment = fragment;
+        this.context = fragment.getContext();
     }
 
     public byte[] convertBitmapToByteArray(Bitmap bitmap) {
@@ -43,11 +52,16 @@ public class ImageManager {
         return Bitmap.createScaledBitmap(image, 1000, 1000, true);
     }
 
-    public void loadPictureFromGallery(Activity activity) {
+    public void loadPictureFromGallery() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        activity.startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE_CODE);
+
+        if (fragment != null)
+            fragment.startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE_CODE);
+        else if (activity != null)
+            activity.startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE_CODE);
+
     }
 
     public UploadTask uploadImage(Bitmap bitmap, StorageReference ref) {
@@ -79,7 +93,7 @@ public class ImageManager {
     }
 
     public void locallySavePicture(Bitmap bitmapImage, String folder, String fileName) {
-            ContextWrapper cw = new ContextWrapper(activity);
+            ContextWrapper cw = new ContextWrapper(context);
             File directory = cw.getDir(folder, Context.MODE_PRIVATE);
             // Create imageDir
             File mypath = new File(directory, fileName);
@@ -101,11 +115,11 @@ public class ImageManager {
     }
 
     public boolean doesPictureExistLocally(String folder, String fileName) {
-        return Files.doesExist(activity, folder, fileName);
+        return Files.doesExist(context, folder, fileName);
     }
 
     public Bitmap loadPictureLocally(String folder, String filename) {
-        File imgFile = new File(Files.getPath(activity, folder, filename));
+        File imgFile = new File(Files.getPath(context, folder, filename));
         Bitmap myBitmap = null;
         if (imgFile.exists()) {
             myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());

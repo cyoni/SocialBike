@@ -89,7 +89,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
             headerPicture.setOnClickListener(view -> {
                 BitmapDrawable drawable = (BitmapDrawable) headerPicture.getDrawable();
                 if (drawable == null){
-                    imageManager.loadPictureFromGallery(this);
+                    imageManager.loadPictureFromGallery();
                 }
                 else
                     openSheet();
@@ -167,7 +167,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
 
         ImageManager imageManager = new ImageManager(this);
         button2.setOnClickListener(v -> {
-            imageManager.loadPictureFromGallery(this);
+            imageManager.loadPictureFromGallery();
             bottomSheetDialog.dismiss();
         });
         button3.setOnClickListener(v -> {

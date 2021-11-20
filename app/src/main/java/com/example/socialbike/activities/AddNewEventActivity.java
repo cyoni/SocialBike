@@ -100,7 +100,7 @@ public class AddNewEventActivity extends AppCompatActivity {
 
     private void openSheet() {
         if (compressImage == null){
-            imageManager.loadPictureFromGallery(this);
+            imageManager.loadPictureFromGallery();
         }
         else {
             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
@@ -110,7 +110,7 @@ public class AddNewEventActivity extends AppCompatActivity {
             Button button3 = bottomSheetDialog.findViewById(R.id.button_remove_picture);
 
             button2.setOnClickListener(v -> {
-                imageManager.loadPictureFromGallery(this);
+                imageManager.loadPictureFromGallery();
                 bottomSheetDialog.dismiss();
             });
 

@@ -138,19 +138,21 @@ exports.updateProfile = functions.https.onCall(async (request, context) => {
     const gender = request.gender || null
     const age = request.age || null
 
-    const a = admin.database().ref('public').child(publicKey).child('profile').set({
-        age: age,
-        gender: gender
-    });
 
-    const b = admin.database().ref('public').child(publicKey).child('profile').child('preferred_location').set({
+    const await_age = admin.database().ref('public').child(publicKey).child('profile').child('age').set(age);
+    const await_gender = admin.database().ref('public').child(publicKey).child('profile').child('gender').set(gender);
+
+    const await_preferred_location = admin.database().ref('public').child(publicKey).child('profile').child('preferred_location').set({
         lat: lat,
         lng: lng,
         country: country,
         city: city
     })
 
-    await a, b
+    await await_age
+    await await_gender
+    await await_preferred_location
+    
     return "OK"
 })
 

@@ -1,4 +1,4 @@
-package com.example.socialbike.fragment;
+package com.example.socialbike.signup;
 
 import android.os.Bundle;
 
@@ -54,7 +54,7 @@ public class SetNicknameFragment extends Fragment {
 
     private void proceedToNextFragment() {
         Utils.hideKeyboard(getActivity());
-        nav.navigate(R.id.action_se2tNicknameFragment_to_setProfileFragment);
+        nav.navigateUp();
     }
 
     private void setNickname() {

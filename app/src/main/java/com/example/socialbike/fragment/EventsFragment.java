@@ -116,16 +116,19 @@ public class EventsFragment extends Fragment
 
 
     private void getEvents() {
-        no_events_text.setVisibility(View.GONE);
-        container.clear();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("country", position.getCountry());
-        data.put("city", position.getCity());
-        data.put("lat", position.getLatLng().latitude);
-        data.put("lng", position.getLatLng().longitude);
-        System.out.println( position.getLatLng().latitude + "," +  position.getLatLng().longitude);
-        eventsManager.getEvents(data);
+        if (position.getLatLng() != null){
+            no_events_text.setVisibility(View.GONE);
+            container.clear();
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("country", position.getCountry());
+            data.put("city", position.getCity());
+            data.put("lat", position.getLatLng().latitude);
+            data.put("lng", position.getLatLng().longitude);
+            System.out.println( position.getLatLng().latitude + "," +  position.getLatLng().longitude);
+            eventsManager.getEvents(data);
+        }
     }
 
     private void setListeners(View root) {

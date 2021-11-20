@@ -26,7 +26,7 @@ public class MenuManager {
         menu.clear();
         currentLayout = layout;
 
-        if (ConnectedUser.getPublicKey().equals("-"))
+        if (ConnectedUser.getPublicKey() == null || ConnectedUser.getPublicKey().equals("-"))
             createLogInButton();
 
         switch (layout){
@@ -37,7 +37,7 @@ public class MenuManager {
             case R.layout.activity_my_account: createAccountMenu(); break;
         }
 
-        if (layout != R.layout.activity_my_account && !ConnectedUser.getPublicKey().equals("-")){
+        if (ConnectedUser.getPublicKey() != null && layout != R.layout.activity_my_account && !ConnectedUser.getPublicKey().equals("-")){
             createMyAccountButton();
         }
 
