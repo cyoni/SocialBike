@@ -17,9 +17,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 
+import com.example.socialbike.PreferredLocationManager;
 import com.example.socialbike.R;
 import com.example.socialbike.activities.MainActivity;
+import com.example.socialbike.utilities.ConnectedUser;
+import com.example.socialbike.utilities.Consts;
 import com.example.socialbike.utilities.ImageManager;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.storage.StorageReference;
@@ -31,7 +35,9 @@ public class SetProfilePictureFragment extends Fragment {
 
     View root;
     Button doneButton, skipButton, loadPictureButton;
+    ImageView profilePicture;
     ImageManager imageManager;
+    private Bitmap bitmap;
 
     public SetProfilePictureFragment() {
         // Required empty public constructor
@@ -52,8 +58,8 @@ public class SetProfilePictureFragment extends Fragment {
             doneButton = root.findViewById(R.id.done_button);
             skipButton = root.findViewById(R.id.skip_button);
             loadPictureButton = root.findViewById(R.id.load_button);
+            profilePicture = root.findViewById(R.id.profile_picture);
             setButtonListeners();
-
         }
 
         return root;
@@ -84,31 +90,13 @@ public class SetProfilePictureFragment extends Fragment {
         if (requestCode == SELECT_PICTURE_CODE && resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
+                bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
                 Bitmap compressImage = imageManager.compressImage(bitmap);
-                Bitmap copy = imageManager.compressImage(bitmap);
-                Bitmap copy2 = imageManager.compressImage(bitmap);
 
-                imageManager.setImage(compressImage, headerPicture);
 
-                StorageReference ref = getPath().child("header");;
+                imageManager.setImage(compressImage, profilePicture);
 
-                final ProgressDialog progressDialog = new ProgressDialog(this);
-                progressDialog.setTitle("Uploading...");
-                progressDialog.setMessage("Uploading image");
-                progressDialog.show();
 
-                imageManager.uploadImage(copy, ref).addOnSuccessListener(x -> {
-                    progressDialog.dismiss();
-                    imageManager.removePictureLocally(this, "event_picture_headers", event.getEventId());
-                    imageManager.locallySavePicture(copy2, "event_picture_headers", event.getEventId());
-                    MainActivity.toast(this, "Success!", true);
-                } ).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
-                    }
-                });
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -124,10 +112,31 @@ public class SetProfilePictureFragment extends Fragment {
     }
 
     private void uploadPicture() {
+        Bitmap copy = imageManager.compressImage(bitmap);
+        Bitmap copy2 = imageManager.compressImage(bitmap);
 
+        StorageReference ref = MainActivity.storageRef.child("members").child(ConnectedUser.getPublicKey()).child("profile").child("main");;
+
+        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setTitle("Uploading...");
+        progressDialog.setMessage("Uploading image");
+        progressDialog.show();
+
+        imageManager.uploadImage(copy, ref).addOnSuccessListener(x -> {
+            progressDialog.dismiss();
+            imageManager.removePictureLocally(getContext(), Consts.Profile_Picture, ConnectedUser.getPublicKey());
+            imageManager.locallySavePicture(copy2, Consts.Profile_Picture, ConnectedUser.getPublicKey());
+            MainActivity.toast(getContext(), "Success!", true);
+            getActivity().finish();
+        } ).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressDialog.dismiss();
+            }
+        });
     }
 
     private boolean isPictureValid() {
-        return false;
+        return bitmap != null;
     }
 }

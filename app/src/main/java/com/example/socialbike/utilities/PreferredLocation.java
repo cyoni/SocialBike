@@ -15,7 +15,7 @@ public class PreferredLocation {
     private final Activity activity;
     private Position position;
 
-    public PreferredLocation(Activity activity, Position position){
+    public PreferredLocation(Activity activity, Position position) {
         this.activity = activity;
         this.position = position;
     }

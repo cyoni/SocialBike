@@ -53,8 +53,8 @@ public class SetNicknameFragment extends Fragment {
     }
 
     private void proceedToNextFragment() {
+        nav.navigate(R.id.action_setNicknameFragment_to_setPreferred_loc);
         Utils.hideKeyboard(getActivity());
-        nav.navigateUp();
     }
 
     private void setNickname() {

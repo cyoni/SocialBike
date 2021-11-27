@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 
 import com.example.socialbike.utilities.Position;
@@ -49,7 +50,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LinearLayout search_layout;
     private Position position = null;
     private EditText search_bar;
-    private Button set_button;
+    private TextView searchAddress;
     Toolbar toolbar;
     private ImageView pin;
 
@@ -67,9 +68,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         search_bar = findViewById(R.id.search_bar);
         search_bar.setOnClickListener(view -> openSearchBar());
 
+        searchAddress = findViewById(R.id.search_address);
+        searchAddress.setText("");
 
-        Button search_button = findViewById(R.id.search_button);
-        set_button = findViewById(R.id.set_button);
+        Button set_button = findViewById(R.id.set_button);
 
         pin = findViewById(R.id.pin);
 
@@ -120,8 +122,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         finish();
     }
 
-    private void getAddressByCoordinates(LatLng latLng) {
-
+    private String getAddressByCoordinates(LatLng latLng) {
+        System.out.println(latLng.latitude + "," + latLng.longitude);
         GeocodingResult[] results = null;
         try {
             com.google.maps.model.LatLng newLatLng = new com.google.maps.model.LatLng(latLng.latitude, latLng.longitude);
@@ -129,15 +131,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (results == null) {
-            // MainActivity.toast(this, "No result.", 0);
+        if (results == null || results.length == 0) {
+            return "";
         } else {
-            String address = results[0].formattedAddress;
-            position.setAddress(address);
-            if (address.contains(",")) {
+            return results[0].formattedAddress;
+
+            //position.setAddress(address);
+ /*           if (address.contains(",")) {
                 position.setLocationName(address.substring(0, address.indexOf(",")));
             } else
-                position.setLocationName("");
+                position.setLocationName("");*/
         }
     }
 
@@ -177,16 +180,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             position = new Position(lat, lng);
         }
 
-       // setMarker(new Position(latLng, null, null));
+        googleMap.setOnCameraIdleListener (this::refreshText);
 
-      //  if (position == null){
             String country = Utils.getUserCountry(this);
             if (country != null){
                 latLng = getLatLngOfString(country + " country");
                 if (latLng != null)
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 1));
             }
-     //   }
+
 
         if (isForDisplayOnly){
             toolbar.setVisibility(View.GONE);
@@ -201,6 +203,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position.getLatLng(), 15));
             }
         }
+    }
+
+    private void refreshText() {
+        searchAddress.setText(getAddressByCoordinates(new LatLng(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude)));
     }
 
     public LatLng getLatLngOfString(String address){

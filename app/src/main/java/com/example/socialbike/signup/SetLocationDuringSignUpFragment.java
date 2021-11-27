@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.socialbike.Enums.Place;
+import com.example.socialbike.PreferredLocationManager;
 import com.example.socialbike.R;
 import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.activities.MapsActivity;
@@ -35,10 +36,9 @@ import java.util.Map;
 public class SetLocationDuringSignUpFragment extends Fragment/* implements AdapterView.OnItemSelectedListener*/ {
 
     private Button continueButton, clean_map_address_button;
-    private EditText preferred_location;
     private NavController nav;
-    private Position position;
     View root;
+    private PreferredLocationManager preferredLocationManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,11 +50,13 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_set_preferred_location, container, false);
             continueButton = root.findViewById(R.id.done_button);
-            preferred_location = root.findViewById(R.id.preferred_location);
             clean_map_address_button = root.findViewById(R.id.clean_map_address_button);
             nav = Navigation.findNavController(container);
 
-          //  Toolbar toolbar = root.findViewById(R.id.toolbar);
+            preferredLocationManager = new PreferredLocationManager(root, this);
+            preferredLocationManager.init();
+
+            //  Toolbar toolbar = root.findViewById(R.id.toolbar);
            // ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
             //  toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
          //   toolbar.setNavigationOnClickListener(v -> nav.navigateUp());
@@ -82,16 +84,16 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
                 }
         );
 
-        preferred_location.setOnClickListener(view -> openMap());
-        clean_map_address_button.setOnClickListener(view -> {
+       /* clean_map_address_button.setOnClickListener(view -> {
             preferred_location.setText("");
             position = new Position(new LatLng(0, 0), null, null);
             clean_map_address_button.setVisibility(View.GONE);
-        });
+        });*/
     }
 
     private boolean isFormOk() {
-        if (position == null || position.getLatLng() == null) {
+        if (preferredLocationManager.position == null ||
+                preferredLocationManager.position.getLatLng() == null) {
             return false;
         }
 
@@ -100,63 +102,23 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-
-        if (requestCode == ADDRESS_FROM_MAPS_CODE) {
-            if (resultCode == RESULT_OK) {
-                double lat = data.getDoubleExtra("lat", -1);
-                double lng = data.getDoubleExtra("lng", -1);
-                position = new Position(new LatLng(lat, lng), null, null);
-                getAddressAndSetBox();
-            }
-        }
+        preferredLocationManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void openMap() {
-        Intent intent = new Intent(getContext(), MapsActivity.class);
-        if (position == null) {
-            position = new Position(new LatLng(0, 0), null, null);
-        }
-        intent.putExtra("lng", position.getLatLng().longitude);
-        intent.putExtra("lat", position.getLatLng().latitude);
-
-        startActivityForResult(intent, ADDRESS_FROM_MAPS_CODE);
-    }
-
-    private void getAddressAndSetBox() {
-        GeocodingResult[] results = null;
-        preferred_location.setText("Loading...");
-        try {
-            com.google.maps.model.LatLng newLatLng = new com.google.maps.model.LatLng(position.getLatLng().latitude, position.getLatLng().longitude);
-            results = GeocodingApi.newRequest(geoApiContext).latlng(newLatLng).await();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (results != null && results.length > 0) {
-            String address = results[0].formattedAddress;
-            position.setCity(Utils.getEntity(results[0], Place.LOCALITY));
-            position.setCity(Utils.getEntity(results[0], Place.COUNTRY));
-            preferred_location.setText(address);
-            clean_map_address_button.setVisibility(View.VISIBLE);
-        } else {
-            preferred_location.setText("");
-        }
-    }
-
-
     private void submitForm() {
 
-       Utils.savePreference(getActivity(), "data", "country", position.getCountry());
-       Utils.savePreference(getActivity(), "data", "city", position.getCity());
+       Utils.savePreference(getActivity(), "data", "country", preferredLocationManager.position.getCountry());
+       Utils.savePreference(getActivity(), "data", "city", preferredLocationManager.position.getCity());
 
         continueButton.setText("Please wait...");
 
         Map<String, Object> data = new HashMap<>();
 
-        data.put("lat", position.getLatLng().latitude);
-        data.put("lng", position.getLatLng().longitude);
-        data.put("country", position.getCountry());
-        data.put("city", position.getCity());
+        data.put("lat", preferredLocationManager.position.getLatLng().latitude);
+        data.put("lng", preferredLocationManager.position.getLatLng().longitude);
+        data.put("country", preferredLocationManager.position.getCountry());
+        data.put("city", preferredLocationManager.position.getCity());
 
         MainActivity.mFunctions
                 .getHttpsCallable("updateProfile")
@@ -165,7 +127,8 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
                     String answer = task.getResult().getData().toString();
                     System.out.println("Response from Server: " + answer);
                     if (answer.equals("OK")){
-                        nav.navigateUp();
+                        preferredLocationManager.saveLocation();
+                        nav.navigate(R.id.action_setProfileFragment_to_setProfilePictureFragment);
                     }
                     return null;
                 });
