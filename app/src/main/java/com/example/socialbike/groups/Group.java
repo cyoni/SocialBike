@@ -11,18 +11,14 @@ import com.google.firebase.functions.HttpsCallableResult;
 import java.util.HashMap;
 import java.util.Map;
 
-interface IGroup{
-    Task<HttpsCallableResult> joinGroup(Activity activity);
-    Task<HttpsCallableResult> exitGroup(Activity activity);
-}
 
-public class Group implements IGroup {
+public class Group {
 
-    private String groupId;
-    private String title;
-    private String description;
-    private int memberCount;
-    private boolean isMember;
+    protected String groupId;
+    protected String title;
+    protected String description;
+    protected int memberCount;
+    protected boolean isMember;
 
     public Group(){} // do not remove!
 
@@ -68,33 +64,9 @@ public class Group implements IGroup {
         this.memberCount = memberCount;
     }
 
-    @Override
-    public Task<HttpsCallableResult> joinGroup(Activity activity) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("groupId", groupId);
-        return MainActivity.mFunctions
-                .getHttpsCallable("JoinGroup")
-                .call(data).continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    Utils.savePreference(activity, "connected_groups", groupId, "ok");
-                    return null;
-                });
-    }
 
-    @Override
-    public Task<HttpsCallableResult> exitGroup(Activity activity) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("groupId", groupId);
-        return MainActivity.mFunctions
-                .getHttpsCallable(EMethods.LeaveGroup.name())
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    Utils.removePreference(activity, "connected_groups", groupId);
-                    return null;
-                });
+    public void setIsMember(boolean isMember) {
+        this.isMember = isMember;
     }
 }
 

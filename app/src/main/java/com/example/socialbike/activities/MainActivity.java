@@ -1,6 +1,5 @@
 package com.example.socialbike.activities;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -9,16 +8,16 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.socialbike.groups.Group;
+import com.example.socialbike.groups.GroupManager;
 import com.example.socialbike.utilities.AppDatabase;
 import com.example.socialbike.utilities.ConnectedUser;
 import com.example.socialbike.fragment.EventsFragment;
@@ -42,7 +41,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.maps.GeoApiContext;
 
-import java.nio.channels.AcceptPendingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,10 +56,12 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     public static BottomNavigationView bottomNavigationView;
     public static AppDatabase database;
     public static Map<String, String> membersMap = new HashMap<>();
+    public static Map<String, Group> MyConnectedGroups = new HashMap<>();
     public static MemberDao memberDao;
     public static boolean isUserConnected;
     public static StorageReference storageRef;
     private MenuManager menuManager = new MenuManager();
+    public static boolean IsGettingMyConnectedGroups;
     private int currentLayout;
 
     public static void toast(Context context, String msg, boolean isLong) {
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     public MainActivity() {
         chatManager = new ChatManager();
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,15 +92,42 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
         database = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "appDatabase").allowMainThreadQueries().build();
 
-        if (isUserConnected)
+        if (isUserConnected){
+            setupChatMembers();
+            setupMyConnectedGroups();
             startChat();
+        }
+
         initiatePlaces();
-        setupMembers();
 
         // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
-    private void setupMembers() {
+    public static void updateConnectedGroups(ArrayList<Group> container) {
+        MyConnectedGroups.clear();
+        for (Group group : container){
+            MyConnectedGroups.put(group.getGroupId(), group);
+        }
+    }
+
+    private void setupMyConnectedGroups() {
+        // connect to db and get groups that the user is in
+        IsGettingMyConnectedGroups = true;
+        ArrayList<Group> container = new ArrayList<>();
+        GroupManager groupManager = new GroupManager(this, container);
+
+        groupManager.getMyConnectedGroups().continueWith(task -> {
+            String response = String.valueOf(task.getResult().getData());
+            System.out.println("response:" + response);
+            groupManager.parseGroups(response);
+            updateConnectedGroups(groupManager.container);
+            IsGettingMyConnectedGroups = false;
+            return null;
+        });
+
+    }
+
+    private void setupChatMembers() {
         memberDao = MainActivity.database.memberDao();
         List<Member> members = memberDao.getAllMembers();
         for (Member member : members)

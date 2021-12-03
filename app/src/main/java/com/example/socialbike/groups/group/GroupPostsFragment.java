@@ -1,6 +1,5 @@
 package com.example.socialbike.groups.group;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,7 +12,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.socialbike.activities.AddPostActivity;
 import com.example.socialbike.post.PostManager;
-import com.example.socialbike.utilities.MessageGetter;
 import com.example.socialbike.post.Post;
 import com.example.socialbike.R;
 import com.example.socialbike.recyclerview.RecyclerViewAdapter;
@@ -59,7 +57,7 @@ public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (root == null) {
-            root = inflater.inflate(R.layout.fragment_home, container, false);
+            root = inflater.inflate(R.layout.activity_group_posts, container, false);
             floatingButton = root.findViewById(R.id.fab);
             recyclerView = root.findViewById(R.id.post_recyclerView);
             swipeLayout = root.findViewById(R.id.swipe_refresh);

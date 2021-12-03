@@ -109,12 +109,14 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         else {
             joinButton.setVisibility(View.VISIBLE);
             joinButton.setOnClickListener(view -> {
-                joinButton.setText("Joining...");
-                group.joinGroup(GroupActivity.this).continueWithTask(task -> {
+                joinButton.setText("FIX .. Joining...");
+
+               /* group.joinGroup(GroupActivity.this).continueWithTask(task -> {
                     joinButton.setVisibility(View.GONE);
                     MainActivity.toast(GroupActivity.this, "Welcome to the group!", true);
                     return null;
-                });
+                });*/
+
             });
         }
     }

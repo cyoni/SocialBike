@@ -152,7 +152,7 @@ exports.updateProfile = functions.https.onCall(async (request, context) => {
     await await_age
     await await_gender
     await await_preferred_location
-    
+
     return "OK"
 })
 
@@ -183,7 +183,7 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 
     var stop = false 
 
-    return route.child('posts').once('value').then(snapshot => {
+    return route.child('posts').orderByChild('timestamp', 'desc').once('value').then(snapshot => {
         snapshot.forEach(raw_post => {
 
             if (!stop){
@@ -378,7 +378,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
         ref = admin.database().ref('events')
 
         
-    return ref.once('value').then(snapshot => {
+    return ref.orderByChild('createdEventTime').once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
             if (

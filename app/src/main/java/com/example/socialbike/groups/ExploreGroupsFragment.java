@@ -2,7 +2,6 @@ package com.example.socialbike.groups;
 
 import static android.app.Activity.RESULT_OK;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -13,10 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -60,6 +57,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     private PreferredLocation preferredLocation;
     private String location = "xxx";
     private Position position = new Position();
+    GroupManager groupManager;
 
     public ExploreGroupsFragment(GroupContainer groupContainer) {
         this.groupContainer = groupContainer;
@@ -86,6 +84,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
             swipeLayout = root.findViewById(R.id.swipe_refresh);
             progressBar.setVisibility(View.VISIBLE);
 
+            groupManager = new GroupManager(getContext(), this.container);
             setSwipeLayout();
             initAdapter();
         }
@@ -103,20 +102,11 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     private void getGroups() {
         container.clear();
 
-        Map<String, Object> data = new HashMap<>();
-        //   data.put("lat", position.getLatLng().latitude);
-        //   data.put("lng", position.getLatLng().longitude);
-        MainActivity.mFunctions
-                .getHttpsCallable(EMethods.GetAllGroups.name())
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
+        groupManager.getAllGroups().continueWith(task -> {
+            parseGroups(String.valueOf(task.getResult().getData()));
+            return null;
+        });
 
-                    parseGroups(response);
-
-                    return null;
-                });
     }
 
     private void parseGroups(String response) {
@@ -166,7 +156,30 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         _holder.title.setText(current.getTitle());
         _holder.description.setText(current.getDescription());
         _holder.memberCount.setText(current.getMemberCount() + " members");
-        enableItemMenu(_holder.menu_button, position);
+       // enableItemMenu(_holder.menu_button, position);
+    }
+
+    private void joinOrLeaveGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
+        if (!(holder.joinButton.getText().equals("Leaving") || holder.joinButton.getText().equals("Joining"))){
+            Group group = container.get(position);
+            if (group.getIsMember()){ // leave
+                holder.joinButton.setText("Leaving");
+                groupManager.exitGroup(group.getGroupId()).continueWith(task -> {
+                    holder.joinButton.setText("Join");
+                    group.setIsMember(false);
+                    MainActivity.MyConnectedGroups.remove(group.getGroupId());
+                    return null;
+                });
+            } else { // join
+                holder.joinButton.setText("Joining");
+                groupManager.joinGroup(group.getGroupId()).continueWith(task -> {
+                    holder.joinButton.setText("Joined");
+                    group.setIsMember(true);
+                    MainActivity.MyConnectedGroups.put(group.getGroupId(), group);
+                    return null;
+                });
+            }
+        }
     }
 
     @Override
@@ -193,7 +206,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
                 //
                 // = new Position(place.getLatLng(), place.getName(), country);
                 //
-                updateCityTextView(position.getCountry());
+                //updateCityTextView(position.getCountry());
                 //getEvents();
             }
             return;
@@ -213,7 +226,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
     }
 
-    private void enableItemMenu(View view, int position) {
+    /*private void enableItemMenu(View view, int position) {
         view.setOnClickListener(view1 -> {
             PopupMenu popup = new PopupMenu(getContext(), view1);
             popup.inflate(R.menu.group);
@@ -238,23 +251,8 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
             popup.show();
         });
     }
+*/
 
-    private void joinOrLeaveGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
-        if (holder.joinButton.getText().toString().toLowerCase().equals("join")) {
-            joinGroup(holder, position);
-        } else
-            leaveGroup(holder, position);
-    }
-
-    private void leaveGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
-        holder.joinButton.setText("Join");
-        String groupId = container.get(position).getGroupId();
-        int index = getIndex(groupContainer.groupsThatImInFragment.container, groupId);
-        container.get(position).exitGroup(getActivity());
-        groupContainer.groupsThatImInFragment.container.remove(index);
-        groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRemoved(index);
-
-    }
 
 
     private int getIndex(ArrayList<Group> container, String groupId) {
@@ -271,15 +269,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         startActivity(intent);
     }
 
-    private void joinGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
-        holder.joinButton.setText("Joining");
-        container.get(position).joinGroup(getActivity()).continueWith(task -> {
-            groupContainer.groupsThatImInFragment.container.add(0, container.get(position));
-            groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRangeChanged(0, groupContainer.groupsThatImInFragment.container.size());
-            holder.joinButton.setText("Joined");
-            return null;
-        });
-    }
+
 
 
     @Override

@@ -120,4 +120,8 @@ public class PostManager implements RecyclerViewAdapter.ItemClickListener{
         if (progressBar != null)
             progressBar.setVisibility(View.GONE);
     }
+
+    public void clean() {
+        container.clear();
+    }
 }

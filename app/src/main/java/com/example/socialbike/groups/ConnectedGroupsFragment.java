@@ -2,7 +2,6 @@ package com.example.socialbike.groups;
 
 import static android.app.Activity.RESULT_OK;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -12,11 +11,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.CountDownTimer;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 
 import com.example.socialbike.utilities.Constants;
@@ -28,48 +26,35 @@ import com.example.socialbike.R;
 import com.example.socialbike.recyclerview.RecyclerViewAdapter2;
 import com.example.socialbike.utilities.Updater;
 import com.example.socialbike.groups.group.GroupActivity;
-import com.example.socialbike.groups.group.GroupDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.socialbike.utilities.Utils;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
-public class GroupFragment extends Fragment implements RecyclerViewAdapter2.ItemClickListener, Updater.IUpdate {
+public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAdapter2.ItemClickListener, Updater.IUpdate {
 
-    private final boolean isExplore;
     private final GroupContainer groupContainer;
-    private RecyclerView recyclerView;
-    public RecyclerViewAdapter2 recyclerViewAdapter;
-    public ArrayList<Group> container = new ArrayList<>();
+
+
     private ProgressBar progressBar;
     private View root;
     private SwipeRefreshLayout swipeLayout;
-    protected Set<String> groupIds = new HashSet<>();
     private final int DIVIDER_LAYOUT = 0;
     private final int EVENT_LAYOUT = 1;
     private PreferredLocation preferredLocation;
     private String location = "xxx";
     private Position position = new Position();
+    GroupManager groupManager;
+    private ArrayList<Group> container = new ArrayList<>();
+    public RecyclerView recyclerView;
+    public RecyclerViewAdapter2 recyclerViewAdapter;
 
-    public GroupFragment(GroupContainer groupContainer, boolean isExplore) {
-        this.isExplore = isExplore;
+    public ConnectedGroupsFragment(GroupContainer groupContainer) {
         this.groupContainer = groupContainer;
-    }
-
-    private void initAdapter() {
-        recyclerViewAdapter = new RecyclerViewAdapter2(getContext(), R.layout.item_group, container);
-        recyclerViewAdapter.setClassReference(this);
-        recyclerView.setAdapter(recyclerViewAdapter);
     }
 
     @Override
@@ -81,58 +66,85 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (root == null) {
+
             root = inflater.inflate(R.layout.fragment_group, container, false);
-            recyclerView = root.findViewById(R.id.recyclerview);
             progressBar = root.findViewById(R.id.progressBar);
             swipeLayout = root.findViewById(R.id.swipe_refresh);
             progressBar.setVisibility(View.VISIBLE);
             preferredLocation.initPreferredLocation();
 
             setSwipeLayout();
-            initAdapter();
+
+            groupManager = new GroupManager(getContext(), this.container);
+            recyclerView = root.findViewById(R.id.recyclerview);
+
+            recyclerViewAdapter = new RecyclerViewAdapter2(getContext(), R.layout.item_group, this.container);
+            recyclerView.setAdapter(recyclerViewAdapter);
+            recyclerViewAdapter.setClassReference(this);
+
+            locallyGetGroups();
 
         }
         return root;
     }
 
+    private void locallyGetGroups() {
+            new CountDownTimer(3000, 500) {
+                public void onTick(long millisUntilFinished) {
+                    System.out.println("waiting for main activity to finish downloading groups...");
+                    if (!MainActivity.IsGettingMyConnectedGroups) {
+                        refresh();
+                        cancel();
+                    }
+                }
+
+                public void onFinish() {
+                    System.out.println("Ticker stopped.");
+                }
+            }.start();
+    }
+
+    private void refresh() {
+        container.clear();
+        System.out.println("size: " +  MainActivity.MyConnectedGroups.size());
+        for (Map.Entry<String, Group> group : MainActivity.MyConnectedGroups.entrySet()) {
+            container.add(group.getValue());
+        }
+        onFinishedUpdating();
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        if (container.isEmpty())
-            getGroups();
+        if (!MainActivity.IsGettingMyConnectedGroups && !MainActivity.MyConnectedGroups.isEmpty()) {
+            System.out.println("refresh list");
+            refresh();
+        }
     }
 
     private void getGroups() {
+        groupManager.getMyConnectedGroups().continueWith(task -> {
+            groupManager.parseGroups(String.valueOf(task.getResult().getData()));
+            MainActivity.updateConnectedGroups(container);
+            onFinishedUpdating();
+            return null;
+        });
+    }
+
+/*    public void getConnectedGroups(){
         container.clear();
 
         Map<String, Object> data = new HashMap<>();
-
-        MainActivity.mFunctions
-                .getHttpsCallable(isExplore ? "GetAllGroups" : "GetMyGroups")
-                .call(data)
+        Utils.PostData(EMethods.GetMyGroups, data)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response:" + response);
-
-                    parseGroups(response);
-
+                    groupManager.parseGroups(response);
                     return null;
                 });
-    }
+    }*/
 
-    private void parseGroups(String response) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            GroupDTO groupDTO = objectMapper.readValue(response, GroupDTO.class);
-            container.addAll(groupDTO.getGroups());
-            for (Group group : container)
-                groupIds.add(group.getGroupId());
 
-            onFinishedUpdating();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void sortContainer() {
         ArrayList<Group> tmpContainer = new ArrayList<>();
@@ -161,7 +173,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
         _holder.title.setText(current.getTitle());
         _holder.description.setText(current.getDescription());
         _holder.memberCount.setText(current.getMemberCount() + " members");
-        enableItemMenu(_holder.menu_button, position);
+        // enableItemMenu(_holder.menu_button, position);
     }
 
     @Override
@@ -183,7 +195,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
 
                 //  position = new Position(place.getLatLng(), place.getName(), country);
                 //  savePosition();
-                updateCityTextView(address.split(",")[0]);
+
                 // getEvents();
             }
             return;
@@ -191,19 +203,18 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void updateCityTextView(String country) {
-        location = country;
-        recyclerViewAdapter.notifyItemChanged(0);
-    }
 
+
+/*
     private void openCitiesAutoComplete() {
         List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
         Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
                 .build(getContext());
         startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
     }
+*/
 
-    private void enableItemMenu(View view, int position) {
+/*    private void enableItemMenu(View view, int position) {
         view.setOnClickListener(view1 -> {
             PopupMenu popup = new PopupMenu(getContext(), view1);
             popup.inflate(R.menu.group);
@@ -227,36 +238,25 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
             });
             popup.show();
         });
-    }
+    }*/
 
-    private void joinOrLeaveGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
+/*    private void joinOrLeaveGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
         if (holder.joinButton.getText().toString().toLowerCase().equals("join")) {
-            joinGroup(holder, position);
+            //joinGroup(holder, position);
         } else
-            leaveGroup(holder, position);
-    }
+            //leaveGroup(holder, position);
+    }*/
 
-    private void leaveGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
+/*    private void leaveGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
         holder.joinButton.setText("Join");
         String groupId = container.get(position).getGroupId();
         int index = getIndex(groupContainer.groupsThatImInFragment.container, groupId);
         groupContainer.groupsThatImInFragment.container.remove(index);
         groupContainer.groupsThatImInFragment.recyclerViewAdapter.notifyItemRemoved(index);
         leaveNow(groupId);
-    }
+    }*/
 
-    private void leaveNow(String groupId) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("groupId", groupId);
-        MainActivity.mFunctions
-                .getHttpsCallable(EMethods.LeaveGroup.name())
-                .call(data)
-                .continueWith(task -> {
-                    String response = String.valueOf(task.getResult().getData());
-                    System.out.println("response:" + response);
-                    return null;
-                });
-    }
+
 
     private int getIndex(ArrayList<Group> container, String groupId) {
         for (int i = 0; i < container.size(); i++)
@@ -272,7 +272,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
         startActivity(intent);
     }
 
-    private void joinGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
+/*    private void joinGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
         holder.joinButton.setText("Joining");
         Map<String, Object> data = new HashMap<>();
         data.put("groupId", container.get(position).getGroupId());
@@ -288,7 +288,7 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
                     holder.joinButton.setText("Joined");
                     return null;
                 });
-    }
+    }*/
 
     private void setSwipeLayout() {
         swipeLayout.setOnRefreshListener(this::getGroups);
@@ -306,7 +306,8 @@ public class GroupFragment extends Fragment implements RecyclerViewAdapter2.Item
     @Override
     public void onFinishedUpdating() {
         swipeLayout.setRefreshing(false);
-        recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
+        recyclerViewAdapter.notifyDataSetChanged();
+
         progressBar.setVisibility(View.GONE);
     }
 

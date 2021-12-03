@@ -6,6 +6,7 @@ public enum EMethods {
     GetAllGroups,
     getPosts,
     updateProfile,
-    getEvents
+    getEvents,
+    GetMyGroups
 }
 

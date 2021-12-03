@@ -1,6 +1,7 @@
 package com.example.socialbike.fragment;
 
-import android.annotation.SuppressLint;
+import
+        android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -26,6 +27,7 @@ import com.example.socialbike.utilities.Constants;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,9 +104,7 @@ public class EventsFragment extends Fragment
         cityText = root.findViewById(R.id.city);
         no_events_text = root.findViewById(R.id.no_events_text);
         no_events_text.setVisibility(View.GONE);
-
         cityText.setOnClickListener(view -> openCitiesAutoComplete());
-
 
         setListeners(root);
 
@@ -153,7 +153,6 @@ public class EventsFragment extends Fragment
             eventsManager.showProgressbar();
             getEvents();
         });
-
     }
 
     private void openLoginActivity() {

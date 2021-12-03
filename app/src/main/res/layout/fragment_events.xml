@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,59 +8,81 @@
     android:padding="5dp"
     tools:context=".fragment.EventsFragment">
 
-    <RelativeLayout
-        android:id="@+id/topMenu"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:fitsSystemWindows="true">
 
-        <Button
-            android:id="@+id/add_new_event_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_toStartOf="@id/sort_button"
-            android:text="Add New Event" />
-
-        <Button
-            android:id="@+id/sort_button"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="170dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_marginLeft="5dp"
-            android:text="@string/trending"
-            app:icon="@drawable/ic_baseline_arrow_drop_down_24" />
-
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/materialup.toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:background="#00FFFFFF"
+        android:layout_marginBottom="5dp"
+        app:layout_collapseMode="pin"
+        app:layout_scrollFlags="scroll|enterAlways">
 
         <RelativeLayout
-            android:id="@+id/searchSection"
+            android:id="@+id/topMenu"
             android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:layout_below="@id/sort_button">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/rangeText"
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/add_new_event_button"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Finds events near" />
+                android:layout_alignParentLeft="true"
+                android:layout_toStartOf="@id/sort_button"
+                android:text="Add New Event" />
 
-            <TextView
-                android:id="@+id/city"
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/sort_button"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_toEndOf="@id/rangeText"
-                android:text="Tel Aviv"
-                android:textColor="@color/blue"
+                android:layout_alignParentEnd="true"
+                android:layout_marginLeft="5dp"
+                android:text="@string/trending"
+                app:icon="@drawable/ic_baseline_arrow_drop_down_24" />
 
-                />
+
+            <RelativeLayout
+                android:id="@+id/searchSection"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_below="@id/sort_button">
+
+                <TextView
+                    android:id="@+id/rangeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Finds events near" />
+
+                <TextView
+                    android:id="@+id/city"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_toEndOf="@id/rangeText"
+                    android:text="Tel Aviv"
+                    android:textColor="@color/blue"
+
+                    />
+
+
+            </RelativeLayout>
+
 
 
         </RelativeLayout>
 
+    </androidx.appcompat.widget.Toolbar>
 
+    </com.google.android.material.appbar.AppBarLayout>
 
-    </RelativeLayout>
 
 
 
@@ -97,4 +119,4 @@
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
