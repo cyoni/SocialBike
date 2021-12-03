@@ -7,19 +7,26 @@
 
     <fragment
         android:id="@+id/setNicknameFragment"
-        android:name="com.example.socialbike.SetNicknameFragment"
+        android:name="com.example.socialbike.signup.SetNicknameFragment"
         android:label="fragment_set_nickname"
         tools:layout="@layout/fragment_set_nickname">
-
         <action
-            android:id="@+id/action_se2tNicknameFragment_to_setProfileFragment"
-            app:destination="@id/setProfileFragment" />
-
+            android:id="@+id/action_setNicknameFragment_to_setPreferred_loc"
+            app:destination="@id/setPreferredLocFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/setProfileFragment"
-        android:name="com.example.socialbike.SetProfileFragment"
+        android:id="@+id/setPreferredLocFragment"
+        android:name="com.example.socialbike.signup.SetLocationDuringSignUpFragment"
         android:label="fragment_set_profile"
-        tools:layout="@layout/fragment_set_profile" />
+        tools:layout="@layout/fragment_set_preferred_location" >
+        <action
+            android:id="@+id/action_setProfileFragment_to_setProfilePictureFragment"
+            app:destination="@id/setProfilePictureFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/setProfilePictureFragment"
+        android:name="com.example.socialbike.signup.SetProfilePictureFragment"
+        android:label="fragment_set_profile_picture"
+        tools:layout="@layout/fragment_set_profile_picture" />
 </navigation>

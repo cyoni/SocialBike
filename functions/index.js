@@ -138,19 +138,21 @@ exports.updateProfile = functions.https.onCall(async (request, context) => {
     const gender = request.gender || null
     const age = request.age || null
 
-    const a = admin.database().ref('public').child(publicKey).child('profile').set({
-        age: age,
-        gender: gender
-    });
 
-    const b = admin.database().ref('public').child(publicKey).child('profile').child('preferred_location').set({
+    const await_age = admin.database().ref('public').child(publicKey).child('profile').child('age').set(age);
+    const await_gender = admin.database().ref('public').child(publicKey).child('profile').child('gender').set(gender);
+
+    const await_preferred_location = admin.database().ref('public').child(publicKey).child('profile').child('preferred_location').set({
         lat: lat,
         lng: lng,
         country: country,
         city: city
     })
 
-    await a, b
+    await await_age
+    await await_gender
+    await await_preferred_location
+
     return "OK"
 })
 
@@ -166,6 +168,7 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 
     const groupId = request.groupId || null
     const eventId = request.eventId || null
+    const getFirstEvent = request.getFirstEvent || null
 
     var route
 
@@ -178,29 +181,34 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
     else if (groupId === null && eventId !== null)
         route = admin.database().ref('events').child(eventId)
 
+    var stop = false 
 
-    return route.child('posts').once('value').then(snapshot => {
+    return route.child('posts').orderByChild('timestamp', 'desc').once('value').then(snapshot => {
         snapshot.forEach(raw_post => {
 
-            var post = []
-            post = ({
-                postId: raw_post.key,
-                publicKey: raw_post.child('user_public_key').val(),
-                name: "...",
-                message: raw_post.child('message').val(),
-                timestamp: raw_post.child('timestamp').val(),
-            })
+            if (!stop){
+                var post = []
+                post = ({
+                    postId: raw_post.key,
+                    publicKey: raw_post.child('user_public_key').val(),
+                    name: "...",
+                    message: raw_post.child('message').val(),
+                    timestamp: raw_post.child('timestamp').val(),
+                })
 
-            if (raw_post.child('comments').exists())
-                post['comments_count'] = raw_post.child('comments').numChildren()
+                if (raw_post.child('comments').exists())
+                    post['comments_count'] = raw_post.child('comments').numChildren()
 
-            if (raw_post.child('likes_count').exists()) {
-                post['likes_count'] = raw_post.child('likes_count').val()
-                if (userPublicId !== null)
-                    post['isLiked'] = raw_post.child('likes').child(userPublicId).exists()
+                if (raw_post.child('likes_count').exists()) {
+                    post['likes_count'] = raw_post.child('likes_count').val()
+                    if (userPublicId !== null)
+                        post['isLiked'] = raw_post.child('likes').child(userPublicId).exists()
+                }
+
+                data['posts'].push(post)
+                if (getFirstEvent)
+                    stop = true
             }
-
-            data['posts'].push(post)
         })
         return JSON.stringify(data)
     })
@@ -358,24 +366,37 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     const range = 100
     const country = request.country || null
     const groupId = request.groupId || null
+    const getFirstEvent = request.getFirstEvent || null
 
     var ref;
+    var stop = false
+
     if (groupId !== null) {
         ref = admin.database().ref('groups').child(groupId).child('events')
     }
     else
         ref = admin.database().ref('events')
 
-    return ref.once('value').then(snapshot => {
+        
+    return ref.orderByChild('createdEventTime').once('value').then(snapshot => {
         snapshot.forEach(raw_data => {
 
             if (
                 groupId !== null ||
                 distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range 
                      && raw_data.child('country').val() === country
+                     && raw_data.child("user_public_key").exists() 
             ) {
 
-                data['events'].push(makeEventObject(raw_data, groupId, publicKey))
+                if (!stop){
+                    if (raw_data.child('user_public_key').exists()){
+                        var eventObject = makeEventObject(raw_data, groupId, publicKey)
+                        data['events'].push(eventObject)
+                    }
+                }
+
+                if (getFirstEvent)
+                    stop = true
             }
         })
 
@@ -397,7 +418,9 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                     if (groupEvents.exists()){
                         groupEvents.forEach(current => {
                             // if current is active
-                            my_extra_events.push( makeEventObject(current, raw_data.key, publicKey)  )
+                            if (raw_data.child('user_public_key').exists()){
+                                my_extra_events.push( makeEventObject(current, raw_data.key, publicKey)  )
+                            }
                         })
                     }
                 }
@@ -419,6 +442,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
 
     })
 })
+
 
 exports.updateNickname = functions.https.onCall(async (data, context) => {
     const privateKey = context.auth.uid;

@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
-import com.example.socialbike.MainActivity;
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.R;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -24,8 +24,8 @@ public class GroupContainer extends Fragment implements IPageAdapter {
     public MainActivity mainActivity;
     String[] tabTitles = {"My Groups", "Explore"};
     private View root;
-    protected final GroupFragment groupsThatImInFragment = new GroupFragment(this, false);
-    protected final GroupFragment exploreFragment = new GroupFragment(this, true);
+    protected final ConnectedGroupsFragment groupsThatImInFragment = new ConnectedGroupsFragment(this);
+    protected final ExploreGroupsFragment exploreFragment = new ExploreGroupsFragment(this);
 
     public static GroupContainer getInstance() {
         if (groupContainer == null) {

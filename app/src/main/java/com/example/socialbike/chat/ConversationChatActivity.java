@@ -12,10 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.socialbike.MainActivity;
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.R;
-import com.example.socialbike.RecyclerViewAdapter;
-import com.example.socialbike.Utils;
+import com.example.socialbike.recyclerview.RecyclerViewAdapter;
+import com.example.socialbike.utilities.Utils;
 import com.example.socialbike.chat.history.History;
 import com.example.socialbike.chat.history.HistoryDao;
 

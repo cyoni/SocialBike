@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.socialbike" >
+    package="com.example.socialbike">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -12,11 +12,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SocialBike" >
+        android:theme="@style/Theme.SocialBike">
         <activity
-            android:name=".EventActivity"
+            android:name=".activities.MyAccountActivity"
             android:exported="true"
-            android:theme="@style/Theme.SocialBike.NoActionBar"/>
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
+        <activity
+            android:name=".activities.EventActivity"
+            android:exported="true"
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
         <activity
             android:name=".groups.group.GroupActivity"
             android:exported="true"
@@ -29,6 +33,14 @@
             android:theme="@style/Theme.SocialBike.NoActionBar" />
         <activity
             android:name=".chat.ConversationChatActivity"
+            android:label="@string/title_activity_conversation_chat"
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
+        <activity
+            android:name=".groups.group.GroupEvents"
+            android:label="@string/title_activity_conversation_chat"
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
+        <activity
+            android:name=".groups.group.PostsOfGroupOrEventActivity"
             android:label="@string/title_activity_conversation_chat"
             android:theme="@style/Theme.SocialBike.NoActionBar" />
         <!--
@@ -44,13 +56,13 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".Maps"
-            android:theme="@style/Theme.SocialBike.NoActionBar"
-            android:label="@string/title_activity_maps" />
+            android:name=".utilities.Maps"
+            android:label="@string/title_activity_maps"
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
         <activity
-            android:name=".MapsActivity"
-            android:theme="@style/Theme.SocialBike.NoActionBar"
-            android:label="@string/title_activity_maps" />
+            android:name=".activities.MapsActivity"
+            android:label="@string/title_activity_maps"
+            android:theme="@style/Theme.SocialBike.NoActionBar" />
         <!--
                Set to true if your app is Standalone, that is, it does not require the handheld
                app to run.
@@ -60,9 +72,9 @@
             android:value="true" />
 
         <activity
-            android:name=".PostActivity"
-            android:theme="@style/Theme.SocialBike.NoActionBar"
-            android:label="@string/title_activity_post" >
+            android:name=".activities.PostActivity"
+            android:label="@string/title_activity_post"
+            android:theme="@style/Theme.SocialBike.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -70,23 +82,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddNewEventActivity"
+            android:name=".activities.AddNewEventActivity"
             android:label="@string/title_activity_add_new_event"
             android:theme="@style/Theme.SocialBike.NoActionBar" />
         <activity
-            android:name=".AddPostActivity"
+            android:name=".activities.AddPostActivity"
             android:label="@string/title_activity_adding_post"
             android:theme="@style/Theme.SocialBike.NoActionBar" />
-        <activity android:name=".WelcomeActivity" />
+        <activity android:name=".activities.WelcomeActivity" />
         <activity
-            android:name=".LogInActivity"
+            android:name=".activities.LogInActivity"
             android:label="@string/title_activity_log_in"
             android:theme="@style/Theme.SocialBike.NoActionBar" />
-
-        <activity
-            android:name=".MainActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

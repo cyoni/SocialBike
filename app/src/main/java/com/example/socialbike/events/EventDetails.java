@@ -8,7 +8,6 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.socialbike.EventsManager;
 import com.example.socialbike.R;
 
 public class EventDetails extends Fragment {

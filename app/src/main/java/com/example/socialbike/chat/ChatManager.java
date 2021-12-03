@@ -6,9 +6,9 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.socialbike.DateUtils;
-import com.example.socialbike.MainActivity;
-import com.example.socialbike.ConnectedUser;
+import com.example.socialbike.utilities.DateUtils;
+import com.example.socialbike.activities.MainActivity;
+import com.example.socialbike.utilities.ConnectedUser;
 import com.example.socialbike.chat.history.History;
 import com.example.socialbike.chat.history.HistoryDao;
 import com.google.firebase.database.ChildEventListener;
@@ -25,48 +25,59 @@ public class ChatManager {
     public ChatLobbyFragment chatLobbyFragment;
     private HistoryDao historyDao;
     public PreviewChatMessageDao previewMessage;
+    private ChildEventListener chatInstance;
 
     public void listenForNewMessages() {
-        System.out.println("Chat Manager has started");
-        initDatabases();
+        if (chatInstance == null) {
+            System.out.println("Chat Manager has started");
+            initDatabases();
 
-        MainActivity.mDatabase.child("private_msgs").child(ConnectedUser.getPublicKey()).addChildEventListener(new ChildEventListener() {
+            chatInstance = MainActivity.mDatabase.child("private_msgs").child(ConnectedUser.getPublicKey()).addChildEventListener(new ChildEventListener() {
 
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.exists()) {
-                    System.out.println("raw data: " + snapshot.toString());
-                    for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                        String senderPublicKey = String.valueOf(postSnapshot.child("senderPublicKey").getValue());
-                        String message = String.valueOf(postSnapshot.child("message").getValue());
-                        String sendersName = String.valueOf(postSnapshot.child("sendersName").getValue());
-                        long timestamp = Long.parseLong(String.valueOf(postSnapshot.child("timestamp").getValue()));
-                        String messageId = snapshot.getKey();
-                        System.out.println("New message: " + postSnapshot.child("message").getValue());
-                        System.out.println("Message key: " + postSnapshot.getKey());
-                        handleNewMessage(messageId, senderPublicKey, sendersName, message, true, timestamp);
-                        removeMessageFromServer(messageId);
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    if (snapshot.exists()) {
+                        System.out.println("raw data: " + snapshot.toString());
+                        for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                            String senderPublicKey = String.valueOf(postSnapshot.child("senderPublicKey").getValue());
+                            String message = String.valueOf(postSnapshot.child("message").getValue());
+                            String sendersName = String.valueOf(postSnapshot.child("sendersName").getValue());
+                            long timestamp = Long.parseLong(String.valueOf(postSnapshot.child("timestamp").getValue()));
+                            String messageId = snapshot.getKey();
+                            System.out.println("New message: " + postSnapshot.child("message").getValue());
+                            System.out.println("Message key: " + postSnapshot.getKey());
+                            handleNewMessage(messageId, senderPublicKey, sendersName, message, true, timestamp);
+                            removeMessageFromServer(messageId);
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-            }
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                }
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-            }
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-            }
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                System.out.println("ERROR CONNECT " + databaseError.getDetails());
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    System.out.println("ERROR CONNECT " + databaseError.getDetails());
+                }
+            });
+        } else {
+            System.out.println("Chat Manager is already running.");
+        }
+
+    }
+
+    public void endChat(){
+        MainActivity.mDatabase.removeEventListener(chatInstance);
+        System.out.println("Chat has ended.");
     }
 
     private void initDatabases() {

@@ -1,12 +1,24 @@
 package com.example.socialbike.groups;
 
+import android.app.Activity;
+
+import com.example.socialbike.activities.MainActivity;
+import com.example.socialbike.utilities.EMethods;
+import com.example.socialbike.utilities.Utils;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.functions.HttpsCallableResult;
+
+import java.util.HashMap;
+import java.util.Map;
+
+
 public class Group {
 
-    private String groupId;
-    private String title;
-    private String description;
-    private int memberCount;
-    private boolean isMember;
+    protected String groupId;
+    protected String title;
+    protected String description;
+    protected int memberCount;
+    protected boolean isMember;
 
     public Group(){} // do not remove!
 
@@ -52,6 +64,10 @@ public class Group {
         this.memberCount = memberCount;
     }
 
+
+    public void setIsMember(boolean isMember) {
+        this.isMember = isMember;
+    }
 }
 
 
