@@ -116,7 +116,7 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
     @Override
     public void onResume() {
         super.onResume();
-        if (!MainActivity.IsGettingMyConnectedGroups && !MainActivity.MyConnectedGroups.isEmpty()) {
+        if (!MainActivity.IsGettingMyConnectedGroups) {
             System.out.println("refresh list");
             refresh();
         }

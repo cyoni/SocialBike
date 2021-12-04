@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.socialbike.groups.Group;
+import com.example.socialbike.groups.GroupManager;
 import com.example.socialbike.post.PostManager;
 import com.example.socialbike.R;
 import com.example.socialbike.utilities.Updater;
@@ -46,7 +47,7 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         Intent intent = getIntent();
         String groupName = intent.getStringExtra("groupName");
         groupId = intent.getStringExtra("groupId");
-        group = new Group(groupId, "title?", "description?");
+        group = new Group(groupId, groupName, "description?");
 
         eventsManager = new EventsManager(this, this, update);
         eventsManager.init();
@@ -102,21 +103,22 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         });
 
         joinButton = findViewById(R.id.join_button);
-        Map<String, ?> allGroups = Utils.getAllPreferences(this, "connected_groups");
-        if (allGroups.containsKey(groupId)){
+
+        if (MainActivity.MyConnectedGroups.containsKey(groupId)){
             joinButton.setVisibility(View.GONE);
         }
         else {
+
             joinButton.setVisibility(View.VISIBLE);
             joinButton.setOnClickListener(view -> {
-                joinButton.setText("FIX .. Joining...");
-
-               /* group.joinGroup(GroupActivity.this).continueWithTask(task -> {
+                GroupManager groupManager = new GroupManager(this);
+                joinButton.setText("Joining...");
+                groupManager.joinGroup(groupId).continueWith(task -> {
                     joinButton.setVisibility(View.GONE);
-                    MainActivity.toast(GroupActivity.this, "Welcome to the group!", true);
+                    groupManager.add(group);
+                    MainActivity.toast(GroupActivity.this, "Welcome to " + group.getTitle(), true);
                     return null;
-                });*/
-
+                });
             });
         }
     }

@@ -97,6 +97,31 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         super.onResume();
         if (container.isEmpty())
             getGroups();
+        else{
+            locallyRefresh();
+        }
+    }
+
+    private void locallyRefresh() {
+        List<Integer> indexes = new ArrayList<>();
+        for (int i = 0; i< container.size(); i++){
+            Group group = container.get(i);
+            if (group.getIsMember()){
+                if (!MainActivity.MyConnectedGroups.containsKey(group.getGroupId())){
+                    group.setIsMember(false);
+                    indexes.add(i);
+                }
+            } else{
+                if (MainActivity.MyConnectedGroups.containsKey(group.getGroupId())){
+                    group.setIsMember(true);
+                    indexes.add(i);
+                }
+            }
+        }
+
+        for (int index : indexes){
+            recyclerViewAdapter.notifyItemChanged(index);
+        }
     }
 
     private void getGroups() {
@@ -166,16 +191,15 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
                 holder.joinButton.setText("Leaving");
                 groupManager.exitGroup(group.getGroupId()).continueWith(task -> {
                     holder.joinButton.setText("Join");
-                    group.setIsMember(false);
-                    MainActivity.MyConnectedGroups.remove(group.getGroupId());
+                    groupManager.remove(group);
                     return null;
                 });
             } else { // join
                 holder.joinButton.setText("Joining");
                 groupManager.joinGroup(group.getGroupId()).continueWith(task -> {
                     holder.joinButton.setText("Joined");
+                    groupManager.add(group);
                     group.setIsMember(true);
-                    MainActivity.MyConnectedGroups.put(group.getGroupId(), group);
                     return null;
                 });
             }
@@ -255,7 +279,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
 
 
 
-    private int getIndex(ArrayList<Group> container, String groupId) {
+    private int getIndex(String groupId) {
         for (int i = 0; i < container.size(); i++)
             if (container.get(i).getGroupId().equals(groupId))
                 return i;

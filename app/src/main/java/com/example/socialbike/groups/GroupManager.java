@@ -29,6 +29,10 @@ public class GroupManager {
         this.container = container;
     }
 
+    public GroupManager(Context context){
+        this.context = context;
+    }
+
     public Task<HttpsCallableResult> getAllGroups(){
         container.clear();
 
@@ -75,7 +79,7 @@ public class GroupManager {
 
     public Task<HttpsCallableResult> exitGroup(String groupId) {
         Map<String, Object> data = new HashMap<>();
-       // data.put("groupId", groupId);
+        data.put("groupId", groupId);
         return MainActivity.mFunctions
                 .getHttpsCallable(EMethods.LeaveGroup.name())
                 .call(data);
@@ -92,4 +96,14 @@ public class GroupManager {
             e.printStackTrace();
         }
     }
+
+    public void add(Group group) {
+        group.setIsMember(true);
+        MainActivity.MyConnectedGroups.put(group.getGroupId(), group);
+    }
+
+    public void remove(Group group) {
+        MainActivity.MyConnectedGroups.remove(group.getGroupId());
+    }
+
 }
