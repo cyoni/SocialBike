@@ -116,6 +116,7 @@ public class AddNewEventActivity extends AppCompatActivity {
 
             button3.setOnClickListener(v -> {
                 compressImage = null;
+                headerPicture.setImageResource(R.drawable.default_image);
                 bottomSheetDialog.dismiss();
             });
 

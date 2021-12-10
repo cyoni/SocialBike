@@ -37,7 +37,7 @@ public class SetNicknameFragment extends Fragment {
         continueButton.setOnClickListener(view -> {
             String name = nickname_txt.getText().toString();
             if (MainActivity.isUserConnected &&
-                    (ConnectedUser.getName() == null ||
+                    (ConnectedUser.getName() != null &&
                             ConnectedUser.getName().toLowerCase().equals(name.toLowerCase()))) {
                 proceedToNextFragment();
             } else if (isNameValid(name)) {
@@ -48,8 +48,7 @@ public class SetNicknameFragment extends Fragment {
     }
 
     private boolean isNameValid(String name) {
-        return !(ConnectedUser.getName() == null
-                || name.trim().isEmpty());
+        return !(name.trim().isEmpty());
     }
 
     private void proceedToNextFragment() {

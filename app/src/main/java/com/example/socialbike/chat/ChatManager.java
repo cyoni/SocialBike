@@ -39,7 +39,7 @@ public class ChatManager {
                     if (snapshot.exists()) {
                         System.out.println("raw data: " + snapshot.toString());
                         for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                            String senderPublicKey = String.valueOf(postSnapshot.child("senderPublicKey").getValue());
+                            String senderPublicKey = String.valueOf(postSnapshot.child("publicKey").getValue());
                             String message = String.valueOf(postSnapshot.child("message").getValue());
                             String sendersName = String.valueOf(postSnapshot.child("sendersName").getValue());
                             long timestamp = Long.parseLong(String.valueOf(postSnapshot.child("timestamp").getValue()));
@@ -92,9 +92,8 @@ public class ChatManager {
                 .child(messageId).removeValue();
     }
 
-    public boolean doesUserAppearOnTheList(String userPublicKey) {
-        ArrayList<PreviewChatMessage> container = chatLobbyFragment.users;
-        return container.stream().anyMatch(x -> x.publicKey.equals(userPublicKey));
+    public boolean doesUserAppearOnTheList(String userPublicKey, ArrayList<PreviewChatMessage> usersList) {
+        return usersList.stream().anyMatch(x -> x.publicKey.equals(userPublicKey));
     }
 
 
@@ -109,13 +108,15 @@ public class ChatManager {
         PreviewChatMessage chatMessage = new PreviewChatMessage(otherSidePublicKey, sendersName, message, time, isIncomingMessage);
 
         if (chatLobbyFragment != null) {
-            ArrayList<PreviewChatMessage> usersList = chatLobbyFragment.users;
+            ArrayList<PreviewChatMessage> usersList = chatLobbyFragment.reserve;
             if (isUserOnTopOfTheList(otherSidePublicKey, usersList)) {
                 updateTopElement(chatMessage);
-            } else if (doesUserAppearOnTheList(otherSidePublicKey)) {
-                moveElementOnTopOfTheList(chatMessage);
+            } else if (doesUserAppearOnTheList(otherSidePublicKey, usersList)) {
+                moveElementOnTopOfTheList(chatMessage, usersList);
             } else
-                insertNewElement(chatMessage);
+                insertNewElement(chatMessage, usersList);
+
+
 
             if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)) {
                 previewMessage.resetUnreadMessages(chatMessage.publicKey);
@@ -162,15 +163,16 @@ public class ChatManager {
 
     private boolean isUserOnTopOfTheList(String senderPublicKey,
                                          ArrayList<PreviewChatMessage> usersList) {
-        return doesUserAppearOnTheList(senderPublicKey) &&
+        return doesUserAppearOnTheList(senderPublicKey, usersList) &&
                 usersList.get(0).publicKey.equals(senderPublicKey);
     }
 
     private void updatePreviewMessage(PreviewChatMessage chatMessage) {
-        PreviewChatMessage tmp = chatLobbyFragment.users.get(0);
+        PreviewChatMessage tmp = chatLobbyFragment.reserve.get(0);
         chatMessage.setUnreadMsgs(tmp.unreadMessages + 1);
-        chatLobbyFragment.users.set(0, chatMessage);
+        chatLobbyFragment.reserve.set(0, chatMessage);
         previewMessage.update(chatMessage);
+        chatLobbyFragment.updateLists();
     }
 
     private void updateTopElement(PreviewChatMessage chatMessage) {
@@ -178,8 +180,7 @@ public class ChatManager {
         chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
     }
 
-    private void moveElementOnTopOfTheList(PreviewChatMessage chatMessage) {
-        ArrayList<PreviewChatMessage> usersList = chatLobbyFragment.users;
+    private void moveElementOnTopOfTheList(PreviewChatMessage chatMessage, ArrayList<PreviewChatMessage> usersList) {
         int index = getIndexOfUserOnTheList(chatMessage.publicKey);
         PreviewChatMessage tmp = usersList.get(index);
         usersList.remove(index);
@@ -190,20 +191,24 @@ public class ChatManager {
                 .notifyItemRangeChanged(0, usersList.size());
     }
 
-    private void insertNewElement(PreviewChatMessage chatMessage) {
-        ArrayList<PreviewChatMessage> users = chatLobbyFragment.users;
+    private void insertNewElement(PreviewChatMessage chatMessage, ArrayList<PreviewChatMessage> users) {
+        if (chatMessage.publicKey.equals("null")){
+            System.out.println("Error! Trying to insert a null value to chat list");
+            System.exit(0);
+        }
         chatMessage.unreadMessages = 1;
         chatLobbyFragment.insert(chatMessage);
         users.add(0, chatMessage);
+        chatLobbyFragment.updateLists();
         chatLobbyFragment.recyclerViewAdapter.notifyItemInserted(0);
         chatLobbyFragment.recyclerViewAdapter.notifyItemRangeChanged(0, users.size());
 
         System.out.println("A new element was inserted on the chat list.");
     }
 
-    private int getIndexOfUserOnTheList(String senderPublicKey) {
-        for (int i = 0; i < chatLobbyFragment.users.size(); i++) {
-            if (chatLobbyFragment.users.get(i).publicKey.equals(senderPublicKey))
+    public int getIndexOfUserOnTheList(String senderPublicKey) {
+        for (int i = 0; i < chatLobbyFragment.reserve.size(); i++) {
+            if (chatLobbyFragment.reserve.get(i).publicKey.equals(senderPublicKey))
                 return i;
         }
         return -1;

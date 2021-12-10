@@ -183,6 +183,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
 
     private void resetHeaderPicture() {
         headerPicture.setImageBitmap(null);
+        headerPicture.setImageResource(R.drawable.default_image);
     }
 
     private void setAllFields() {

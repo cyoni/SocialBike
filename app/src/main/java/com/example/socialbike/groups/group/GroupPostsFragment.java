@@ -67,7 +67,7 @@ public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
             initAdapter();
 
             //updater = new Updater(this, this.container, recyclerViewAdapter);
-            messageManager = new PostManager(recyclerView, getActivity(), this, groupId, eventId);
+            messageManager = new PostManager(getActivity(), root, this, groupId, eventId);
             getPosts();
         }
         return root;

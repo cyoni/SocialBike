@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.socialbike.utilities.EMethods;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 public class PostManager implements RecyclerViewAdapter.ItemClickListener{
 
+    private View root;
     private Activity activity;
     private Updater.IUpdate updater;
     private ArrayList<Post> container = new ArrayList<>();
@@ -33,13 +35,15 @@ public class PostManager implements RecyclerViewAdapter.ItemClickListener{
     public RecyclerViewAdapter recyclerViewAdapter;
     private final RecyclerView recyclerView;
 
-    public PostManager(Activity activity, Updater.IUpdate update, String groupId, String eventId) {
-        this.recyclerView = activity.findViewById(R.id.post_recyclerView);
+    public PostManager(Activity activity, View root, Updater.IUpdate update, String groupId, String eventId) {
+        this.activity = activity;
+        this.root = root;
+        this.recyclerView = root.findViewById(R.id.post_recyclerView);
         init(activity, update, groupId, eventId);
     }
 
-    public PostManager(RecyclerView recyclerView, Activity activity, Updater.IUpdate update, String groupId, String eventId) {
-        this.recyclerView = recyclerView;
+    public PostManager(Activity activity, Updater.IUpdate update, String groupId, String eventId) {
+        this.recyclerView = activity.findViewById(R.id.post_recyclerView);
         init(activity, update, groupId, eventId);
     }
 
@@ -53,7 +57,11 @@ public class PostManager implements RecyclerViewAdapter.ItemClickListener{
     }
 
     private void initProperties() {
-        progressBar = activity.findViewById(R.id.posts_progressBar);
+        if (root != null){
+            progressBar = root.findViewById(R.id.posts_progressBar);
+        }
+        else
+            progressBar = activity.findViewById(R.id.posts_progressBar);
     }
 
     protected void initAdapter() {

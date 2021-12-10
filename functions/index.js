@@ -555,7 +555,7 @@ exports.sendPrivateMsg = functions.https.onCall(async (request, context) => {
     admin.database().ref('private_msgs')
         .child(receiverPublicKey)
         .child(messageId)
-        .child(senderPublicKey)
+        .child(publicKey)
         .set(data)
     return "OK"
 })

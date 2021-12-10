@@ -41,13 +41,14 @@ public class ChatLobbyFragment extends Fragment
     static ChatLobbyFragment chatFragment = null;
     private RecyclerView recyclerView;
     protected final ArrayList<PreviewChatMessage> users = new ArrayList<>();
-    private final ArrayList<PreviewChatMessage> reserve = new ArrayList<>();
+    protected final ArrayList<PreviewChatMessage> reserve = new ArrayList<>();
     private final HashSet<String> prefixWithoutResults = new HashSet<>();
     public RecyclerViewAdapter recyclerViewAdapter;
     private Context context;
     private View root;
     private EditText searchUserTextbox;
     ProgressBar progressBar;
+    private boolean isSearching;
 
 
     public static ChatLobbyFragment getInstance() {
@@ -91,11 +92,11 @@ public class ChatLobbyFragment extends Fragment
             recyclerViewAdapter.setClassReference(this); // reference this class to the adaptor
 
             MainActivity.chatManager.currentConversationChat = null;
-            // get user list
-            reserve.addAll(users);
 
-            if (ConnectedUser.getName() != null)
+
+            if (ConnectedUser.getName() != null) {
                 loadUsersFromLocalDB();
+            }
 
         }
         return root;
@@ -112,11 +113,8 @@ public class ChatLobbyFragment extends Fragment
 
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                        if (charSequence.toString().isEmpty())
-                            return;
 
-
-                        if (charSequence.toString().equals("reset")) {
+                       /* if (charSequence.toString().equals("reset")) {
                             users.clear();
                             List<PreviewChatMessage> chatMessages = MainActivity.chatManager.previewMessage.getAllMembers();
                             for (int _i=0; _i<chatMessages.size(); _i++)
@@ -156,15 +154,17 @@ public class ChatLobbyFragment extends Fragment
                                     setValue(map);
                             System.out.println("SENT " + message + "; " + name);
                             searchUserTextbox.setText(name);
-                        }
+                        }*/
 
-/*                        if (charSequence.toString().isEmpty()) {
+                       if (isSearching && charSequence.toString().isEmpty()) {
                             users.clear();
                             users.addAll(reserve);
-                            recyclerViewAdapter.notifyDataSetChanged();
+                           recyclerViewAdapter.notifyItemRangeChanged(0, reserve.size());
+                           isSearching = false;
                         } else if (charSequence.toString().length() > 0) {
+                           isSearching = true;
                             findUsers(charSequence.toString());
-                        }*/
+                        }
                     }
 
                     @Override
@@ -178,8 +178,8 @@ public class ChatLobbyFragment extends Fragment
 
     private void loadUsersFromLocalDB() { // TODO Work on another thread
         List<PreviewChatMessage> chatMessages = MainActivity.chatManager.previewMessage.getAllMembers();
-        users.addAll(chatMessages);
-        recyclerViewAdapter.notifyItemRangeChanged(0, chatMessages.size());
+        reserve.addAll(chatMessages);
+        users.addAll(reserve);
     }
 
 /*    private void loadUsers() {
@@ -222,7 +222,7 @@ public class ChatLobbyFragment extends Fragment
     private ArrayList<PreviewChatMessage> getLocalUsers(String user) {
         ArrayList<PreviewChatMessage> tmp = new ArrayList<>();
         for (int i = 0; i < reserve.size(); i++) {
-            if (reserve.get(i).publicKey.toLowerCase().contains(user.toLowerCase()))
+            if (reserve.get(i).name.toLowerCase().contains(user.toLowerCase()))
                 tmp.add(reserve.get(i));
         }
         return tmp;
@@ -279,8 +279,8 @@ public class ChatLobbyFragment extends Fragment
                         }
                     }
 
-                    ///    if (!doesExist)
-                    //        tmp.add(new PreviewChatMessage(userId, name, "", 0, 0, isIncomingMessage));
+                        if (!doesExist)
+                            tmp.add(new PreviewChatMessage(userId, name, "", 0, false));
 
                 } catch (JSONException e) {
                     System.out.println("An error was caught in message fetcher: " + e.getMessage());
@@ -289,6 +289,14 @@ public class ChatLobbyFragment extends Fragment
 
         users.addAll(tmp);
         recyclerViewAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!searchUserTextbox.getText().toString().isEmpty()) {
+            searchUserTextbox.setText("");
+        }
     }
 
     @Override
@@ -343,6 +351,22 @@ public class ChatLobbyFragment extends Fragment
         AsyncTask.execute(() -> {
             MainActivity.chatManager.previewMessage.insert(chatMember);
         });
+    }
+
+    public void updateLists() {
+        if (searchUserTextbox.getText().toString().isEmpty()){
+            users.clear();
+            users.addAll(reserve);
+        }
+        else{
+            // check if users has elements in reserve
+            for (PreviewChatMessage current : users){
+                int index = MainActivity.chatManager.getIndexOfUserOnTheList(current.publicKey);
+                if (index != -1){
+                    users.set(index, reserve.get(index));
+                }
+            }
+        }
     }
 
 
