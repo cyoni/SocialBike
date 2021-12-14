@@ -317,6 +317,7 @@ function distanceFromMe(lat1, lon1, lat2, lon2) {
 }
 
 function makeEventObject(raw_data, groupId, publicKey="_"){
+    console.log("in make event object. " + groupId + "," + publicKey)
     var dataOfEvent = {
         event_id: raw_data.key,
         publicKey: raw_data.child('user_public_key').val(),
@@ -345,6 +346,9 @@ function makeEventObject(raw_data, groupId, publicKey="_"){
 
     const score = 2 * dataOfEvent.num_participants + dataOfEvent.num_interested_members
     dataOfEvent['elementScore'] = score
+
+    console.log("makeEventObject - finished.")
+
     return dataOfEvent
 }
 
@@ -378,7 +382,51 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
         ref = admin.database().ref('events')
 
         
-    return ref.orderByChild('createdEventTime').once('value').then(snapshot => {
+    return admin.database().ref('groups').orderByChild('createdEventTime').once('value').then(snapshot => {
+        // get events from groups 
+
+        // take my groups
+        // take their events
+        // sort everything
+
+        console.log("getting extra events. groupId: " + groupId)
+        if (groupId === null){
+            console.log("enters extra zone scope. snapshot: " + snapshot.numChildren())
+
+            var group_events = []
+            
+            snapshot.forEach(raw_data => {
+                console.log("1")
+                if (raw_data.child('members').child(publicKey).exists()){
+                    console.log("2")
+                    var groupEvents = raw_data.child('events')
+                    console.log("3")
+                    if (groupEvents.exists()){
+                        console.log("4")
+                        groupEvents.forEach(current => {
+                            console.log("5")
+                            // if current is active
+                            if (raw_data.child('publicKey').exists()){
+                                console.log("6")
+                                group_events.push( makeEventObject(current, null, publicKey)  )
+                            }
+                        })
+                    }
+                }
+            })
+
+            group_events.forEach(current => {
+                console.log("found extra event! " )
+                data['events'].push(current)
+            })
+      
+        }
+
+
+        return ref.orderByChild('createdEventTime').once('value')
+
+    }).then(snapshot => { 
+
         snapshot.forEach(raw_data => {
 
             if (
@@ -391,7 +439,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                 if (!stop){
                     if (raw_data.child('user_public_key').exists()){
                         var eventObject = makeEventObject(raw_data, groupId, publicKey)
-                        data['events'].push(eventObject)
+                        data['extra_events'].push(eventObject)
                     }
                 }
 
@@ -400,37 +448,6 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
             }
         })
 
-        return admin.database().ref('groups').once('value')
-
-    }).then(snapshot => { // get events from groups 
-
-        // take my groups
-        // take their events
-        // sort everything
-
-        if (groupId === null){
-            
-            var my_extra_events = []
-            
-            snapshot.forEach(raw_data => {
-                if (raw_data.child('members').child(publicKey).exists()){
-                    var groupEvents = raw_data.child('events')
-                    if (groupEvents.exists()){
-                        groupEvents.forEach(current => {
-                            // if current is active
-                            if (raw_data.child('user_public_key').exists()){
-                                my_extra_events.push( makeEventObject(current, raw_data.key, publicKey)  )
-                            }
-                        })
-                    }
-                }
-            })
-
-            my_extra_events.forEach(current => {
-                data['extra_events'].push(current)
-            })
-      
-        }
 
 
         if (dataType === "TRENDING") {

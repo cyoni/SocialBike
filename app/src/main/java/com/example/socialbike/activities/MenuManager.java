@@ -12,7 +12,7 @@ public class MenuManager {
     public static final int LOGIN_SIGN_UP = 1;
     public static final int LOG_OUT = 3;
     public static final int Profile = 10;
-    public static final int HistoryCleanUp = 11;
+    public static final int ChatSettings = 11;
     public static final int MY_ACCOUNT = 12;
 
 
@@ -38,7 +38,7 @@ public class MenuManager {
         }
 
         if (ConnectedUser.getPublicKey() != null && layout != R.layout.activity_my_account && !ConnectedUser.getPublicKey().equals("-")){
-            createMyAccountButton();
+
         }
 
 
@@ -70,7 +70,7 @@ public class MenuManager {
     }
 
     private void createChatMenu() {
-        createButton(HistoryCleanUp, "Clean all history");
+        createButton(ChatSettings, "Settings");
     }
 
     private void createButton(int buttonCode, String button) {
@@ -82,7 +82,7 @@ public class MenuManager {
     }
 
     private void createEventsMenu() {
-
+        createMyAccountButton();
     }
 
 

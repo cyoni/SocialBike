@@ -32,6 +32,7 @@ import com.example.socialbike.room_database.MemberDao;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -197,13 +198,18 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     @SuppressLint("NonConstantResourceId")
     private void startListeningBottomMenu() {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
+       // bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
 
             switch (item.getItemId()) {
                 case R.id.events:
+
                     changeFragment(EventsFragment.getInstance());
                     currentLayout = R.layout.fragment_events;
+                    BadgeDrawable xx = bottomNavigationView.getOrCreateBadge(2);
+                    boolean a = xx.hasNumber();
+                    xx.setVisible(true);
+                    xx.setNumber(3);
                     break;
                 case R.id.groups:
                     changeFragment(GroupContainer.getInstance());
@@ -220,6 +226,9 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
             }
             return true;
         });
+
+
+
     }
 
     private void changeFragment(Object fragment) {

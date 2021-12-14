@@ -88,8 +88,8 @@ public class ImageManager {
         FirebaseStorage storage = FirebaseStorage.getInstance();
        // StorageReference storageRef = storage.getReference();
         //StorageReference islandRef = storageRef.child(address);
-        final long ONE_MEGABYTE = 1024 * 1024;
-        return islandRef.getBytes(ONE_MEGABYTE);
+        final long TWO_MEGABYTES = 2*1024 * 1024;
+        return islandRef.getBytes(TWO_MEGABYTES);
     }
 
     public void locallySavePicture(Bitmap bitmapImage, String folder, String fileName) {
