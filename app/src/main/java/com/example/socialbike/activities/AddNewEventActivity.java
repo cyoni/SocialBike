@@ -292,6 +292,20 @@ public class AddNewEventActivity extends AppCompatActivity {
         if (submitButton.getText().toString().equals("posting..."))
             return;
 
+        if (title.getText().toString().isEmpty()){
+            MainActivity.toast(this, "Please type a title.", true);
+            return;
+        } else if (time.getText().toString().isEmpty()){
+            MainActivity.toast(this, "Please enter time.", true);
+            return;
+        } else if (position == null){
+            MainActivity.toast(this, "Please set a location.", true);
+            return;
+        } else if (details.getText().toString().isEmpty()){
+            MainActivity.toast(this, "Please write some details.", true);
+            return;
+        }
+
 
         String pattern = "EEE, d MMM yyyy h:m a";
         String dateTime1 = date.getText().toString() + " " + time.getText().toString();

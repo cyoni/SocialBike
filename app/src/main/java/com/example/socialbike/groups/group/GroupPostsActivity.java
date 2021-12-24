@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -23,11 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 
-public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
+public class GroupPostsActivity extends AppCompatActivity implements Updater.IUpdate {
 
-    private final String groupId;
+    private String groupId;
     private ExtendedFloatingActionButton floatingButton;
-    private final ArrayList<Post> container = new ArrayList<>();
+    private ArrayList<Post> container = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private PostManager messageManager;
@@ -35,43 +36,31 @@ public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
     private SwipeRefreshLayout swipeLayout;
     private String eventId;
 
-    public GroupPostsFragment(String groupId) {
-        this.groupId = groupId;
-    }
-
-    public GroupPostsFragment(String groupId, String eventId) {
-        this.groupId = groupId;
-        this.eventId = eventId;
-    }
 
     private void initAdapter() {
-        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_post, container);
+        recyclerViewAdapter = new RecyclerViewAdapter(this, R.layout.item_post, container);
         recyclerView.setAdapter(recyclerViewAdapter);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        floatingButton = root.findViewById(R.id.fab);
+        recyclerView = root.findViewById(R.id.post_recyclerView);
+        swipeLayout = root.findViewById(R.id.swipe_refresh);
+
+        setSwipeLayout();
+        activateFloatingButton();
+        initAdapter();
+
+        groupId = getIntent().getStringExtra("groupId");
+
+        //updater = new Updater(this, this.container, recyclerViewAdapter);
+        messageManager = new PostManager(this, this, groupId, null);
+        getPosts();
     }
 
-    @Override
-    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (root == null) {
-            root = inflater.inflate(R.layout.activity_group_posts, container, false);
-            floatingButton = root.findViewById(R.id.fab);
-            recyclerView = root.findViewById(R.id.post_recyclerView);
-            swipeLayout = root.findViewById(R.id.swipe_refresh);
-
-            setSwipeLayout();
-            activateFloatingButton();
-            initAdapter();
-
-            //updater = new Updater(this, this.container, recyclerViewAdapter);
-            messageManager = new PostManager(getActivity(), root, this, groupId, eventId);
-            getPosts();
-        }
-        return root;
-    }
 
     private void getPosts() {
         container.clear();
@@ -93,7 +82,7 @@ public class GroupPostsFragment extends Fragment implements Updater.IUpdate {
     }
 
     private void openNewPostActivity() {
-        Intent intent = new Intent(getContext(), AddPostActivity.class);
+        Intent intent = new Intent(this, AddPostActivity.class);
         intent.putExtra("groupId", groupId);
         if (eventId != null)
             intent.putExtra("eventId", eventId);

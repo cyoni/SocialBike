@@ -40,7 +40,7 @@
             android:label="@string/title_activity_conversation_chat"
             android:theme="@style/Theme.SocialBike.NoActionBar" />
         <activity
-            android:name=".groups.group.PostsOfGroupOrEventActivity"
+            android:name=".groups.group.GroupPosts"
             android:label="@string/title_activity_conversation_chat"
             android:theme="@style/Theme.SocialBike.NoActionBar" />
         <!--

@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.socialbike.groups.group.PostsOfEventEmbedded;
 import com.example.socialbike.utilities.ConnectedUser;
 import com.example.socialbike.utilities.Consts;
 import com.example.socialbike.utilities.DateUtils;
@@ -37,7 +38,6 @@ import com.example.socialbike.events.EventDetails;
 import com.example.socialbike.groups.IPageAdapter;
 import com.example.socialbike.groups.SectionsPagerAdapter;
 import com.example.socialbike.groups.TabManager;
-import com.example.socialbike.groups.group.GroupPostsFragment;
 import com.example.socialbike.utilities.pictureSheetDialog;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -56,7 +56,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
     String[] tabTitles = {"Details", "Discussion"};
     public TabLayout tabLayout;
     EventDetails eventDetails;
-    GroupPostsFragment privateGroupFragment;
+    PostsOfEventEmbedded privateGroupFragment;
     private Event event;
     Button save, interested, going;
     LinearLayout interestedLayOut, goingLayout;
@@ -100,7 +100,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(sectionsPagerAdapter);
 
-        privateGroupFragment = new GroupPostsFragment(event.getGroupId(), event.getEventId());
+        privateGroupFragment = new PostsOfEventEmbedded(event.getGroupId(), event.getEventId());
         eventDetails = new EventDetails(event.getDetails());
 
         setAllFields();

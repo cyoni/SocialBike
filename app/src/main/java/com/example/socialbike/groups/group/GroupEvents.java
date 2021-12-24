@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -27,14 +28,20 @@ public class GroupEvents extends FragmentActivity implements Updater.IUpdate {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_group_events);
+        setContentView(R.layout.activity_group_events);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         this.groupId = getIntent().getStringExtra("groupId");
+
+        String groupTitle = getIntent().getStringExtra("title");
+        toolbar.setTitle("Events - " + groupTitle);
 
         eventsManager = new EventsManager(this, this, update);
         initiateScreen();
         setSwipeLayout();
-        ExtendedFloatingActionButton extendedFloatingActionButton = findViewById(R.id.extended_fab);
+        ExtendedFloatingActionButton extendedFloatingActionButton = findViewById(R.id.fab);
         extendedFloatingActionButton.setOnClickListener(view -> {
             Intent intent = new Intent(this, AddNewEventActivity.class);
             intent.putExtra("groupId", groupId);

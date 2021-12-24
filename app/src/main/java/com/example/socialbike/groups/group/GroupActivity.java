@@ -18,7 +18,6 @@ import com.example.socialbike.groups.GroupManager;
 import com.example.socialbike.post.PostManager;
 import com.example.socialbike.R;
 import com.example.socialbike.utilities.Updater;
-import com.example.socialbike.utilities.Utils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -97,7 +96,7 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         });
 
         posts_button.setOnClickListener(view -> {
-            Intent intent1 = new Intent(this, PostsOfGroupOrEventActivity.class);
+            Intent intent1 = new Intent(this, GroupPosts.class);
             intent1.putExtra("groupId", groupId);
             startActivity(intent1);
         });

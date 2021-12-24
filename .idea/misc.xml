@@ -16,6 +16,7 @@
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/activity_conversation_chat.xml" value="0.29074074074074074" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/activity_create_group.xml" value="0.46551724137931033" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/activity_event.xml" value="0.3671875" />
+        <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/activity_group_events.xml" value="0.3104166666666667" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/activity_group_posts.xml" value="0.365625" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/activity_main.xml" value="0.3671875" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/activity_maps.xml" value="0.3671875" />
@@ -38,9 +39,11 @@
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_group.xml" value="0.3671875" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_group_container.xml" value="0.3671875" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_group_container2.xml" value="0.45" />
-        <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_group_events.xml" value="0.3671875" />
+        <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_group_events.xml" value="0.3560606060606061" />
+        <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_group_posts.xml" value="0.3125" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_home.xml" value="0.3671875" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_host.xml" value="0.3671875" />
+        <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_posts_event_embedded.xml" value="0.365625" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_profile.xml" value="0.3671875" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_set_nickname.xml" value="0.3671875" />
         <entry key="..\:/Documents/AirDroid/SocialBike-master/app/src/main/res/layout/fragment_set_preferred_location.xml" value="0.19270833333333334" />

@@ -28,7 +28,7 @@ public class PostManager implements RecyclerViewAdapter.ItemClickListener{
     private View root;
     private Activity activity;
     private Updater.IUpdate updater;
-    private ArrayList<Post> container = new ArrayList<>();
+    public ArrayList<Post> container = new ArrayList<>();
     private String groupId;
     private String eventId;
     private ProgressBar progressBar;

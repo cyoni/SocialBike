@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.socialbike.activities.AddPostActivity;
@@ -13,7 +14,7 @@ import com.example.socialbike.utilities.Updater;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class PostsOfGroupOrEventActivity extends AppCompatActivity implements Updater.IUpdate {
+public class GroupPosts extends AppCompatActivity implements Updater.IUpdate {
 
     private String groupId, eventId;
     private PostManager postManager;
@@ -21,20 +22,22 @@ public class PostsOfGroupOrEventActivity extends AppCompatActivity implements Up
     ExtendedFloatingActionButton createButton;
     private SwipeRefreshLayout swipeLayout;
 
-    public PostsOfGroupOrEventActivity() {}
+    public GroupPosts() {}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_posts);
 
-       // Toolbar toolbar = findViewById(R.id.flexible_example_toolbar);
-       // toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
         swipeLayout = findViewById(R.id.swipe_refresh);
         createButton = findViewById(R.id.fab);
 
         Intent intent = getIntent();
         groupId = intent.getStringExtra("groupId");
+        String groupTitle = intent.getStringExtra("title");
+        toolbar.setTitle("Posts - " + groupTitle);
 
         createButton.setOnClickListener(view -> {
             Intent group_intent = new Intent(this, AddPostActivity.class);
