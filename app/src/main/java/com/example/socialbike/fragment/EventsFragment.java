@@ -74,7 +74,7 @@ public class EventsFragment extends Fragment
 
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_events, container, false);
-            eventsManager = new EventsManager(getActivity(), getContext(), update);
+            eventsManager = new EventsManager(getActivity(), getContext(), update, true);
             this.container = eventsManager.container;
             initiateScreen(root);
             eventsManager.showProgressbar();

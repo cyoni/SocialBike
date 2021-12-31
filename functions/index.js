@@ -24,7 +24,7 @@ function verifyUser(userPrivateKey) {
         const snapshot = await admin.database().ref('users').child(userPrivateKey).once('value');
         if (snapshot.exists() && snapshot.child('accountActivated').val() === true) {
             return resolve({
-                publicKey: snapshot.child('user_public_key').val(),
+                publicKey: snapshot.child('userPublicKey').val(),
             });
         }
         else
@@ -66,6 +66,8 @@ function getNickname(publicKey) {
 
 
 function removeOldNickname(oldNickname) {
+    if (oldNickname === null || oldNickname === "")
+        return;
     return admin.database().ref('nicknames').child(oldNickname).remove();
 }
 
@@ -168,7 +170,7 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
 
     const groupId = request.groupId || null
     const eventId = request.eventId || null
-    const getFirstEvent = request.getFirstEvent || null
+    const getFirstPost = request.getFirstPost || null
 
     var route
 
@@ -181,12 +183,15 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
     else if (groupId === null && eventId !== null)
         route = admin.database().ref('events').child(eventId)
 
-    var stop = false 
+    route = route.child('posts')
 
-    return route.child('posts').orderByChild('timestamp', 'desc').once('value').then(snapshot => {
+    if (getFirstPost){
+        route = route.limitToLast(1)
+    }
+
+    return route.once('value').then(snapshot => {
         snapshot.forEach(raw_post => {
 
-            if (!stop){
                 var post = []
                 post = ({
                     postId: raw_post.key,
@@ -206,10 +211,9 @@ exports.getPosts = functions.https.onCall(async (request, context) => {
                 }
 
                 data['posts'].push(post)
-                if (getFirstEvent)
-                    stop = true
-            }
         })
+   
+        data.posts = data.posts.reverse()
         return JSON.stringify(data)
     })
 })
@@ -373,7 +377,6 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     const getFirstEvent = request.getFirstEvent || null
 
     var ref;
-    var stop = false
 
     if (groupId !== null) {
         ref = admin.database().ref('groups').child(groupId).child('events')
@@ -382,15 +385,15 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
         ref = admin.database().ref('events')
 
         
-    return admin.database().ref('groups').orderByChild('createdEventTime').once('value').then(snapshot => {
+    return admin.database().ref('groups').once('value').then(snapshot => {
         // get events from groups 
-
         // take my groups
         // take their events
         // sort everything
 
         console.log("getting extra events. groupId: " + groupId)
-        if (groupId === null){
+        if (groupId === null)
+        {
             console.log("enters extra zone scope. snapshot: " + snapshot.numChildren())
 
             var group_events = []
@@ -423,7 +426,11 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
         }
 
 
-        return ref.orderByChild('createdEventTime').once('value')
+        if (getFirstEvent)
+            ref = ref.limitToLast(1)
+        
+        
+        return ref.orderByChild('created_event_time').once('value')
 
     }).then(snapshot => { 
 
@@ -436,15 +443,13 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                      && raw_data.child("user_public_key").exists() 
             ) {
 
-                if (!stop){
-                    if (raw_data.child('user_public_key').exists()){
-                        var eventObject = makeEventObject(raw_data, groupId, publicKey)
-                        data['extra_events'].push(eventObject)
-                    }
+                if (raw_data.child('user_public_key').exists())
+                {
+                    var eventObject = makeEventObject(raw_data, groupId, publicKey)
+                    data['extra_events'].push(eventObject)
                 }
+                
 
-                if (getFirstEvent)
-                    stop = true
             }
         })
 
@@ -454,6 +459,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
             data.events = data.events.sort(compare)
         }
 
+        data.extra_events = data.extra_events.reverse()
         data.events = data.events.reverse()
         return JSON.stringify(data)
 
@@ -462,24 +468,43 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
 
 
 exports.updateNickname = functions.https.onCall(async (data, context) => {
-    const privateKey = context.auth.uid;
+    console.log("updatenickname ")
+
+    const privateKey = context.auth.uid || null;
     var inputNickname = data.nickname.trim();
+    console.log("updatenickname - verifying  user: " + privateKey)
+
     const account = await verifyUser(privateKey);
+
+    console.log("updatenickname - verified ")
+
     if (account === null)
         return "[AUTH_FAILED]";
+    console.log("aa ")
+
     const validNickname = isNicknameValid(inputNickname);
     if (!validNickname)
         return "[INVALID_NICKNAME]"
+    console.log("bb ")
 
     const result = await admin.database().ref('nicknames').once('value')
+    console.log("cc ")
+
     const takenNickname = (result.child(inputNickname).exists());
+    console.log("dd ")
 
     if (takenNickname === true)
         return "[NICKNAME_TAKEN]"
+    console.log("e ")
+
     const oldNickname = await getNickname(account.publicKey);
+    console.log("f")
+
     if (oldNickname !== "")
         removeOldNickname(oldNickname);
+    console.log("1 ")
     await setNewNickname(account.publicKey, inputNickname);
+    console.log("2")
     return inputNickname;
 });
 

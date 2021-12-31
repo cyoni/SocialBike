@@ -279,6 +279,9 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
             case MenuManager.MY_ACCOUNT:
                 myAccount();
                 break;
+                case MenuManager.RemoveChats:
+                    chatManager.removeAllChats();
+                    break;
         }
     }
 }

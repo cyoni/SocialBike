@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,15 +25,20 @@ import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.HashMap;
 
 public class LogInActivity extends AppCompatActivity {
 
-    private SignInButton logInButton;
+    private SignInButton GoogleLogInButton;
     private GoogleSignInOptions gso;
     private GoogleSignInClient mGoogleSignInClient;
+    private Button logInButton, signUpButton;
     private int RC_SIGN_IN = 9001;
 
 
@@ -40,7 +46,9 @@ public class LogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
-        logInButton = findViewById(R.id.sign_in_button);
+        GoogleLogInButton = findViewById(R.id.sign_in_button);
+        logInButton = findViewById(R.id.LoginButton);
+        signUpButton = findViewById(R.id.signupButton);
 
         initialize();
         startListening();
@@ -55,12 +63,74 @@ public class LogInActivity extends AppCompatActivity {
     }
 
     private void startListening() {
-        logInButton.setOnClickListener(new View.OnClickListener() {
+        GoogleLogInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 logIn();
             }
         });
+
+        signUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String email = ((EditText)findViewById(R.id.EmailAddress)).getText().toString();
+                String password = ((EditText)findViewById(R.id.TextPassword)).getText().toString();
+                signUpButton.setText("Please wait..");
+                signUp(email, password);
+            }
+            });
+
+        logInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String email = ((EditText)findViewById(R.id.EmailAddress)).getText().toString();
+                String password = ((EditText)findViewById(R.id.TextPassword)).getText().toString();
+                logInButton.setText("please wait");
+                login(email, password);
+
+            }
+        });
+    }
+
+    private void login(String email, String password) {
+        MainActivity.mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            System.out.println("signInWithEmail:success");
+                            checkAccount();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            System.out.println("signInWithEmail:failure");
+
+                        }
+                    }
+                });
+    }
+
+
+    private void signUp(String email, String password) {
+
+
+        MainActivity.mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            System.out.println("Success!");
+                            // FirebaseUser user = MainActivity.getCurrentUser();
+                            checkAccount();
+
+                        } else {
+                            // If sign in fails, display a message to the user.
+
+                            System.out.println("Sign up failed.");
+                        }
+                    }
+                });
     }
 
     private void logIn() {
@@ -126,7 +196,7 @@ public class LogInActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     final HashMap<String, Object> dataMap = (HashMap<String, Object>) dataSnapshot.getValue();
-                    String publicKey = String.valueOf(dataMap.get("user_public_key"));
+                    String publicKey = String.valueOf(dataMap.get("userPublicKey"));
                     String isActiveAccount = String.valueOf(dataMap.get("activeAccount"));
 
                     if (isActiveAccount.equals("false")) {
@@ -138,6 +208,9 @@ public class LogInActivity extends AppCompatActivity {
                         ConnectedUser.setPublicKey(publicKey);
                         getNicknameFromDBAndSave();
                     }
+                }
+                else{
+                    System.out.println("User is not connected");
                 }
             }
 
@@ -153,21 +226,29 @@ public class LogInActivity extends AppCompatActivity {
         MainActivity.mDatabase.child("public").child(ConnectedUser.getPublicKey()).child("profile").child("nickname").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!   dataSnapshot.exists()) {
+                if (  dataSnapshot.exists()) {
                     String nickname = (String) dataSnapshot.getValue();
                     ConnectedUser.setNickname(nickname);
                     saveNicknameOnDevice(nickname);
                     closeActivity();
                     MainActivity.toast(getApplicationContext(), "Hi " + nickname, false);
+                    System.out.println("!");
                 } else {
+                    System.out.println("@");
                     openSetNicknameActivity();
                     finish();
                 }
+                System.out.println("#");
+
                 MainActivity.startChat();
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {}
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                System.out.println("& " + databaseError.getDetails());
+
+            }
 
         });
     }

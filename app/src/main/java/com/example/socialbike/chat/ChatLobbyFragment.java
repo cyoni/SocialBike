@@ -72,7 +72,6 @@ public class ChatLobbyFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainActivity.chatManager.chatLobbyFragment = this;
     }
 
     @Override
@@ -81,11 +80,11 @@ public class ChatLobbyFragment extends Fragment
                              Bundle savedInstanceState) {
 
         if (root == null) {
+
             root = inflater.inflate(R.layout.fragment_chat_lobby, container, false);
             recyclerView = root.findViewById(R.id.recyclerview);
             searchUserTextbox = root.findViewById(R.id.search_box);
             progressBar = root.findViewById(R.id.progressBar);
-
 
             initSearchMembersTextBox();
             initAdapter();
@@ -97,6 +96,9 @@ public class ChatLobbyFragment extends Fragment
             if (ConnectedUser.getName() != null) {
                 loadUsersFromLocalDB();
             }
+
+            MainActivity.chatManager.chatLobbyFragment = this;
+            MainActivity.chatManager.handleQueue();
 
         }
         return root;
@@ -177,7 +179,7 @@ public class ChatLobbyFragment extends Fragment
 
 
     private void loadUsersFromLocalDB() { // TODO Work on another thread
-        List<PreviewChatMessage> chatMessages = MainActivity.chatManager.previewMessage.getAllMembers();
+        List<PreviewChatMessage> chatMessages = MainActivity.chatManager.previewMessageDb.getAllMembers();
         reserve.addAll(chatMessages);
         users.addAll(reserve);
     }
@@ -332,7 +334,7 @@ public class ChatLobbyFragment extends Fragment
         String name = chatMember.name;
         chatMember.unreadMessages = 0;
         MainActivity.chatManager.openConversationActivity(getContext(), userId, name);
-        MainActivity.chatManager.previewMessage.resetUnreadMessages(userId);
+        MainActivity.chatManager.previewMessageDb.resetUnreadMessages(userId);
         recyclerViewAdapter.notifyItemChanged(position);
     }
 
@@ -349,7 +351,7 @@ public class ChatLobbyFragment extends Fragment
 
     public void insert(PreviewChatMessage chatMember) {
         AsyncTask.execute(() -> {
-            MainActivity.chatManager.previewMessage.insert(chatMember);
+            MainActivity.chatManager.previewMessageDb.insert(chatMember);
         });
     }
 

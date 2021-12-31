@@ -27,4 +27,6 @@ public interface HistoryDao {
     @Delete
     void delete(History history);
 
+    @Query("DELETE FROM History")
+    void removeAll();
 }

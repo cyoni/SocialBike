@@ -1,6 +1,7 @@
 package com.example.socialbike.chat;
 
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,7 +28,8 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
     private RecyclerView recyclerView;
     private final ArrayList<History> messages = new ArrayList<>();
     private RecyclerViewAdapter recyclerViewAdapter;
-    private String userId;
+    private String receiverId;
+    private String name;
     private HistoryDao historyDao;
     int messageCount = 0;
 
@@ -45,13 +47,21 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
         setToolbar();
         historyDao = MainActivity.database.historyDao();
 
-        userId = getIntent().getStringExtra("userId");
+        receiverId = getIntent().getStringExtra("userId");
+        name = getIntent().getStringExtra("name");
         MainActivity.chatManager.currentConversationChat = this;
         sendMessageListener();
         messageBox = findViewById(R.id.messageBox);
         recyclerView = findViewById(R.id.recyclerview);
         initAdapter();
         getChatHistory();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
     }
 
     private void sendMessageListener() {
@@ -61,7 +71,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
             String message = messageBox.getText().toString();
             if (message.trim().isEmpty())
                 return;
-            MainActivity.chatManager.sendMessage(userId, message);
+            MainActivity.chatManager.sendMessage(name, receiverId, message);
             scrollToBottom();
             messageBox.setText("");
         });
@@ -79,14 +89,14 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
         scrollToBottom();
     }
 
-    public String getUserId() {
-        return userId;
+    public String getReceiverId() {
+        return receiverId;
     }
 
     private void setToolbar() {
         Toolbar toolbar = findViewById(R.id.flexible_example_toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
-        toolbar.setTitle(getIntent().getStringExtra("name"));
+        toolbar.setTitle(name);
     }
 
     @Override
@@ -115,7 +125,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
 
 
     public void getChatHistory() {  // TO IMPROVE
-        historyDao.getHistoryOfMember(userId).observe(this, history -> {
+        historyDao.getHistoryOfMember(receiverId).observe(this, history -> {
             for (int i = messageCount; i < history.size(); i++) {
                 messages.add(history.get(i));
             }

@@ -37,7 +37,7 @@ import java.util.Map;
 public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
 
     public final int NEW_EVENT_CODE = 100;
-    public final EventsCommentsExtension eventsCommentsExtension;
+    public EventsCommentsExtension eventsCommentsExtension;
 
     public String MOST_RECENT_CODE = "MOST_RECENT";
     public String TRADING_CODE = "TRADING";
@@ -53,9 +53,19 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     public TextView rangeText;
     public SwipeRefreshLayout swipe_refresh;
     ImageManager imageManager;
+    private boolean addDivider;
 
 
     public EventsManager(Activity activity, Context context, Updater.IUpdate update) {
+        initConstructor(activity, context, update);
+    }
+
+    public EventsManager(Activity activity, Context context, Updater.IUpdate update, boolean addDivider) {
+        this.addDivider = addDivider;
+        initConstructor(activity, context, update);
+    }
+
+    private void initConstructor(Activity activity, Context context, Updater.IUpdate update) {
         this.update = update;
         this.activity = activity;
         this.context = context;
@@ -108,7 +118,8 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
             EventDTO eventDTO = objectMapper.readValue(data, EventDTO.class);
             container.addAll(eventDTO.getEvents());
             if (!eventDTO.getExtraEvents().isEmpty()) {
-                container.add(null);
+                if (addDivider)
+                    container.add(null);
                 container.addAll(eventDTO.getExtraEvents());
             }
 

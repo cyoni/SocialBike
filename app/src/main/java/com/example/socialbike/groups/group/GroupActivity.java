@@ -48,7 +48,7 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         groupId = intent.getStringExtra("groupId");
         group = new Group(groupId, groupName, "description?");
 
-        eventsManager = new EventsManager(this, this, update);
+        eventsManager = new EventsManager(this, this, update, false);
         eventsManager.init();
         postManager = new PostManager(this, update, groupId, null);
 
@@ -81,7 +81,7 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
     private void getFirstPost() {
         //Manager.showProgressbar();
         Map<String, Object> data = new HashMap<>();
-        data.put("getFirstEvent", true);
+        data.put("getFirstPost", true);
         postManager.getPosts(data);
     }
 

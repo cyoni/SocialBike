@@ -16,7 +16,7 @@ public interface PreviewChatMessageDao {
     //LiveData<List<ChatMember>> getAllMembers();
 
     @Query("SELECT * FROM PreviewChatMessage WHERE publicKey = (:userId)")
-    List<PreviewChatMessage> getUserById(int userId);
+    PreviewChatMessage getUserById(String userId);
 
     @Query("SELECT * FROM PreviewChatMessage WHERE name = (:name)")
     List<PreviewChatMessage> getUserByName(String name);
@@ -35,5 +35,8 @@ public interface PreviewChatMessageDao {
 
     @Delete
     void delete(PreviewChatMessage chatMember);
+
+    @Query("DELETE FROM PreviewChatMessage")
+    void removeAll();
 
 }

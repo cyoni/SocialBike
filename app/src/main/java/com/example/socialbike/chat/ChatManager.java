@@ -1,5 +1,6 @@
 package com.example.socialbike.chat;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 
@@ -17,15 +18,18 @@ import com.google.firebase.database.DatabaseError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 public class ChatManager {
 
     public ConversationChatActivity currentConversationChat;
     public ChatLobbyFragment chatLobbyFragment;
     private HistoryDao historyDao;
-    public PreviewChatMessageDao previewMessage;
+    public PreviewChatMessageDao previewMessageDb;
     private ChildEventListener chatInstance;
+    private Queue<PreviewChatMessage> queue = new LinkedList<>();
 
     public void listenForNewMessages() {
         if (chatInstance == null) {
@@ -46,7 +50,13 @@ public class ChatManager {
                             String messageId = snapshot.getKey();
                             System.out.println("New message: " + postSnapshot.child("message").getValue());
                             System.out.println("Message key: " + postSnapshot.getKey());
-                            handleNewMessage(messageId, senderPublicKey, sendersName, message, true, timestamp);
+
+                            PreviewChatMessage chatMessage = new PreviewChatMessage(senderPublicKey, sendersName, message, timestamp, true);
+
+                            updateNewMessages(chatMessage);
+                            recordMessageInHistory(chatMessage);
+
+                            handleNewMessage(chatMessage);
                             removeMessageFromServer(messageId);
                         }
                     }
@@ -75,6 +85,18 @@ public class ChatManager {
 
     }
 
+    private void updateNewMessages(PreviewChatMessage chatMessage) {
+        PreviewChatMessage previewMsgLocal = previewMessageDb.getUserById(chatMessage.publicKey);
+        if (previewMsgLocal != null){
+            chatMessage.setUnreadMsgs(previewMsgLocal.unreadMessages + 1);
+        }
+        else{
+            chatMessage.unreadMessages = 1;
+        }
+
+        previewMessageDb.update(chatMessage);
+    }
+
     public void endChat(){
         MainActivity.mDatabase.removeEventListener(chatInstance);
         System.out.println("Chat has ended.");
@@ -82,7 +104,7 @@ public class ChatManager {
 
     private void initDatabases() {
         historyDao = MainActivity.database.historyDao();
-        previewMessage = MainActivity.database.chatMemberDao();
+        previewMessageDb = MainActivity.database.chatMemberDao();
     }
 
     private void removeMessageFromServer(String messageId) {
@@ -103,30 +125,31 @@ public class ChatManager {
     }*/
 
     // TOFIX design fix
-    private void handleNewMessage(String messageId, String otherSidePublicKey, String sendersName, String message, boolean isIncomingMessage, long time) {
+    private void handleNewMessage(PreviewChatMessage chatMessage) {
         // messageId - from server
-        PreviewChatMessage chatMessage = new PreviewChatMessage(otherSidePublicKey, sendersName, message, time, isIncomingMessage);
 
         if (chatLobbyFragment != null) {
             ArrayList<PreviewChatMessage> usersList = chatLobbyFragment.reserve;
-            if (isUserOnTopOfTheList(otherSidePublicKey, usersList)) {
+            if (isUserOnTopOfTheList(chatMessage.publicKey, usersList)) {
                 updateTopElement(chatMessage);
-            } else if (doesUserAppearOnTheList(otherSidePublicKey, usersList)) {
+            } else if (doesUserAppearOnTheList(chatMessage.publicKey, usersList)) {
                 moveElementOnTopOfTheList(chatMessage, usersList);
             } else
                 insertNewElement(chatMessage, usersList);
 
-
-
-            if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)) {
-                previewMessage.resetUnreadMessages(chatMessage.publicKey);
+            if (isConversationActivityOpen() && isConversationWith(chatMessage.publicKey)) {
+                previewMessageDb.resetUnreadMessages(chatMessage.publicKey);
                 usersList.get(0).unreadMessages = 0;
                 chatLobbyFragment.recyclerViewAdapter.notifyItemChanged(0);
             }
+
+        }
+        else{
+            queue.add(chatMessage);
         }
 
         // add new msg to chat history
-        recordMessageInHistory(chatMessage);
+
 
 /*        if (isConversationActivityOpen() && isConversationWith(otherSidePublicKey)) {
 
@@ -143,6 +166,14 @@ public class ChatManager {
         }*/
     }
 
+    public void handleQueue(){
+        while (!queue.isEmpty()){
+            PreviewChatMessage chatMsg = queue.poll();
+            handleNewMessage(chatMsg);
+        }
+
+    }
+
     private void recordMessageInHistory(PreviewChatMessage chatMessage) {
         History history = new History(
                 chatMessage.publicKey,
@@ -154,7 +185,7 @@ public class ChatManager {
     }
 
     private boolean isConversationWith(String userId) {
-        return MainActivity.chatManager.currentConversationChat.getUserId().equals(userId);
+        return MainActivity.chatManager.currentConversationChat.getReceiverId().equals(userId);
     }
 
     private boolean isConversationActivityOpen() {
@@ -169,9 +200,9 @@ public class ChatManager {
 
     private void updatePreviewMessage(PreviewChatMessage chatMessage) {
         PreviewChatMessage tmp = chatLobbyFragment.reserve.get(0);
-        chatMessage.setUnreadMsgs(tmp.unreadMessages + 1);
+        //chatMessage.setUnreadMsgs(tmp.unreadMessages + 1);
         chatLobbyFragment.reserve.set(0, chatMessage);
-        previewMessage.update(chatMessage);
+       // previewMessageDb.update(chatMessage);
         chatLobbyFragment.updateLists();
     }
 
@@ -214,15 +245,18 @@ public class ChatManager {
         return -1;
     }
 
-    public void sendMessage(String receiver, String message) {
+    public void sendMessage(String name, String receiver, String message) {
 
         Map<String, Object> data = new HashMap<>();
         data.put("receiver", receiver);
         data.put("publicKey", ConnectedUser.getPublicKey());
         data.put("message", message);
 
-        System.out.println("sending private msg to " + receiver + "...");
-        handleNewMessage("123456", receiver, ConnectedUser.getName(), message, false, DateUtils.getTimeInMiliSecs());
+        System.out.println("sending private msg to " + receiver + "... my user id: " + ConnectedUser.getPublicKey() + " message: " + message);
+
+        PreviewChatMessage chatMessage = new PreviewChatMessage(receiver, name, message, DateUtils.getTimeInMiliSecs(), false);
+        recordMessageInHistory(chatMessage);
+        handleNewMessage(chatMessage);
 
         MainActivity.mFunctions
                 .getHttpsCallable("sendPrivateMsg")
@@ -251,7 +285,15 @@ public class ChatManager {
     }
 
     public void incrementUnreadMessages(PreviewChatMessage chatMember) {
-        previewMessage.incrementUnreadMessages(chatMember.publicKey);
+        previewMessageDb.incrementUnreadMessages(chatMember.publicKey);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    public void removeAllChats() {
+        historyDao.removeAll();
+        previewMessageDb.removeAll();
+        chatLobbyFragment.users.clear();
+        chatLobbyFragment.reserve.clear();
+        chatLobbyFragment.recyclerViewAdapter.notifyDataSetChanged();
+    }
 }

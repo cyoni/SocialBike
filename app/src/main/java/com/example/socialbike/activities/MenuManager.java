@@ -14,6 +14,7 @@ public class MenuManager {
     public static final int Profile = 10;
     public static final int ChatSettings = 11;
     public static final int MY_ACCOUNT = 12;
+    public static final int RemoveChats = 13;
 
 
 
@@ -70,6 +71,7 @@ public class MenuManager {
     }
 
     private void createChatMenu() {
+        createButton(RemoveChats, "Remove all chats");
         createButton(ChatSettings, "Settings");
     }
 
