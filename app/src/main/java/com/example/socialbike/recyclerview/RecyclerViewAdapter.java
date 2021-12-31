@@ -25,7 +25,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private List mData; // reference
     private LayoutInflater mInflater;
     private ItemClickListener classReference;
-    private int layout;
+    private int layout, dividerLayout;
     private static final int DIVIDER_LAYOUT = 0;
     private static final int EVENT_LAYOUT = 1;
 
@@ -35,6 +35,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.mData = mData;
         this.layout = layout;
     }
+
+    public RecyclerViewAdapter(Context context, int layout, int dividerLayout, List mData) {
+        this.mInflater = LayoutInflater.from(context);
+        this.mData = mData;
+        this.layout = layout;
+        this.dividerLayout = dividerLayout;
+    }
+
 
     @Override
     public int getItemViewType(int position) {
@@ -53,7 +61,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         RecyclerView.ViewHolder viewHolder = null;
 
         if (viewType == DIVIDER_LAYOUT) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.event_more_devider, parent, false);
+            view = LayoutInflater.from(parent.getContext()).inflate(dividerLayout, parent, false);
         } else {
             view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         }

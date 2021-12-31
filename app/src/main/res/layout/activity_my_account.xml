@@ -71,7 +71,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="Preferred location"
+                    android:text="Location"
                     android:textSize="20dp"
                     app:layout_constraintStart_toStartOf="parent"
                     tools:layout_editor_absoluteY="219dp" />
@@ -84,56 +84,6 @@
                     android:clickable="true"
                     android:focusable="false"
                     android:ems="10" />
-
-                <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="City"
-                    android:textSize="20dp" />
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:ems="10"
-                    android:inputType="textCapSentences"
-                    android:maxLength="50" />
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Age"
-                    android:textSize="20dp" />
-
-                <EditText
-                    android:id="@+id/age"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:ems="10"
-                    android:inputType="number"
-                    android:maxLength="2" />
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Gender"
-                    android:textSize="20sp" />
-
-                <Spinner
-                    android:id="@+id/gender"
-                    android:layout_width="377dp"
-                    android:layout_height="50dp"
-                    android:background="@android:drawable/btn_dropdown"
-                    android:spinnerMode="dropdown"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.647"
-                    app:layout_constraintStart_toStartOf="parent"
-                    tools:layout_editor_absoluteY="456dp" />
 
 
             </LinearLayout>

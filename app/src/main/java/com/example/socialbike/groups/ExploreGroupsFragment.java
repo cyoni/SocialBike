@@ -2,6 +2,8 @@ package com.example.socialbike.groups;
 
 import static android.app.Activity.RESULT_OK;
 
+import static com.example.socialbike.activities.MainActivity.groupManager;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -17,13 +19,12 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.socialbike.recyclerview.RecyclerViewAdapter;
 import com.example.socialbike.utilities.Constants;
 import com.example.socialbike.activities.MainActivity;
-import com.example.socialbike.utilities.EMethods;
 import com.example.socialbike.utilities.Position;
 import com.example.socialbike.utilities.PreferredLocation;
 import com.example.socialbike.R;
-import com.example.socialbike.recyclerview.RecyclerViewAdapter2;
 import com.example.socialbike.utilities.Updater;
 import com.example.socialbike.groups.group.GroupActivity;
 import com.example.socialbike.groups.group.GroupDTO;
@@ -35,18 +36,16 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 
-public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapter2.ItemClickListener, Updater.IUpdate {
+public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapter.ItemClickListener, Updater.IUpdate {
 
     private final GroupContainer groupContainer;
     private RecyclerView recyclerView;
-    private RecyclerViewAdapter2 recyclerViewAdapter;
+    private RecyclerViewAdapter recyclerViewAdapter;
     private ArrayList<Group> container = new ArrayList<>();
     private ProgressBar progressBar;
     private View root;
@@ -57,14 +56,13 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     private PreferredLocation preferredLocation;
     private String location = "xxx";
     private Position position = new Position();
-    GroupManager groupManager;
 
     public ExploreGroupsFragment(GroupContainer groupContainer) {
         this.groupContainer = groupContainer;
     }
 
     private void initAdapter() {
-        recyclerViewAdapter = new RecyclerViewAdapter2(getContext(), R.layout.item_group, container);
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_group, R.layout.fragment_group_location, container);
         recyclerViewAdapter.setClassReference(this);
         recyclerView.setAdapter(recyclerViewAdapter);
     }
@@ -79,12 +77,12 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_group, container, false);
+
             recyclerView = root.findViewById(R.id.recyclerview);
             progressBar = root.findViewById(R.id.progressBar);
             swipeLayout = root.findViewById(R.id.swipe_refresh);
             progressBar.setVisibility(View.VISIBLE);
 
-            groupManager = new GroupManager(getContext(), this.container);
             setSwipeLayout();
             initAdapter();
         }
@@ -95,7 +93,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     @Override
     public void onResume() {
         super.onResume();
-        if (container.isEmpty())
+        if (container.isEmpty() || container.get(0) == null)
             getGroups();
         else{
             locallyRefresh();
@@ -104,15 +102,15 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
 
     private void locallyRefresh() {
         List<Integer> indexes = new ArrayList<>();
-        for (int i = 0; i< container.size(); i++){
+        for (int i = 1; i < container.size(); i++){
             Group group = container.get(i);
             if (group.getIsMember()){
-                if (!MainActivity.MyConnectedGroups.containsKey(group.getGroupId())){
+                if (!groupManager.MyConnectedGroups.containsKey(group.getGroupId())){
                     group.setIsMember(false);
                     indexes.add(i);
                 }
             } else{
-                if (MainActivity.MyConnectedGroups.containsKey(group.getGroupId())){
+                if (groupManager.MyConnectedGroups.containsKey(group.getGroupId())){
                     group.setIsMember(true);
                     indexes.add(i);
                 }
@@ -161,35 +159,39 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         tmpContainer.addAll(container);
 
         container.clear();
+        container.add(null); // for divider
         container.addAll(tmpContainer);
     }
 
 
     @Override
-    public void onBinding(@NonNull RecyclerView.ViewHolder holder, int position) {
-        RecyclerViewAdapter2.ViewHolder _holder = (RecyclerViewAdapter2.ViewHolder) holder;
+    public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Group current = container.get(position);
-        _holder.joinButton.setVisibility(View.VISIBLE);
-        _holder.joinButton.setOnClickListener(view -> joinOrLeaveGroup(_holder, position));
+
+        if (current == null)
+            return;
+
+        holder.joinButton.setVisibility(View.VISIBLE);
+        holder.joinButton.setOnClickListener(view -> joinOrLeaveGroup(holder, position));
 
         if (current.getIsMember())
-            _holder.joinButton.setText("Joined");
+            holder.joinButton.setText("Joined");
         else
-            _holder.joinButton.setText("Join");
+            holder.joinButton.setText("Join");
 
-        _holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle()));
-        _holder.title.setText(current.getTitle());
-        _holder.description.setText(current.getDescription());
-        _holder.memberCount.setText(current.getMemberCount() + " members");
+        holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle()));
+        holder.title.setText(current.getTitle());
+        holder.description.setText(current.getDescription());
+        holder.memberCount.setText(current.getMemberCount() + " members");
        // enableItemMenu(_holder.menu_button, position);
     }
 
-    private void joinOrLeaveGroup(RecyclerViewAdapter2.ViewHolder holder, int position) {
+    private void joinOrLeaveGroup(RecyclerViewAdapter.ViewHolder holder, int position) {
         if (!(holder.joinButton.getText().equals("Leaving") || holder.joinButton.getText().equals("Joining"))){
             Group group = container.get(position);
             if (group.getIsMember()){ // leave
                 holder.joinButton.setText("Leaving");
-                groupManager.exitGroup(group.getGroupId()).continueWith(task -> {
+                groupManager.leaveGroup(group.getGroupId()).continueWith(task -> {
                     holder.joinButton.setText("Join");
                     groupManager.remove(group);
                     return null;
@@ -299,17 +301,6 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     @Override
     public void onItemClick(@NonNull View holder, int position) {
         System.out.println(position);
-    }
-
-    @Override
-    public RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_group, parent, false);
-        return recyclerViewAdapter.getLayoutView(view);
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return EVENT_LAYOUT;
     }
 
     private void setSwipeLayout() {

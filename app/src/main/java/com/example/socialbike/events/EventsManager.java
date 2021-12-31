@@ -78,7 +78,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
     }
 
     protected void initAdapter() {
-        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_events, container);
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), R.layout.item_events, R.layout.event_more_devider, container);
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerViewAdapter.setClassReference(this);
     }

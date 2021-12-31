@@ -2,6 +2,7 @@ package com.example.socialbike.groups.group;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.socialbike.groups.Group;
-import com.example.socialbike.groups.GroupManager;
 import com.example.socialbike.post.PostManager;
 import com.example.socialbike.R;
 import com.example.socialbike.utilities.Updater;
@@ -34,14 +34,17 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
     private EventsManager eventsManager;
     private PostManager postManager;
     private Group group;
+    Toolbar toolbar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.group_activity);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        toolbar.inflateMenu(R.menu.group);
+        setToolbarMenuListener(toolbar);
 
         Intent intent = getIntent();
         String groupName = intent.getStringExtra("groupName");
@@ -52,12 +55,29 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         eventsManager.init();
         postManager = new PostManager(this, update, groupId, null);
 
+        joinButton = findViewById(R.id.join_button);
+
         initButtons();
         getGroupDescription();
         getFirstEvent();
         getFirstPost();
         toolbar.setTitle(groupName);
 
+    }
+
+    private void setToolbarMenuListener(Toolbar toolbar) {
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.leave_group) {
+                    MainActivity.groupManager.MyConnectedGroups.remove(groupId);
+                    MainActivity.groupManager.leaveGroup(groupId);
+                    showOrHideJoinButton();
+                }
+
+                return false;
+            }
+        });
     }
 
     private void getGroupDescription() {
@@ -101,24 +121,32 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
             startActivity(intent1);
         });
 
-        joinButton = findViewById(R.id.join_button);
-
-        if (MainActivity.MyConnectedGroups.containsKey(groupId)){
-            joinButton.setVisibility(View.GONE);
-        }
-        else {
-
-            joinButton.setVisibility(View.VISIBLE);
-            joinButton.setOnClickListener(view -> {
-                GroupManager groupManager = new GroupManager(this);
+        joinButton.setOnClickListener(view -> {
+            if (!joinButton.getText().toString().equals("Joining...")) {
                 joinButton.setText("Joining...");
-                groupManager.joinGroup(groupId).continueWith(task -> {
+                MainActivity.groupManager.joinGroup(groupId).continueWith(task -> {
                     joinButton.setVisibility(View.GONE);
-                    groupManager.add(group);
+                    joinButton.setText("Join Group");
+                    MainActivity.groupManager.add(group);
                     MainActivity.toast(GroupActivity.this, "Welcome to " + group.getTitle(), true);
+                    showOrHideJoinButton();
                     return null;
                 });
-            });
+            }
+        });
+
+        showOrHideJoinButton();
+    }
+
+    private void showOrHideJoinButton() {
+
+        if (MainActivity.groupManager.MyConnectedGroups.containsKey(groupId)){
+            joinButton.setVisibility(View.GONE);
+            toolbar.getMenu().findItem(R.id.leave_group).setVisible(true);
+        }
+        else {
+            toolbar.getMenu().findItem(R.id.leave_group).setVisible(false);
+            joinButton.setVisibility(View.VISIBLE);
         }
     }
 

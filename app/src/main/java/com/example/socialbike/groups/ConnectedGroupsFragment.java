@@ -2,6 +2,8 @@ package com.example.socialbike.groups;
 
 import static android.app.Activity.RESULT_OK;
 
+import static com.example.socialbike.activities.MainActivity.groupManager;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -48,7 +50,6 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
     private PreferredLocation preferredLocation;
     private String location = "xxx";
     private Position position = new Position();
-    GroupManager groupManager;
     private ArrayList<Group> container = new ArrayList<>();
     public RecyclerView recyclerView;
     public RecyclerViewAdapter2 recyclerViewAdapter;
@@ -75,7 +76,6 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
 
             setSwipeLayout();
 
-            groupManager = new GroupManager(getContext(), this.container);
             recyclerView = root.findViewById(R.id.recyclerview);
 
             recyclerViewAdapter = new RecyclerViewAdapter2(getContext(), R.layout.item_group, this.container);
@@ -91,7 +91,7 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
     private void locallyGetGroups() {
             new CountDownTimer(3000, 500) {
                 public void onTick(long millisUntilFinished) {
-                    System.out.println("waiting for main activity to finish downloading groups...");
+                    System.out.println("Waiting for main activity to finish downloading groups...");
                     if (!MainActivity.IsGettingMyConnectedGroups) {
                         refresh();
                         cancel();
@@ -106,8 +106,8 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
 
     private void refresh() {
         container.clear();
-        System.out.println("size: " +  MainActivity.MyConnectedGroups.size());
-        for (Map.Entry<String, Group> group : MainActivity.MyConnectedGroups.entrySet()) {
+        System.out.println("size: " +  groupManager.MyConnectedGroups.size());
+        for (Map.Entry<String, Group> group : groupManager.MyConnectedGroups.entrySet()) {
             container.add(group.getValue());
         }
         onFinishedUpdating();

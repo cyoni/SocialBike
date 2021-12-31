@@ -60,7 +60,6 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         name.setText(ConnectedUser.getName());
         initPicture();
 
-        age = findViewById(R.id.age);
 
     }
 

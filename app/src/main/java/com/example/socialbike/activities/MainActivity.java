@@ -57,13 +57,13 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     public static BottomNavigationView bottomNavigationView;
     public static AppDatabase database;
     public static Map<String, String> membersMap = new HashMap<>();
-    public static Map<String, Group> MyConnectedGroups = new HashMap<>();
     public static MemberDao memberDao;
     public static boolean isUserConnected;
     public static StorageReference storageRef;
     private MenuManager menuManager = new MenuManager();
     public static boolean IsGettingMyConnectedGroups;
     private int currentLayout;
+    public static GroupManager groupManager = new GroupManager();
 
     public static void toast(Context context, String msg, boolean isLong) {
         int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
@@ -104,24 +104,23 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
         // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
-    public static void updateConnectedGroups(ArrayList<Group> container) {
-        MyConnectedGroups.clear();
+    public static void updateConnectedGroups(List<Group> container) {
+        groupManager.MyConnectedGroups.clear();
         for (Group group : container){
-            MyConnectedGroups.put(group.getGroupId(), group);
+            groupManager.MyConnectedGroups.put(group.getGroupId(), group);
         }
     }
 
     private void setupMyConnectedGroups() {
-        // connect to db and get groups that the user is in
+        // connect to server and get groups that the user is in
         IsGettingMyConnectedGroups = true;
         ArrayList<Group> container = new ArrayList<>();
-        GroupManager groupManager = new GroupManager(this, container);
 
         groupManager.getMyConnectedGroups().continueWith(task -> {
             String response = String.valueOf(task.getResult().getData());
             System.out.println("response:" + response);
-            groupManager.parseGroups(response);
-            updateConnectedGroups(groupManager.container);
+            List<Group> groups = groupManager.parseGroups(response);
+            updateConnectedGroups(groups);
             IsGettingMyConnectedGroups = false;
             return null;
         });

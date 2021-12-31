@@ -116,7 +116,6 @@ public class EventsFragment extends Fragment
 
 
     private void getEvents() {
-
         if (position.getLatLng() != null){
             no_events_text.setVisibility(View.GONE);
             container.clear();
