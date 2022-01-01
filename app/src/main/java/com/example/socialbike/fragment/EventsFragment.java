@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.example.socialbike.events.Event;
 import com.example.socialbike.events.EventsManager;
+import com.example.socialbike.utilities.Geo;
 import com.example.socialbike.utilities.Position;
 import com.example.socialbike.utilities.PreferredLocation;
 import com.example.socialbike.R;
@@ -25,14 +26,11 @@ import com.example.socialbike.activities.AddNewEventActivity;
 import com.example.socialbike.activities.LogInActivity;
 import com.example.socialbike.utilities.Constants;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
@@ -53,7 +51,7 @@ public class EventsFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.preferredLocation = new PreferredLocation(getActivity(), position);
+        this.preferredLocation = new PreferredLocation(getActivity());
     }
 
     public EventsFragment() {
@@ -70,7 +68,7 @@ public class EventsFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        preferredLocation.initPreferredLocation();
+        preferredLocation.initPreferredLocation(position);
 
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_events, container, false);
@@ -104,7 +102,8 @@ public class EventsFragment extends Fragment
         cityText = root.findViewById(R.id.city);
         no_events_text = root.findViewById(R.id.no_events_text);
         no_events_text.setVisibility(View.GONE);
-        cityText.setOnClickListener(view -> openCitiesAutoComplete());
+
+        cityText.setOnClickListener(view -> Geo.startAutoComplete(null, this, TypeFilter.CITIES));
 
         setListeners(root);
 
@@ -165,7 +164,7 @@ public class EventsFragment extends Fragment
 
      //   cityText.setText(HtmlCompat.fromHtml
        //         ("<u><b>" + location + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
-        preferredLocation.setLocationText(cityText);
+        preferredLocation.setLocationText(position, cityText);
     }
 
     @Override
@@ -176,23 +175,9 @@ public class EventsFragment extends Fragment
             }
         } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Place place = Autocomplete.getPlaceFromIntent(data);
+                position = Geo.getPosition(data);
+                preferredLocation.savePosition(position);
 
-                String address = place.getAddress();
-                String country, state = null;
-                if (address != null && address.contains(",")) {
-                    String[] countryAndState = address.split(",");
-                    state = countryAndState[0].trim();
-                    country = countryAndState[1].trim();
-                } else if (address != null) {
-                    country = address.trim();
-                } else
-                    country = "DEFAULT";
-
-                position.setLatLng(place.getLatLng());// = new Position(place.getLatLng(), place.getName(), country);
-                position.setCity(place.getName());
-                position.setCountry(country);
-                preferredLocation.savePosition();
                 updateCityTextView();
                 getEvents();
             }
@@ -200,14 +185,6 @@ public class EventsFragment extends Fragment
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-
-    private void openCitiesAutoComplete() {
-        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
-        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
-                .build(getContext());
-        startActivityForResult(intent, Constants.AUTOCOMPLETE_REQUEST_CODE);
-    }
-
 
     @SuppressLint("NotifyDataSetChanged")
     @Override

@@ -33,7 +33,13 @@ import java.util.Map;
 
 public class Utils {
 
-    public static void hideKeyboard(Activity activity) {
+    private final Activity activity;
+
+    public Utils(Activity activity){
+        this.activity = activity;
+    }
+
+    public void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         //Find the currently focused view, so we can grab the correct window token from it.
         View view = activity.getCurrentFocus();
@@ -44,12 +50,12 @@ public class Utils {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    public static void showKeyboard(Activity activity) {
+    public void showKeyboard() {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
-    public static String getUserCountry(Context context) {
+    public String getUserCountry() {
         try {
             final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             final String simCountry = tm.getSimCountryIso();
@@ -66,7 +72,7 @@ public class Utils {
         return null;
     }
 
-    public static Position getLatLngOfString(String address) {
+    public Position getLatLngOfString(String address) {
         GeocodingResult[] request = new GeocodingResult[0];
         try {
             request = GeocodingApi.newRequest(geoApiContext).address(address).await();
@@ -84,28 +90,28 @@ public class Utils {
         return new Position(new LatLng(location.lat, location.lng), locationName, locationName);
     }
 
-    public static void savePreference(Activity activity, String preferenceFolder, String key, String value) {
+    public void savePreference(String preferenceFolder, String key, String value) {
         SharedPreferences.Editor editor = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE).edit();
         editor.putString(key, value);
         editor.apply();
     }
 
-    public static String getPreference(Activity activity, String preferenceFolder, String key) {
+    public String getPreference(String preferenceFolder, String key) {
         SharedPreferences prefs = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE);
         return prefs.getString(key, null);
     }
 
-    public static Map<String, ?> getAllPreferences(Activity activity, String preferenceFolder) {
+    public Map<String, ?> getAllPreferences(String preferenceFolder) {
         SharedPreferences prefs = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE);
         return prefs.getAll();
     }
 
-    public static void removePreference(Activity activity, String preferenceFolder, String key) {
+    public void removePreference(String preferenceFolder, String key) {
         SharedPreferences prefs = activity.getSharedPreferences(preferenceFolder, MODE_PRIVATE);
         prefs.edit().remove(key).apply();
     }
 
-    public static String getEntity(GeocodingResult results, Place entity) {
+    public String getEntity(GeocodingResult results, Place entity) {
         AddressComponent[] addressComponents = results.addressComponents;
         for (AddressComponent current : addressComponents) {
             for (int j = 0; j < current.types.length; j++) {
@@ -117,7 +123,7 @@ public class Utils {
         return null;
     }
 
-    public static void registerLike(Post post, String groupId, String eventId) {
+    public void registerLike(Post post, String groupId, String eventId) {
 
         Map<String, Object> data = new HashMap<>();
         data.put("eventId", eventId);
@@ -139,7 +145,7 @@ public class Utils {
 
     }
 
-    public static Task<HttpsCallableResult> PostData(EMethods method, Map<String, Object> data){
+    public Task<HttpsCallableResult> PostData(EMethods method, Map<String, Object> data){
         return MainActivity.mFunctions
                 .getHttpsCallable(method.name())
                 .call(data);

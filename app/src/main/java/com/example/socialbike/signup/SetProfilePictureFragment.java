@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.example.socialbike.PreferredLocationManager;
 import com.example.socialbike.R;
 import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.utilities.ConnectedUser;

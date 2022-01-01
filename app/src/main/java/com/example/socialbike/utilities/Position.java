@@ -5,20 +5,13 @@ import com.google.android.gms.maps.model.LatLng;
 public class Position {
 
     private LatLng latLng;
-    private String locationName, address, country, state, city;
+    private String address, country, state, city;
 
     public Position(LatLng latLng, String city, String country) {
         this.latLng = latLng;
         this.city = city;
         this.country = country;
     }
-
-/*    public Position(LatLng latLng, String locationName, String country, String state) {
-        this.latLng = latLng;
-        this.locationName = locationName;
-        this.country = country;
-        this.state = state;
-    }*/
 
     public Position(LatLng latLng, String address, String city, String country) {
         this.latLng = latLng;
@@ -36,13 +29,8 @@ public class Position {
         this.latLng = new LatLng(lat, lng);
     }
 
-
     public LatLng getLatLng() {
         return latLng;
-    }
-
-    public String getLocationName() {
-        return locationName;
     }
 
     public String getAddress() {
@@ -61,17 +49,13 @@ public class Position {
         this.address = address;
     }
 
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
-    }
-
     public void setLatLng(LatLng latLng) {
         this.latLng = latLng;
     }
 
     @Override
     public String toString() {
-        return locationName + ", " + address + ", " + country + ", " + state;
+        return address;
     }
 
     public void setCity(String city) {

@@ -61,7 +61,7 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.preferredLocation = new PreferredLocation(getActivity(), position);
+        this.preferredLocation = new PreferredLocation(getActivity());
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
             progressBar = root.findViewById(R.id.progressBar);
             swipeLayout = root.findViewById(R.id.swipe_refresh);
             progressBar.setVisibility(View.VISIBLE);
-            preferredLocation.initPreferredLocation();
+            preferredLocation.initPreferredLocation(position);
 
             setSwipeLayout();
 

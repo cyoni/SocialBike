@@ -29,6 +29,7 @@ import com.example.socialbike.chat.ChatManager;
 import com.example.socialbike.groups.GroupContainer;
 import com.example.socialbike.room_database.Member;
 import com.example.socialbike.room_database.MemberDao;
+import com.example.socialbike.utilities.Utils;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.libraries.places.api.Places;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     public static boolean IsGettingMyConnectedGroups;
     private int currentLayout;
     public static GroupManager groupManager = new GroupManager();
+    public static Utils utils;
 
     public static void toast(Context context, String msg, boolean isLong) {
         int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
 
     public MainActivity() {
         chatManager = new ChatManager();
+        utils = new Utils(this);
     }
 
 

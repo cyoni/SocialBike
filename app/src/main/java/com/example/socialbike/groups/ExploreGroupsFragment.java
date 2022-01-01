@@ -70,7 +70,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.preferredLocation = new PreferredLocation(getActivity(), position);
+        this.preferredLocation = new PreferredLocation(getActivity());
     }
 
     @Override
@@ -228,7 +228,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
                 position.setLatLng(place.getLatLng());
                 position.setCity(place.getName());
                 position.setCountry(country);
-                preferredLocation.savePosition();
+                preferredLocation.savePosition(position);
                 //
                 // = new Position(place.getLatLng(), place.getName(), country);
                 //

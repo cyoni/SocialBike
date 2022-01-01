@@ -6,6 +6,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.socialbike.R;
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.activities.PostActivity;
 import com.example.socialbike.recyclerview.RecyclerViewAdapter;
 import com.example.socialbike.utilities.Utils;
@@ -61,7 +62,7 @@ public class PostButtons {
             post.setIsLiked(true);
             post.incrementLike();
         }
-        Utils.registerLike(post, groupId, eventId);
+        MainActivity.utils.registerLike(post, groupId, eventId);
         setLikeButton();
         likes.setText("" + post.getLikesCount());
     }

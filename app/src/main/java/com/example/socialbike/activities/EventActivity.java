@@ -247,7 +247,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
     }
 
     private boolean getIsEventSavedInLocal() {
-        Map<String, ?> map = Utils.getAllPreferences(this, "saved_events");
+        Map<String, ?> map = MainActivity.utils.getAllPreferences("saved_events");
         Set<String> keys = map.keySet();
         return (keys.contains(event.getEventId()));
     }
@@ -322,9 +322,9 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
     private void saveEvent() {
         boolean isSaved = getIsEventSavedInLocal();
         if (isSaved)
-            Utils.removePreference(this, "saved_events", event.getEventId());
+            MainActivity.utils.removePreference("saved_events", event.getEventId());
         else
-             Utils.savePreference(this,"saved_events", event.getEventId(), event.getGroupId() + ",");
+            MainActivity.utils.savePreference("saved_events", event.getEventId(), event.getGroupId() + ",");
         setPressed(save, !isSaved);
     }
 

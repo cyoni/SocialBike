@@ -14,17 +14,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.socialbike.Enums.EnumGeneral;
-import com.example.socialbike.PreferredLocationManager;
+import com.example.socialbike.PreferredLocationService;
 import com.example.socialbike.R;
 import com.example.socialbike.utilities.ConnectedUser;
 import com.example.socialbike.utilities.Consts;
 import com.example.socialbike.utilities.EMethods;
+import com.example.socialbike.utilities.Geo;
 import com.example.socialbike.utilities.ImageManager;
 import com.example.socialbike.utilities.MyPreferences;
-import com.example.socialbike.utilities.Position;
 import com.example.socialbike.utilities.Utils;
-import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.model.TypeFilter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +34,7 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
     ImageManager imageManager;
     ImageView profilePicture;
     Button saveButton;
-    PreferredLocationManager preferredLocationManager;
+    PreferredLocationService preferredLocationManager;
     EditText age;
 
     @Override
@@ -47,8 +46,8 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         getSupportActionBar().setTitle("My Account");
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
         imageManager = new ImageManager(this);
-        preferredLocationManager = new PreferredLocationManager(this);
-        preferredLocationManager.init();
+        preferredLocationManager = new PreferredLocationService(this);
+
         preferredLocationManager.initLocation();
 
         profilePicture = findViewById(R.id.profile_image);
@@ -60,6 +59,8 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         name.setText(ConnectedUser.getName());
         initPicture();
 
+        EditText locationText = findViewById(R.id.preferredLocation);
+        locationText.setOnClickListener(view -> Geo.startAutoComplete(this, null, TypeFilter.CITIES));
 
     }
 
@@ -73,7 +74,8 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
     private void submitForm() {
         Map<String, Object> profileObject = buildRequestObject();
         preferredLocationManager.saveLocation();
-        Utils.PostData(EMethods.updateProfile, profileObject).continueWithTask(task -> {
+        MainActivity.utils.PostData(EMethods.updateProfile, profileObject).continueWithTask(task -> {
+            MainActivity.toast(this, "Saved", false);
             finish();
             return null;
         });
@@ -86,8 +88,6 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         data.put("city", preferredLocationManager.position.getCity());
         data.put("lat", preferredLocationManager.position.getLatLng().latitude);
         data.put("lng", preferredLocationManager.position.getLatLng().longitude);
-        data.put("gender", EnumGeneral.gender.Male);
-        data.put("age", age.getText().toString());
         return data;
     }
 
@@ -132,8 +132,8 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         // delete all local database
 
         MainActivity.stopChat();
-        Utils.removePreference(this, MyPreferences.USER_FOLDER, "nickname" );
-        Utils.removePreference(this, MyPreferences.USER_FOLDER, "user_public_key" );
+        MainActivity.utils.removePreference(MyPreferences.USER_FOLDER, "nickname" );
+        MainActivity.utils.removePreference(MyPreferences.USER_FOLDER, "user_public_key" );
 
         MainActivity.mAuth.signOut();
         ConnectedUser.setPublicKey("-");

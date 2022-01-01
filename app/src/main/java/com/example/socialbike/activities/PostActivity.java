@@ -156,7 +156,7 @@ public class PostActivity extends AppCompatActivity
             return;
 
         sendComment.setText("Sending");
-        Utils.hideKeyboard(this);
+        MainActivity.utils.hideKeyboard();
         Map<String, Object> data = new HashMap<>();
         data.put("comment", comment);
         data.put("postId", post.getPostId());
@@ -182,7 +182,7 @@ public class PostActivity extends AppCompatActivity
 
                     newComment.setText("");
                     sendComment.setEnabled(true);
-                    Utils.hideKeyboard(this);
+                    MainActivity.utils.hideKeyboard();
 
                     return null;
                 });
@@ -221,7 +221,7 @@ public class PostActivity extends AppCompatActivity
     private void likeComment(TextView reference, Post comment) {
         comment.setIsLiked(!comment.getIsLiked());
         changeLikeButtonStyle(reference, comment);
-        Utils.registerLike(comment, groupId, eventId);
+        MainActivity.utils.registerLike(comment, groupId, eventId);
     }
 
     private void changeLikeButtonStyle(TextView reference, Post comment) {
@@ -251,12 +251,12 @@ public class PostActivity extends AppCompatActivity
 
     private void showOrHideNewCommentSection(RecyclerViewAdapter.ViewHolder holder) {
         if (holder.relativelayout.getVisibility() == View.VISIBLE) {
-            Utils.hideKeyboard(this);
+            MainActivity.utils.hideKeyboard();
             holder.relativelayout.setVisibility(View.GONE);
         } else {
             holder.relativelayout.setVisibility(View.VISIBLE);
             holder.comments.requestFocus();
-            Utils.showKeyboard(this);
+            MainActivity.utils.showKeyboard();
         }
     }
 
@@ -279,7 +279,7 @@ public class PostActivity extends AppCompatActivity
 
         if (comment.isEmpty() || holder.postCommentButton.getText().equals("Sending"))
             return;
-        Utils.hideKeyboard(this);
+        MainActivity.utils.hideKeyboard();
         holder.postCommentButton.setText("Sending");
 
         SubComment subComment = new SubComment(

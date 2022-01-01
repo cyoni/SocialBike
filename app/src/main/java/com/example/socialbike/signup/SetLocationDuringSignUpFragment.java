@@ -1,9 +1,5 @@
 package com.example.socialbike.signup;
 
-import static android.app.Activity.RESULT_OK;
-import static com.example.socialbike.utilities.Constants.ADDRESS_FROM_MAPS_CODE;
-import static com.example.socialbike.activities.MainActivity.geoApiContext;
-
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -16,18 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 
-import com.example.socialbike.Enums.Place;
-import com.example.socialbike.PreferredLocationManager;
+import com.example.socialbike.PreferredLocationService;
 import com.example.socialbike.R;
 import com.example.socialbike.activities.MainActivity;
-import com.example.socialbike.activities.MapsActivity;
-import com.example.socialbike.utilities.Position;
 import com.example.socialbike.utilities.Utils;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.maps.GeocodingApi;
-import com.google.maps.model.GeocodingResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +27,7 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
     private Button continueButton, clean_map_address_button;
     private NavController nav;
     View root;
-    private PreferredLocationManager preferredLocationManager;
+    private PreferredLocationService preferredLocationManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,8 +42,8 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
             clean_map_address_button = root.findViewById(R.id.clean_map_address_button);
             nav = Navigation.findNavController(container);
 
-            preferredLocationManager = new PreferredLocationManager(root, this);
-            preferredLocationManager.init();
+            preferredLocationManager = new PreferredLocationService(root, this);
+
 
             //  Toolbar toolbar = root.findViewById(R.id.toolbar);
            // ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
