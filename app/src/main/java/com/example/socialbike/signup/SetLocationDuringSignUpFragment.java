@@ -1,5 +1,8 @@
 package com.example.socialbike.signup;
 
+import static android.app.Activity.RESULT_OK;
+import static com.example.socialbike.utilities.Constants.ADDRESS_FROM_MAPS_CODE;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -12,11 +15,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.example.socialbike.PreferredLocationService;
 import com.example.socialbike.R;
 import com.example.socialbike.activities.MainActivity;
-import com.example.socialbike.utilities.Utils;
+import com.example.socialbike.utilities.Geo;
+import com.example.socialbike.utilities.Position;
+import com.google.android.libraries.places.api.model.TypeFilter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +33,8 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
     private Button continueButton, clean_map_address_button;
     private NavController nav;
     View root;
-    private PreferredLocationService preferredLocationManager;
+    Position position;
+    EditText preferredLocationBox;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,8 +49,8 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
             clean_map_address_button = root.findViewById(R.id.clean_map_address_button);
             nav = Navigation.findNavController(container);
 
-            preferredLocationManager = new PreferredLocationService(root, this);
-
+            preferredLocationBox = root.findViewById(R.id.preferredLocation);
+            preferredLocationBox.setOnClickListener(view -> Geo.startAutoComplete(null, this, TypeFilter.CITIES));
 
             //  Toolbar toolbar = root.findViewById(R.id.toolbar);
            // ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -57,19 +64,13 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
         return root;
     }
 
-/*    private void setGenderSpinner() {
-        String[] items = new String[]{"Male", "Female", "Not specified"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, items);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        genderDropdown.setAdapter(adapter);
-        genderDropdown.setOnItemSelectedListener(this);
-    }*/
 
     private void setButtonListeners() {
         continueButton.setOnClickListener(view ->
                 {
-                    if (isFormOk())
+                    if (isFormOk()) {
                         submitForm();
+                    }
                 }
         );
 
@@ -80,9 +81,12 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
         });*/
     }
 
+    private void savePosition() {
+        MainActivity.preferredLocationService.savePrivateLocation(position);
+    }
+
     private boolean isFormOk() {
-        if (preferredLocationManager.position == null ||
-                preferredLocationManager.position.getLatLng() == null) {
+        if (position == null || position.getLatLng() == null) {
             return false;
         }
 
@@ -91,23 +95,26 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        preferredLocationManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ADDRESS_FROM_MAPS_CODE) {
+            if (resultCode == RESULT_OK) {
+                position = Geo.getPosition(data);
+                preferredLocationBox.setText(position.getAddress());
+            }
+        }
     }
 
     private void submitForm() {
 
-       Utils.savePreference(getActivity(), "data", "country", preferredLocationManager.position.getCountry());
-       Utils.savePreference(getActivity(), "data", "city", preferredLocationManager.position.getCity());
 
         continueButton.setText("Please wait...");
 
         Map<String, Object> data = new HashMap<>();
 
-        data.put("lat", preferredLocationManager.position.getLatLng().latitude);
-        data.put("lng", preferredLocationManager.position.getLatLng().longitude);
-        data.put("country", preferredLocationManager.position.getCountry());
-        data.put("city", preferredLocationManager.position.getCity());
+        data.put("lat", position.getLatLng().latitude);
+        data.put("lng", position.getLatLng().longitude);
+        data.put("country",position.getCountry());
+        data.put("city", position.getCity());
 
         MainActivity.mFunctions
                 .getHttpsCallable("updateProfile")
@@ -116,27 +123,10 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
                     String answer = task.getResult().getData().toString();
                     System.out.println("Response from Server: " + answer);
                     if (answer.equals("OK")){
-                        preferredLocationManager.saveLocation();
+                        savePosition();
                         nav.navigate(R.id.action_setProfileFragment_to_setProfilePictureFragment);
                     }
                     return null;
                 });
     }
-
-/*    @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-        switch (position) {
-            case 0:
-                intGender = 0;
-                break;
-            case 1:
-                intGender = 1;
-                break;
-            case 2:
-                intGender = 2;
-                break;
-        }
-    }*/
-
-
 }

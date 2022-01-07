@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.events.Event;
 import com.example.socialbike.events.EventsManager;
 import com.example.socialbike.utilities.Geo;
@@ -45,13 +47,11 @@ public class EventsFragment extends Fragment
     private View root;
     private EventsManager eventsManager;
     protected ArrayList<Event> container;
-    private PreferredLocation preferredLocation;
     Updater.IUpdate update = this;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.preferredLocation = new PreferredLocation(getActivity());
     }
 
     public EventsFragment() {
@@ -67,8 +67,6 @@ public class EventsFragment extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        preferredLocation.initPreferredLocation(position);
 
         if (root == null) {
             root = inflater.inflate(R.layout.fragment_events, container, false);
@@ -95,14 +93,13 @@ public class EventsFragment extends Fragment
         );
     }
 
-
     private void initiateScreen(View root) {
         eventsManager.init(root);
         eventsManager.rangeText = root.findViewById(R.id.rangeText);
         cityText = root.findViewById(R.id.city);
         no_events_text = root.findViewById(R.id.no_events_text);
         no_events_text.setVisibility(View.GONE);
-
+        position = MainActivity.preferredLocationService.getPreferredPosition();
         cityText.setOnClickListener(view -> Geo.startAutoComplete(null, this, TypeFilter.CITIES));
 
         setListeners(root);
@@ -110,9 +107,6 @@ public class EventsFragment extends Fragment
         eventsManager.showProgressbar();
         getEvents();
     }
-
-
-
 
     private void getEvents() {
         if (position.getLatLng() != null){
@@ -153,18 +147,9 @@ public class EventsFragment extends Fragment
         });
     }
 
-    private void openLoginActivity() {
-        Intent intent = new Intent(getContext(), LogInActivity.class);
-        startActivity(intent);
-    }
-
-
     private void updateCityTextView() {
-      //  String location = position.getCity();
-
-     //   cityText.setText(HtmlCompat.fromHtml
-       //         ("<u><b>" + location + "</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
-        preferredLocation.setLocationText(position, cityText);
+        cityText.setText(HtmlCompat.fromHtml
+                ("<u><b>"+ position.getCity() +"</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
     }
 
     @Override
@@ -176,7 +161,7 @@ public class EventsFragment extends Fragment
         } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 position = Geo.getPosition(data);
-                preferredLocation.savePosition(position);
+                MainActivity.preferredLocationService.savePreferredLocation(position);
 
                 updateCityTextView();
                 getEvents();

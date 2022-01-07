@@ -2,6 +2,7 @@ package com.example.socialbike.utilities;
 
 import androidx.annotation.NonNull;
 
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.model.PostDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,7 +37,7 @@ public class MessageGetter {
         if (eventId != null)
             data.put("eventId", eventId);
 
-       Utils.PostData(EMethods.getPosts, data)
+        MainActivity.utils.PostData(EMethods.getPosts, data)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);

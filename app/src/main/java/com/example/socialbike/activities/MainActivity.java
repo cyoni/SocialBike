@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.socialbike.PreferredLocationService;
 import com.example.socialbike.groups.Group;
 import com.example.socialbike.groups.GroupManager;
 import com.example.socialbike.utilities.AppDatabase;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     private int currentLayout;
     public static GroupManager groupManager = new GroupManager();
     public static Utils utils;
+    public static PreferredLocationService preferredLocationService = new PreferredLocationService();
 
     public static void toast(Context context, String msg, boolean isLong) {
         int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
@@ -103,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
         }
 
         initiatePlaces();
+        preferredLocationService.init();
 
         // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }

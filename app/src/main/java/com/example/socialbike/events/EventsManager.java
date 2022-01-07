@@ -88,7 +88,7 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
         container.clear();
         //  extraEvents.clear();
         data.put("dataType", dataType);
-        Utils.PostData(EMethods.getEvents, data)
+        MainActivity.utils.PostData(EMethods.getEvents, data)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response:" + response);

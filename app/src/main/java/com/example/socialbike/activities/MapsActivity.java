@@ -182,7 +182,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         googleMap.setOnCameraIdleListener (this::refreshText);
 
-            String country = Utils.getUserCountry(this);
+            String country = MainActivity.utils.getUserCountry();
             if (country != null){
                 latLng = getLatLngOfString(country + " country");
                 if (latLng != null)

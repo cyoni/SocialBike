@@ -57,7 +57,7 @@ public class Utils {
 
     public String getUserCountry() {
         try {
-            final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            final TelephonyManager tm = (TelephonyManager) activity.getSystemService(Context.TELEPHONY_SERVICE);
             final String simCountry = tm.getSimCountryIso();
             if (simCountry != null && simCountry.length() == 2) { // SIM country code is available
                 return simCountry.toLowerCase(Locale.US);

@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.utilities.EMethods;
 import com.example.socialbike.R;
 import com.example.socialbike.model.PostDTO;
@@ -93,7 +94,7 @@ public class PostManager implements RecyclerViewAdapter.ItemClickListener{
         if (eventId != null)
             payload.put("eventId", eventId);
 
-        Utils.PostData(EMethods.getPosts, payload)
+        MainActivity.utils.PostData(EMethods.getPosts, payload)
                 .continueWith(task -> {
                     String response = String.valueOf(task.getResult().getData());
                     System.out.println("response: " + response);

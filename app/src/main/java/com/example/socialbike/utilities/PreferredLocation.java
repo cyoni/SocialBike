@@ -5,6 +5,7 @@ import android.widget.TextView;
 
 import androidx.core.text.HtmlCompat;
 
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.utilities.Position;
 import com.example.socialbike.utilities.Utils;
 import com.google.android.gms.maps.model.LatLng;
@@ -19,27 +20,27 @@ public class PreferredLocation {
     }
 
     public void savePosition(Position position) {
-        Utils.savePreference(activity, "data", "lat", String.valueOf(position.getLatLng().latitude));
-        Utils.savePreference(activity, "data", "lng", String.valueOf(position.getLatLng().longitude));
-        Utils.savePreference(activity, "data", "city", position.getCity());
-        Utils.savePreference(activity, "data", "country", position.getCountry());
+        MainActivity.utils.savePreference("data", "lat", String.valueOf(position.getLatLng().latitude));
+        MainActivity.utils.savePreference("data", "lng", String.valueOf(position.getLatLng().longitude));
+        MainActivity.utils.savePreference("data", "city", position.getCity());
+        MainActivity.utils.savePreference("data", "country", position.getCountry());
     }
 
     public void initPreferredLocation(Position position) {
-        String lat = Utils.getPreference(activity, "data", "lat");
-        String lng = Utils.getPreference(activity, "data", "lng");
-        String preferredCity = Utils.getPreference(activity, "data", "city");
-        String preferredCountry = Utils.getPreference(activity, "data", "country");
+        String lat = MainActivity.utils.getPreference("data", "lat");
+        String lng = MainActivity.utils.getPreference("data", "lng");
+        String preferredCity = MainActivity.utils.getPreference("data", "city");
+        String preferredCountry = MainActivity.utils.getPreference("data", "country");
 
         if (lat != null && lng != null && preferredCity != null){
             position.setLatLng(new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)));
             position.setCity(preferredCity);
             position.setCountry(preferredCountry);
         } else {
-            String userCountry = Utils.getUserCountry(activity);
+            String userCountry = MainActivity.utils.getUserCountry();
             if (userCountry != null) {
                 preferredCity = userCountry.toUpperCase();
-                position = Utils.getLatLngOfString(preferredCity + " country");
+                position = MainActivity.utils.getLatLngOfString(preferredCity + " country");
                 savePosition(position);
             }
         }

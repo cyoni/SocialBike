@@ -52,7 +52,7 @@ public class AddPostActivity extends AppCompatActivity {
 
         setTextBoxListener();
 
-        Utils.showKeyboard(this);
+        MainActivity.utils.showKeyboard();
         textBox.requestFocus();
     }
 
@@ -159,7 +159,7 @@ public class AddPostActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed(){
-        Utils.hideKeyboard(this);
+        MainActivity.utils.hideKeyboard();
         finish();
     }
 }

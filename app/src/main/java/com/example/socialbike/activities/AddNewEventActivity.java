@@ -187,8 +187,8 @@ public class AddNewEventActivity extends AppCompatActivity {
         if (results != null) {
             String address = results[0].formattedAddress;
             mapButton.setText(address);
-            String city = Utils.getEntity(results[0], com.example.socialbike.Enums.Place.LOCALITY);
-            String country = Utils.getEntity(results[0], com.example.socialbike.Enums.Place.COUNTRY);
+            String city = MainActivity.utils.getEntity(results[0], com.example.socialbike.Enums.Place.LOCALITY);
+            String country = MainActivity.utils.getEntity(results[0], com.example.socialbike.Enums.Place.COUNTRY);
             position.setCity(city);
             position.setCountry(country);
             position.setAddress(address);

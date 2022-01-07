@@ -24,7 +24,7 @@ public class GroupManager {
         //   data.put("lat", position.getLatLng().latitude);
         //   data.put("lng", position.getLatLng().longitude);
 
-        return Utils.PostData(EMethods.GetAllGroups, data);
+        return MainActivity.utils.PostData(EMethods.GetAllGroups, data);
     }
 
 
@@ -32,7 +32,7 @@ public class GroupManager {
 
         Map<String, Object> data = new HashMap<>();
 
-        return Utils.PostData(EMethods.GetMyGroups, data); // todo: update local groups
+        return MainActivity.utils.PostData(EMethods.GetMyGroups, data); // todo: update local groups
     }
 
 /*

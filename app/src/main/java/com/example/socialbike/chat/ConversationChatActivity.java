@@ -84,7 +84,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
     @Override
     public void onResume() {
         super.onResume();
-        Utils.showKeyboard(this);
+        MainActivity.utils.showKeyboard();
         messageBox.requestFocus();
         scrollToBottom();
     }
@@ -137,7 +137,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
 
     @Override
     public void onBackPressed() {
-        Utils.hideKeyboard(this);
+        MainActivity.utils.hideKeyboard();
         MainActivity.chatManager.currentConversationChat = null;
         finish();
     }

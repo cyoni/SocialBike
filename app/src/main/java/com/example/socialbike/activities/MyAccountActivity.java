@@ -1,5 +1,7 @@
 package com.example.socialbike.activities;
 
+import static com.example.socialbike.utilities.Constants.ADDRESS_FROM_MAPS_CODE;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -22,7 +24,7 @@ import com.example.socialbike.utilities.EMethods;
 import com.example.socialbike.utilities.Geo;
 import com.example.socialbike.utilities.ImageManager;
 import com.example.socialbike.utilities.MyPreferences;
-import com.example.socialbike.utilities.Utils;
+import com.example.socialbike.utilities.Position;
 import com.google.android.libraries.places.api.model.TypeFilter;
 
 import java.util.HashMap;
@@ -34,8 +36,8 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
     ImageManager imageManager;
     ImageView profilePicture;
     Button saveButton;
-    PreferredLocationService preferredLocationManager;
-    EditText age;
+    private Position position;
+    EditText locationText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +48,6 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         getSupportActionBar().setTitle("My Account");
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
         imageManager = new ImageManager(this);
-        preferredLocationManager = new PreferredLocationService(this);
-
-        preferredLocationManager.initLocation();
 
         profilePicture = findViewById(R.id.profile_image);
 
@@ -59,22 +58,27 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         name.setText(ConnectedUser.getName());
         initPicture();
 
-        EditText locationText = findViewById(R.id.preferredLocation);
+        locationText = findViewById(R.id.preferredLocation);
         locationText.setOnClickListener(view -> Geo.startAutoComplete(this, null, TypeFilter.CITIES));
 
+        position = MainActivity.preferredLocationService.getPrivatePosition();
+        if (position != null){
+            locationText.setText(position.getAddress());
+        }
     }
 
     private void save() {
-        if (!saveButton.getText().toString().equals("Saving...")) {
-            saveButton.setText("Saving...");
+        if (!saveButton.getText().toString().equals("Saving")) {
+            saveButton.setText("Saving");
             submitForm();
         }
     }
 
     private void submitForm() {
         Map<String, Object> profileObject = buildRequestObject();
-        preferredLocationManager.saveLocation();
         MainActivity.utils.PostData(EMethods.updateProfile, profileObject).continueWithTask(task -> {
+            MainActivity.preferredLocationService.savePrivateLocation(position);
+            MainActivity.preferredLocationService.savePreferredLocation(position);
             MainActivity.toast(this, "Saved", false);
             finish();
             return null;
@@ -84,19 +88,24 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
 
     private Map<String, Object> buildRequestObject() {
         Map<String, Object> data = new HashMap<>();
-        data.put("country", preferredLocationManager.position.getCountry());
-        data.put("city", preferredLocationManager.position.getCity());
-        data.put("lat", preferredLocationManager.position.getLatLng().latitude);
-        data.put("lng", preferredLocationManager.position.getLatLng().longitude);
+        data.put("country", position.getCountry());
+        data.put("city", position.getCity());
+        data.put("lat", position.getLatLng().latitude);
+        data.put("lng", position.getLatLng().longitude);
         return data;
     }
 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-
-        preferredLocationManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ADDRESS_FROM_MAPS_CODE) {
+            if (resultCode == RESULT_OK) {
+                position = Geo.getPosition(data);
+                locationText.setText(position.getAddress());
+            }
+        }
+
     }
 
     private void initPicture() {

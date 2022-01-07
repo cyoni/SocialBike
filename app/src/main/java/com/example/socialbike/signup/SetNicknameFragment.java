@@ -53,7 +53,7 @@ public class SetNicknameFragment extends Fragment {
 
     private void proceedToNextFragment() {
         nav.navigate(R.id.action_setNicknameFragment_to_setPreferred_loc);
-        Utils.hideKeyboard(getActivity());
+        MainActivity.utils.hideKeyboard();
     }
 
     private void setNickname() {
@@ -107,7 +107,7 @@ public class SetNicknameFragment extends Fragment {
         continueButton = root.findViewById(R.id.continue_button);
         startListening();
         nickname_txt.requestFocus();
-        Utils.showKeyboard(getActivity());
+        MainActivity.utils.showKeyboard();
         return root;
     }
 }

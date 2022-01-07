@@ -39,7 +39,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         submit.setOnClickListener(view -> submitForm());
 
         binding.title.requestFocus();
-        Utils.showKeyboard(this);
+        MainActivity.utils.showKeyboard();
     }
 
     private void submitForm() {
@@ -73,7 +73,7 @@ public class CreateGroupActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed(){
-        Utils.hideKeyboard(this);
+        MainActivity.utils.hideKeyboard();
         finish();
     }
 
