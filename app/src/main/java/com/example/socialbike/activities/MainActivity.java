@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.room.Room;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     public static GroupManager groupManager = new GroupManager();
     public static Utils utils;
     public static PreferredLocationService preferredLocationService = new PreferredLocationService();
+    private int REFRESH_EVENTS_CODE = 7294;
 
     public static void toast(Context context, String msg, boolean isLong) {
         int displayLongMessage = isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
@@ -150,6 +152,12 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REFRESH_EVENTS_CODE) {
+            if(resultCode == Activity.RESULT_OK){
+                EventsFragment.getInstance().refresh();
+            }
+        }
     }
 
     private void initiatePlaces() {
@@ -208,13 +216,12 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
 
             switch (item.getItemId()) {
                 case R.id.events:
-
                     changeFragment(EventsFragment.getInstance());
                     currentLayout = R.layout.fragment_events;
-                    BadgeDrawable xx = bottomNavigationView.getOrCreateBadge(2);
+/*                    BadgeDrawable xx = bottomNavigationView.getOrCreateBadge(2);
                     boolean a = xx.hasNumber();
                     xx.setVisible(true);
-                    xx.setNumber(3);
+                    xx.setNumber(3);*/
                     break;
                 case R.id.groups:
                     changeFragment(GroupContainer.getInstance());
@@ -268,11 +275,11 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     }*/
 
     public void login() {
-        startActivity(new Intent(this, LogInActivity.class));
+        startActivityForResult(new Intent(this, LogInActivity.class), REFRESH_EVENTS_CODE);
     }
 
     public void myAccount() {
-        startActivity(new Intent(this, MyAccountActivity.class));
+        startActivityForResult(new Intent(this, MyAccountActivity.class), REFRESH_EVENTS_CODE);
     }
 
     @Override

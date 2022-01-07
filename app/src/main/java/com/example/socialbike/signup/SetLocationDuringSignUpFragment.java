@@ -82,6 +82,7 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
     }
 
     private void savePosition() {
+        MainActivity.preferredLocationService.savePreferredLocation(position);
         MainActivity.preferredLocationService.savePrivateLocation(position);
     }
 
@@ -96,12 +97,10 @@ public class SetLocationDuringSignUpFragment extends Fragment/* implements Adapt
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ADDRESS_FROM_MAPS_CODE) {
             if (resultCode == RESULT_OK) {
                 position = Geo.getPosition(data);
                 preferredLocationBox.setText(position.getAddress());
             }
-        }
     }
 
     private void submitForm() {

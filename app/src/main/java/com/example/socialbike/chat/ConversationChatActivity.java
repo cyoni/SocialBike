@@ -44,7 +44,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation_chat);
-        setToolbar();
+
         historyDao = MainActivity.database.historyDao();
 
         receiverId = getIntent().getStringExtra("userId");
@@ -54,6 +54,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
         messageBox = findViewById(R.id.messageBox);
         recyclerView = findViewById(R.id.recyclerview);
         initAdapter();
+        setToolbar();
         getChatHistory();
     }
 
@@ -137,7 +138,7 @@ public class ConversationChatActivity extends AppCompatActivity implements Recyc
 
     @Override
     public void onBackPressed() {
-        MainActivity.utils.hideKeyboard();
+        MainActivity.utils.hideKeyboard(this);
         MainActivity.chatManager.currentConversationChat = null;
         finish();
     }

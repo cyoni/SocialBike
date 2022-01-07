@@ -1,5 +1,6 @@
 package com.example.socialbike.signup;
 
+import static android.app.Activity.RESULT_OK;
 import static com.example.socialbike.utilities.ImageManager.SELECT_PICTURE_CODE;
 
 import android.app.Activity;
@@ -74,7 +75,9 @@ public class SetProfilePictureFragment extends Fragment {
             }
         });
 
-        skipButton.setOnClickListener(view -> getActivity().finish());
+        skipButton.setOnClickListener(view -> {
+            getActivity().onBackPressed();
+        });
 
         loadPictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,7 +89,7 @@ public class SetProfilePictureFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SELECT_PICTURE_CODE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == SELECT_PICTURE_CODE && resultCode == RESULT_OK) {
             Uri uri = data.getData();
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
@@ -126,7 +129,7 @@ public class SetProfilePictureFragment extends Fragment {
             imageManager.removePictureLocally(getContext(), Consts.Profile_Picture, ConnectedUser.getPublicKey());
             imageManager.locallySavePicture(copy2, Consts.Profile_Picture, ConnectedUser.getPublicKey());
             MainActivity.toast(getContext(), "Success!", true);
-            getActivity().finish();
+            getActivity().onBackPressed();
         } ).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -138,4 +141,5 @@ public class SetProfilePictureFragment extends Fragment {
     private boolean isPictureValid() {
         return bitmap != null;
     }
+
 }

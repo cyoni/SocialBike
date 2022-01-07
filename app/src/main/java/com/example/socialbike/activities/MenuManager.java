@@ -27,9 +27,6 @@ public class MenuManager {
         menu.clear();
         currentLayout = layout;
 
-        if (ConnectedUser.getPublicKey() == null || ConnectedUser.getPublicKey().equals("-"))
-            createLogInButton();
-
         switch (layout){
             case R.layout.fragment_events: createEventsMenu(); break;
             case R.layout.fragment_group: createGroupMenu(); break;
@@ -43,6 +40,11 @@ public class MenuManager {
         }
 
 
+
+    }
+
+    private void hideMenu(int menuCode) {
+        menu.removeItem(menuCode);
 
     }
 
@@ -76,7 +78,7 @@ public class MenuManager {
     }
 
     private void createButton(int buttonCode, String button) {
-        menu.add(0, buttonCode, Menu.NONE, button);;
+        menu.add(0, buttonCode, Menu.NONE, button);
     }
 
     private void createLogInButton() {
@@ -84,7 +86,10 @@ public class MenuManager {
     }
 
     private void createEventsMenu() {
-        createMyAccountButton();
+        if (ConnectedUser.getPublicKey() == null || ConnectedUser.getPublicKey().equals("-")) {
+            createLogInButton();
+        } else
+            createMyAccountButton();
     }
 
 

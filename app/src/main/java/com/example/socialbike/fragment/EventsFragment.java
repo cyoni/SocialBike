@@ -147,6 +147,12 @@ public class EventsFragment extends Fragment
         });
     }
 
+    public void refresh(){
+        eventsManager.showProgressbar();
+        updateCityTextView();
+        getEvents();
+    }
+
     private void updateCityTextView() {
         cityText.setText(HtmlCompat.fromHtml
                 ("<u><b>"+ position.getCity() +"</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));

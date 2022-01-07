@@ -1,5 +1,6 @@
 package com.example.socialbike.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -16,7 +17,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,11 +25,9 @@ import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import java.util.HashMap;
 
@@ -150,6 +148,8 @@ public class LogInActivity extends AppCompatActivity {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
 
             handleSignInResult(task);
+        } else if(requestCode == 3313){
+            int x = 4;
         }
     }
 
@@ -226,21 +226,17 @@ public class LogInActivity extends AppCompatActivity {
         MainActivity.mDatabase.child("public").child(ConnectedUser.getPublicKey()).child("profile").child("nickname").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (  dataSnapshot.exists()) {
+                if (!  dataSnapshot.exists()) {
                     String nickname = (String) dataSnapshot.getValue();
                     ConnectedUser.setNickname(nickname);
                     saveNicknameOnDevice(nickname);
-                    closeActivity();
-                    MainActivity.toast(getApplicationContext(), "Hi " + nickname, false);
-                    System.out.println("!");
+                    MainActivity.startChat();
+                    refreshAndClose();
                 } else {
-                    System.out.println("@");
                     openSetNicknameActivity();
-                    finish();
                 }
-                System.out.println("#");
 
-                MainActivity.startChat();
+
             }
 
             @Override
@@ -253,7 +249,14 @@ public class LogInActivity extends AppCompatActivity {
         });
     }
 
-    private void closeActivity() {
+    private void setRefresh(){
+        Intent intent = new Intent();
+        intent.putExtra("refresh", "true");
+        setResult(Activity.RESULT_OK, intent);
+    }
+
+    private void refreshAndClose() {
+        setRefresh();
         finish();
     }
 
@@ -263,7 +266,7 @@ public class LogInActivity extends AppCompatActivity {
     }
 
     private void openSetNicknameActivity() {
-        startActivity(new Intent(this, WelcomeActivity.class));
+        startActivityForResult(new Intent(this, WelcomeActivity.class), 3313);
     }
 
     private void savePublicKeyOnDevice(String publicKey) {

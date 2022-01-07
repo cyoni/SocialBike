@@ -1,5 +1,6 @@
 package com.example.socialbike.groups;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 import static com.example.socialbike.activities.MainActivity.groupManager;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import com.example.socialbike.recyclerview.RecyclerViewAdapter;
 import com.example.socialbike.utilities.Constants;
 import com.example.socialbike.activities.MainActivity;
+import com.example.socialbike.utilities.Geo;
 import com.example.socialbike.utilities.Position;
 import com.example.socialbike.utilities.PreferredLocation;
 import com.example.socialbike.R;
@@ -30,6 +32,7 @@ import com.example.socialbike.groups.group.GroupActivity;
 import com.example.socialbike.groups.group.GroupDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
@@ -56,6 +59,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     private PreferredLocation preferredLocation;
     private String location = "xxx";
     private Position position = new Position();
+    private boolean skipRefresh = false;
 
     public ExploreGroupsFragment(GroupContainer groupContainer) {
         this.groupContainer = groupContainer;
@@ -93,10 +97,12 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     @Override
     public void onResume() {
         super.onResume();
-        if (container.isEmpty() || container.get(0) == null)
-            getGroups();
-        else{
-            locallyRefresh();
+        if (!skipRefresh) {
+            if (container.isEmpty() || container.get(0) == null)
+                getGroups();
+            else {
+                locallyRefresh();
+            }
         }
     }
 
@@ -120,6 +126,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         for (int index : indexes){
             recyclerViewAdapter.notifyItemChanged(index);
         }
+        skipRefresh = false;
     }
 
     private void getGroups() {
@@ -168,8 +175,15 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     public void onBinding(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
         Group current = container.get(position);
 
-        if (current == null)
+        if (current == null) {
+            Position location = MainActivity.preferredLocationService.getPreferredPosition();
+            holder.location.setText("Find groups near " + location.getCity());
+            holder.changeLocationButton.setOnClickListener(view -> {
+                skipRefresh = true;
+                Geo.startAutoComplete(null, this, TypeFilter.CITIES);
+            });
             return;
+        }
 
         holder.joinButton.setVisibility(View.VISIBLE);
         holder.joinButton.setOnClickListener(view -> joinOrLeaveGroup(holder, position));
@@ -210,8 +224,17 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
+                Position position = Geo.getPosition(data);
+                MainActivity.preferredLocationService.savePreferredLocation(position);
+                progressBar.setVisibility(View.VISIBLE);
+            } if (resultCode == RESULT_CANCELED){
+                skipRefresh = false;
+            }
+
+           /* if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
 
                 String address = place.getAddress();
@@ -234,10 +257,8 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
                 //
                 //updateCityTextView(position.getCountry());
                 //getEvents();
+            }*/
             }
-            return;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void updateCityTextView(String country) {
@@ -318,6 +339,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
 
     @Override
     public void onFinishedUpdating() {
+        skipRefresh = false;
         swipeLayout.setRefreshing(false);
         recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
         progressBar.setVisibility(View.GONE);

@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -80,6 +81,7 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
             MainActivity.preferredLocationService.savePrivateLocation(position);
             MainActivity.preferredLocationService.savePreferredLocation(position);
             MainActivity.toast(this, "Saved", false);
+            setRefresh();
             finish();
             return null;
         });
@@ -99,13 +101,16 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ADDRESS_FROM_MAPS_CODE) {
-            if (resultCode == RESULT_OK) {
-                position = Geo.getPosition(data);
-                locationText.setText(position.getAddress());
-            }
+        if (resultCode == RESULT_OK) {
+            position = Geo.getPosition(data);
+            locationText.setText(position.getAddress());
         }
+    }
 
+    private void setRefresh(){
+        Intent intent = new Intent();
+        intent.putExtra("refresh", "true");
+        setResult(Activity.RESULT_OK, intent);
     }
 
     private void initPicture() {
@@ -148,6 +153,7 @@ public class MyAccountActivity extends AppCompatActivity implements MenuAction {
         ConnectedUser.setPublicKey("-");
 
         MainActivity.toast(getApplicationContext(), "You have been logged out successfully.", true);
+        setRefresh();
         finish();
     }
 
