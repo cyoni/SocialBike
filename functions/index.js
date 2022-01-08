@@ -875,15 +875,37 @@ exports.CreateGroup = functions.https.onCall(async (request, context) => {
     const account = await verifyUser(privateKey);
     const title = request.title
     const description = request.description
+    
+    const lat = request.lat
+    const lng = request.lng
 
     const data = {
         publicKey: account.publicKey,
         title: title,
-        description: description
+        description: description,
+        lat: lat,
+        lng: lng,
+        timestamp: Date.now()
     }
 
     if (account === null)
         return "[AUTH_FAILED]";
+
+    /*
+    if (country === null && city === null){
+        return "country and city are null"
+    } else if (city === null || city.trim() === "" && country !== null && country.trim() !== "")
+    {
+        await admin.database().ref('groups').child(country).push(data)
+    } else if (country === null || country.trim() === "" && city !== null && city.trim() !== "")
+    {
+        await admin.database().ref('groups').child('no_country').child(city).push(data)
+    }
+    else
+    {
+        await admin.database().ref('groups').child(country).child(city).push(data)
+    }
+    */
 
     await admin.database().ref('groups').push(data)
     return "OK"
@@ -922,25 +944,33 @@ function getGroupData(snapshot) {
         title: snapshot.child('title'),
         description: snapshot.child('description'),
         memberCount: snapshot.child('members').numChildren(),
+        lat: snapshot.child('lat'),
+        lng: snapshot.child('lng')
         })
 }
 
 
 exports.GetAllGroups = functions.https.onCall(async (request, context) => {
     const account = await verifyUser(context.auth.uid);
+    const lat = request.lat
+    const lng = request.lng
+    const range = 100
 
     var data = {}
     data['groups'] = []
 
     return admin.database().ref('groups').once('value').then(snapshot => {
-        snapshot.forEach(raw_post => {
-            var group = []
-            group = getGroupData(raw_post)
-            if (account !== null){
-                console.log(account.publicKey + ", " + raw_post.key  + ", " + raw_post.child('members').child(account.publicKey).exists())
-                group['isMember'] = raw_post.child('members').child(account.publicKey).exists()
+        snapshot.forEach(raw_group => {
+            var group = getGroupData(raw_group)
+
+            console.log(group.lat.val() + "," + group.lng.val() + "," + lat + "," + lng + "," + (distanceFromMe(group.lat, group.lng, lat, lng) <= range))
+            if (distanceFromMe(group.lat.val(), group.lng.val(), lat, lng) <= range){
+                if (account !== null){
+                    console.log(account.publicKey + ", " + raw_group.key  + ", " + raw_group.child('members').child(account.publicKey).exists())
+                    group['isMember'] = raw_group.child('members').child(account.publicKey).exists()
+                }
+                data['groups'].push(group)
             }
-            data['groups'].push(group)
         })
         return JSON.stringify(data)
     })

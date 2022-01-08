@@ -4,6 +4,7 @@ package com.example.socialbike.groups;
 import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.groups.group.GroupDTO;
 import com.example.socialbike.utilities.EMethods;
+import com.example.socialbike.utilities.Position;
 import com.example.socialbike.utilities.Utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.tasks.Task;
@@ -18,11 +19,11 @@ public class GroupManager {
 
     public Map<String, Group> MyConnectedGroups = new HashMap<>();
 
-    public Task<HttpsCallableResult> getAllGroups(){
+    public Task<HttpsCallableResult> getAllGroups(Position position){
 
         Map<String, Object> data = new HashMap<>();
-        //   data.put("lat", position.getLatLng().latitude);
-        //   data.put("lng", position.getLatLng().longitude);
+        data.put("lat", position.getLatLng().latitude);
+        data.put("lng", position.getLatLng().longitude);
 
         return MainActivity.utils.PostData(EMethods.GetAllGroups, data);
     }

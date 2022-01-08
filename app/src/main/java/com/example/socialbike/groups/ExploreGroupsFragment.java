@@ -56,9 +56,6 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     protected Set<String> groupIds = new HashSet<>();
     private final int DIVIDER_LAYOUT = 0;
     private final int EVENT_LAYOUT = 1;
-    private PreferredLocation preferredLocation;
-    private String location = "xxx";
-    private Position position = new Position();
     private boolean skipRefresh = false;
 
     public ExploreGroupsFragment(GroupContainer groupContainer) {
@@ -74,7 +71,6 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.preferredLocation = new PreferredLocation(getActivity());
     }
 
     @Override
@@ -103,6 +99,8 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
             else {
                 locallyRefresh();
             }
+        } else{
+            skipRefresh = false;
         }
     }
 
@@ -126,13 +124,10 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         for (int index : indexes){
             recyclerViewAdapter.notifyItemChanged(index);
         }
-        skipRefresh = false;
     }
 
     private void getGroups() {
-        container.clear();
-
-        groupManager.getAllGroups().continueWith(task -> {
+        groupManager.getAllGroups(MainActivity.preferredLocationService.getPreferredPosition()).continueWith(task -> {
             parseGroups(String.valueOf(task.getResult().getData()));
             return null;
         });
@@ -140,16 +135,22 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     }
 
     private void parseGroups(String response) {
+        System.out.println("groups response: " + response);
+        container.clear();
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             GroupDTO groupDTO = objectMapper.readValue(response, GroupDTO.class);
             container.addAll(groupDTO.getGroups());
-            for (Group group : container)
+            for (Group group : container) {
+                if (group == null)
+                    continue;
                 groupIds.add(group.getGroupId());
+            }
             sortContainer();
+            container.add(0, null); // for divider
             onFinishedUpdating();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println( e.getLocalizedMessage());
         }
     }
 
@@ -157,16 +158,16 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         ArrayList<Group> tmpContainer = new ArrayList<>();
         for (int i = 0; i < container.size(); i++) {
             Group group = container.get(i);
-            if (!group.getIsMember()) {
-                tmpContainer.add(group);
-                container.remove(group);
-                i--;
+            if (group != null) {
+                if (!group.getIsMember()) {
+                    tmpContainer.add(group);
+                    container.remove(group);
+                    i--;
+                }
             }
         }
-        tmpContainer.addAll(container);
 
-        container.clear();
-        container.add(null); // for divider
+        tmpContainer.addAll(container);
         container.addAll(tmpContainer);
     }
 
@@ -180,7 +181,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
             holder.location.setText("Find groups near " + location.getCity());
             holder.changeLocationButton.setOnClickListener(view -> {
                 skipRefresh = true;
-                Geo.startAutoComplete(null, this, TypeFilter.CITIES);
+                Geo.startAutoComplete(null, this, TypeFilter.REGIONS);
             });
             return;
         }
@@ -229,11 +230,9 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
             if (resultCode == RESULT_OK) {
                 Position position = Geo.getPosition(data);
                 MainActivity.preferredLocationService.savePreferredLocation(position);
-                progressBar.setVisibility(View.VISIBLE);
-            } if (resultCode == RESULT_CANCELED){
-                skipRefresh = false;
+                showLoading(true);
+                getGroups();
             }
-
            /* if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
 
@@ -261,9 +260,15 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
             }
     }
 
-    private void updateCityTextView(String country) {
-        location = country;
-        recyclerViewAdapter.notifyItemChanged(0);
+    private void showLoading(boolean show) {
+        if (show){
+            recyclerView.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        else{
+            recyclerView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void openCitiesAutoComplete() {
@@ -340,9 +345,10 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
     @Override
     public void onFinishedUpdating() {
         skipRefresh = false;
+        showLoading(false);
         swipeLayout.setRefreshing(false);
         recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
-        progressBar.setVisibility(View.GONE);
+        System.out.println("container size: " + container.size());
     }
 
     class EmptyView extends RecyclerView.ViewHolder {

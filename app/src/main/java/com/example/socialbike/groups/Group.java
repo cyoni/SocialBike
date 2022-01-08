@@ -19,6 +19,7 @@ public class Group {
     protected String description;
     protected int memberCount;
     protected boolean isMember;
+    protected double lat, lng;
 
     public Group(){} // do not remove!
 
@@ -58,6 +59,14 @@ public class Group {
 
     public int getMemberCount() {
         return memberCount;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLng() {
+        return lng;
     }
 
     public void setMemberCount(int memberCount) {

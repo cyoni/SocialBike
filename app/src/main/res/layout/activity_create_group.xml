@@ -33,7 +33,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
                     android:backgroundTint="@color/purple_700"
-                    android:text="Create" />
+                    android:text="Create Group" />
 
             </LinearLayout>
 
@@ -44,7 +44,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/app_bar"
         android:orientation="vertical"
         android:padding="5dp">
@@ -53,7 +53,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
-            android:text="Group title" />
+            android:text="Title" />
 
         <EditText
             android:id="@+id/title"
@@ -65,6 +65,22 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Region" />
+
+
+        <EditText
+            android:id="@+id/region"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:ems="10"
+            android:focusable="false"
+            android:inputType="text" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Description" />
 
         <EditText
@@ -72,6 +88,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="text" />
+            android:inputType="textMultiLine" />
     </LinearLayout>
 </RelativeLayout>
