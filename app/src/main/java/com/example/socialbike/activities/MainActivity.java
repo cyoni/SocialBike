@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
     public static GroupManager groupManager = new GroupManager();
     public static Utils utils;
     public static PreferredLocationService preferredLocationService = new PreferredLocationService();
+    public static FavoriteEventsService favoriteEventsService = new FavoriteEventsService();
+
     private int REFRESH_EVENTS_CODE = 7294;
 
     public static void toast(Context context, String msg, boolean isLong) {
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
 
         initiatePlaces();
         preferredLocationService.init();
+        favoriteEventsService.init();
 
         // AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }

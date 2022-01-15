@@ -376,6 +376,8 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
     const groupId = request.groupId || null
     const getFirstEvent = request.getFirstEvent || null
 
+    const specificEvents = request.specificEvents || null
+
     var ref;
 
     if (groupId !== null) {
@@ -399,19 +401,16 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
             var group_events = []
             
             snapshot.forEach(raw_data => {
-                console.log("1")
                 if (raw_data.child('members').child(publicKey).exists()){
-                    console.log("2")
                     var groupEvents = raw_data.child('events')
-                    console.log("3")
                     if (groupEvents.exists()){
-                        console.log("4")
                         groupEvents.forEach(current => {
-                            console.log("5")
                             // if current is active
-                            if (raw_data.child('publicKey').exists()){
-                                console.log("6")
-                                group_events.push( makeEventObject(current, null, publicKey)  )
+                            if (
+                                specificEvents !== null && specificEvents.includes(current.key) || 
+                                specificEvents === null && raw_data.child('publicKey').exists()
+                                ){
+                                group_events.push( makeEventObject(current, raw_data.key, publicKey)  )
                             }
                         })
                     }
@@ -419,7 +418,6 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
             })
 
             group_events.forEach(current => {
-                console.log("found extra event! " )
                 data['events'].push(current)
             })
       
@@ -437,6 +435,7 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
         snapshot.forEach(raw_data => {
 
             if (
+                specificEvents !== null && specificEvents.includes(raw_data.key) ||
                 groupId !== null ||
                 distanceFromMe(raw_data.child('lat').val(), raw_data.child('lng').val(), lat, lng) <= range 
                      && raw_data.child('country').val() === country
@@ -687,22 +686,38 @@ exports.sendComment = functions.https.onCall(async (request, context) => {
     return messageId
 })
 
+function GetReference(eventId, groupId){
 
+    var route;
+
+    if (groupId === null && eventId !== null) { // send comment to 'events' bucket
+        route = admin.database().ref('events').child(eventId)
+    } else if (groupId !== null && eventId === null) { // send comment to group -> posts
+        route = admin.database().ref('groups').child(groupId)
+    } else if (groupId !== null && eventId !== null) { // send comment to group -> events -> posts
+        route = admin.database().ref('groups').child(groupId).child('events').child(eventId)
+    }
+
+    return route;
+}
 exports.interested = functions.https.onCall(async (request, context) => {
 
     const privateKey = context.auth.uid;
     const account = await verifyUser(privateKey);
     const eventId = request.eventId
+    const groupId = request.groupId
 
     if (account === null)
         return "[AUTH_FAILED]"
 
-    const a = await admin.database().ref('events').child(eventId).child('interested').child(account.publicKey).once('value')
+    var ref = GetReference(eventId, groupId).child('interested').child(account.publicKey)
+
+    const a = await ref.once('value')
     if (a.exists()) {
-        admin.database().ref('events').child(eventId).child('interested').child(account.publicKey).remove()
+        ref.remove()
     }
     else
-        await admin.database().ref('events').child(eventId).child('interested').child(account.publicKey).set(Date.now())
+        await ref.set(Date.now())
     return "OK"
 
 })
@@ -712,16 +727,18 @@ exports.going = functions.https.onCall(async (request, context) => {
     const privateKey = context.auth.uid;
     const account = await verifyUser(privateKey);
     const eventId = request.eventId
+    const groupId = request.groupId || null
 
     if (account === null)
         return "[AUTH_FAILED]";
 
-    const a = await admin.database().ref('events').child(eventId).child('going').child(account.publicKey).once('value')
+    const ref = GetReference(eventId, groupId).child('going').child(account.publicKey)
+    const a = await ref.once('value')
     if (a.exists()) {
-        admin.database().ref('events').child(eventId).child('going').child(account.publicKey).remove()
+        ref.remove()
     }
     else
-        await admin.database().ref('events').child(eventId).child('going').child(account.publicKey).set(Date.now())
+        ref.set(Date.now())
     return "OK"
 
 })

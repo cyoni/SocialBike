@@ -33,7 +33,6 @@ import com.example.socialbike.utilities.ImageManager;
 import com.example.socialbike.utilities.Maps;
 import com.example.socialbike.post.MembersList;
 import com.example.socialbike.R;
-import com.example.socialbike.utilities.Utils;
 import com.example.socialbike.events.EventDetails;
 import com.example.socialbike.groups.IPageAdapter;
 import com.example.socialbike.groups.SectionsPagerAdapter;
@@ -48,7 +47,6 @@ import com.google.firebase.storage.StorageReference;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class EventActivity extends AppCompatActivity implements IPageAdapter, pictureSheetDialog.BottomSheetListener {
@@ -247,9 +245,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
     }
 
     private boolean getIsEventSavedInLocal() {
-        Map<String, ?> map = MainActivity.utils.getAllPreferences("saved_events");
-        Set<String> keys = map.keySet();
-        return (keys.contains(event.getEventId()));
+        return MainActivity.favoriteEventsService.doesExist(event.getEventId());
     }
 
     private void openMap() {
@@ -278,6 +274,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
         interested_count.setText(String.valueOf(event.getNumInterestedMembers()));
         Map<String, Object> data = new HashMap<>();
         data.put("eventId", event.getEventId());
+        data.put("groupId", event.getGroupId());
         data.put("action", event.getIsInterested());
 
         setPressed(interested, event.getIsInterested());
@@ -309,6 +306,7 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
 
         Map<String, Object> data = new HashMap<>();
         data.put("eventId", event.getEventId());
+        data.put("groupId", event.getGroupId());
         MainActivity.mFunctions
                 .getHttpsCallable("going")
                 .call(data)
@@ -322,9 +320,9 @@ public class EventActivity extends AppCompatActivity implements IPageAdapter, pi
     private void saveEvent() {
         boolean isSaved = getIsEventSavedInLocal();
         if (isSaved)
-            MainActivity.utils.removePreference("saved_events", event.getEventId());
+            MainActivity.favoriteEventsService.remove(event.getEventId());
         else
-            MainActivity.utils.savePreference("saved_events", event.getEventId(), event.getGroupId() + ",");
+            MainActivity.favoriteEventsService.add(event.getEventId());
         setPressed(save, !isSaved);
     }
 

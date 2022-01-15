@@ -181,7 +181,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
             holder.location.setText("Find groups near " + location.getCity());
             holder.changeLocationButton.setOnClickListener(view -> {
                 skipRefresh = true;
-                Geo.startAutoComplete(null, this, TypeFilter.REGIONS);
+                Geo.startAutoComplete(null, this, TypeFilter.CITIES);
             });
             return;
         }
@@ -347,7 +347,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         skipRefresh = false;
         showLoading(false);
         swipeLayout.setRefreshing(false);
-        recyclerViewAdapter.notifyItemRangeChanged(0, container.size());
+        recyclerViewAdapter.notifyDataSetChanged();
         System.out.println("container size: " + container.size());
     }
 

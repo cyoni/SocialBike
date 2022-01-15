@@ -30,30 +30,45 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <Button
-                android:id="@+id/add_new_event_button"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/top_bar"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_toStartOf="@id/sort_button"
-                android:text="Add New Event" />
+                android:gravity="center"
+                >
 
-            <Button
-                android:id="@+id/sort_button"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="170dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginLeft="5dp"
-                android:text="@string/trending"
-                app:icon="@drawable/ic_baseline_arrow_drop_down_24" />
+                <Button
+                    android:id="@+id/add_new_event_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add New Event" />
 
+                <Button
+                    android:id="@+id/sort_button"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="170dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginLeft="5dp"
+                    android:text="@string/trending"
+                    app:icon="@drawable/ic_baseline_arrow_drop_down_24" />
+
+                <ImageButton
+                    android:id="@+id/favoriteEventsButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="centerInside"
+                    android:src ="@drawable/ic_baseline_star_border_24" />
+
+            </LinearLayout>
 
             <RelativeLayout
                 android:id="@+id/searchSection"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
-                android:layout_below="@id/sort_button">
+                android:layout_below="@id/top_bar">
 
                 <TextView
                     android:id="@+id/rangeText"
@@ -84,9 +99,6 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-
-
-
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyle"
@@ -100,10 +112,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textSize="40sp"
-        android:layout_marginTop="50dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="30dp"
-        android:text="No events were found in this area." />
+
+        android:text="No events found" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"

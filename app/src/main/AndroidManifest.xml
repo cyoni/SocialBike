@@ -14,6 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SocialBike">
         <activity
+            android:name=".activities.FavoriteEventsActivity"
+            android:theme="@style/Theme.SocialBike.NoActionBar"
+            android:exported="true" />
+        <activity
             android:name=".activities.MyAccountActivity"
             android:exported="true"
             android:theme="@style/Theme.SocialBike.NoActionBar" />

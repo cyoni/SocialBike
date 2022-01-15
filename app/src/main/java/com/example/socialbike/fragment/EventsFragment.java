@@ -13,9 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.example.socialbike.activities.FavoriteEventsActivity;
 import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.events.Event;
 import com.example.socialbike.events.EventsManager;
@@ -144,6 +146,12 @@ public class EventsFragment extends Fragment
             }
             eventsManager.showProgressbar();
             getEvents();
+        });
+
+        ImageButton favoriteEventsButton = root.findViewById(R.id.favoriteEventsButton);
+        favoriteEventsButton.setOnClickListener(view -> {
+            Intent intent = new Intent(getContext(), FavoriteEventsActivity.class);
+            startActivity(intent);
         });
     }
 

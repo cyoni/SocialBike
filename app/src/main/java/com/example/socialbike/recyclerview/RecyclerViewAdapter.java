@@ -91,7 +91,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public TextView mapButton;
         public Button interested, coming, joinButton, changeLocationButton;
         public RelativeLayout layout, event_picture_layout;
-        public ImageButton commentsButton, likeButton, followButton, menu_button;
+        public ImageButton commentsButton, likeButton, followButton, menu_button, save_button;
         public Button commentButton, postCommentButton, who_is_coming;
         public RelativeLayout relativelayout;
         public LinearLayout commentLayout;
@@ -143,6 +143,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             picture_loader = itemView.findViewById(R.id.picture_loader);
             menu_button = itemView.findViewById(R.id.menu_button);
             changeLocationButton = itemView.findViewById(R.id.changeLocationButton);
+            save_button = itemView.findViewById(R.id.save_button);
 
         }
 

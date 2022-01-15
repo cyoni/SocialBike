@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -25,7 +26,6 @@ import com.example.socialbike.model.EventDTO;
 import com.example.socialbike.room_database.Member;
 import com.example.socialbike.utilities.Consts;
 import com.example.socialbike.utilities.ImageManager;
-import com.example.socialbike.utilities.Utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.storage.StorageReference;
@@ -193,9 +193,30 @@ public class EventsManager implements RecyclerViewAdapter.ItemClickListener {
                 intent.putExtra("event", container.get(position));
                 getContext().startActivity(intent);
             });
+
+            initSaveEventButton(holder.save_button, event.getEventId());
+            holder.save_button.setOnClickListener(view -> saveEventButton((ImageButton) view, event.getEventId()));
         }
     }
 
+    private void initSaveEventButton(ImageButton save_button, String eventId) {
+        if (MainActivity.favoriteEventsService.doesExist(eventId)){
+            save_button.setImageResource(R.drawable.yellowstar);
+        } else{
+            // default icon
+            save_button.setImageResource(R.drawable.ic_baseline_star_border_24);
+        }
+    }
+
+    private void saveEventButton(ImageButton save_button, String eventId) {
+        if (MainActivity.favoriteEventsService.doesExist(eventId)){
+            MainActivity.favoriteEventsService.remove(eventId);
+            save_button.setImageResource(R.drawable.ic_baseline_star_border_24);
+        } else{
+            MainActivity.favoriteEventsService.add(eventId);
+            save_button.setImageResource(R.drawable.yellowstar);
+        }
+    }
 
 
     private StorageReference getPath(String groupId, String eventId) {
