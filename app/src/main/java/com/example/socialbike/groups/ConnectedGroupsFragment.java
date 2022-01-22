@@ -169,7 +169,7 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
         Group current = container.get(position);
             _holder.joinButton.setVisibility(View.GONE);
 
-        _holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle()));
+        _holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle(), current.getOwnerOfGroup()));
         _holder.title.setText(current.getTitle());
         _holder.description.setText(current.getDescription());
         _holder.memberCount.setText(current.getMemberCount() + " members");
@@ -265,10 +265,11 @@ public class ConnectedGroupsFragment extends Fragment implements RecyclerViewAda
         return -1;
     }
 
-    private void openGroupActivity(String groupId, String groupName) {
+    private void openGroupActivity(String groupId, String groupName, String ownerOfGroup) {
         Intent intent = new Intent(getContext(), GroupActivity.class);
         intent.putExtra("groupId", groupId);
         intent.putExtra("groupName", groupName);
+        intent.putExtra("ownerOfGroup", ownerOfGroup);
         startActivity(intent);
     }
 

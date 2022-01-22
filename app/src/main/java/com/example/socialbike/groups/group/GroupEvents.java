@@ -9,8 +9,10 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.socialbike.activities.AddNewEventActivity;
+import com.example.socialbike.activities.MainActivity;
 import com.example.socialbike.events.EventsManager;
 import com.example.socialbike.R;
+import com.example.socialbike.utilities.ConnectedUser;
 import com.example.socialbike.utilities.Updater;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
@@ -34,6 +36,7 @@ public class GroupEvents extends FragmentActivity implements Updater.IUpdate {
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         this.groupId = getIntent().getStringExtra("groupId");
+        String ownerOfEvent = getIntent().getStringExtra("ownerOfGroup");
 
         String groupTitle = getIntent().getStringExtra("title");
         toolbar.setTitle("Events - " + groupTitle);
@@ -42,13 +45,16 @@ public class GroupEvents extends FragmentActivity implements Updater.IUpdate {
         initiateScreen();
         setSwipeLayout();
         ExtendedFloatingActionButton extendedFloatingActionButton = findViewById(R.id.fab);
-        extendedFloatingActionButton.setOnClickListener(view -> {
-            Intent intent = new Intent(this, AddNewEventActivity.class);
-            intent.putExtra("groupId", groupId);
-            startActivity(intent);
-        });
+        extendedFloatingActionButton.setVisibility(View.GONE);
 
-
+        if (MainActivity.isUserConnected && ConnectedUser.getPublicKey().equals(ownerOfEvent)){
+            extendedFloatingActionButton.setVisibility(View.VISIBLE);
+            extendedFloatingActionButton.setOnClickListener(view -> {
+                Intent intent = new Intent(this, AddNewEventActivity.class);
+                intent.putExtra("groupId", groupId);
+                startActivity(intent);
+            });
+        }
     }
 
     public GroupEvents(){}

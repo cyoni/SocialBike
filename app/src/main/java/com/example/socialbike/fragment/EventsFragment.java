@@ -45,7 +45,6 @@ public class EventsFragment extends Fragment
     static EventsFragment eventsFragment = null;
     private SeekBar seekBar;
     private TextView cityText, no_events_text;
-    private Position position = new Position();
     private View root;
     private EventsManager eventsManager;
     protected ArrayList<Event> container;
@@ -101,7 +100,6 @@ public class EventsFragment extends Fragment
         cityText = root.findViewById(R.id.city);
         no_events_text = root.findViewById(R.id.no_events_text);
         no_events_text.setVisibility(View.GONE);
-        position = MainActivity.preferredLocationService.getPreferredPosition();
         cityText.setOnClickListener(view -> Geo.startAutoComplete(null, this, TypeFilter.CITIES));
 
         setListeners(root);
@@ -111,6 +109,7 @@ public class EventsFragment extends Fragment
     }
 
     private void getEvents() {
+        Position position = MainActivity.preferredLocationService.getPreferredPosition();
         if (position.getLatLng() != null){
             no_events_text.setVisibility(View.GONE);
             container.clear();
@@ -163,7 +162,7 @@ public class EventsFragment extends Fragment
 
     private void updateCityTextView() {
         cityText.setText(HtmlCompat.fromHtml
-                ("<u><b>"+ position.getCity() +"</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                ("<u><b>"+ MainActivity.preferredLocationService.getPreferredPosition().getCity() +"</b></u>", HtmlCompat.FROM_HTML_MODE_LEGACY));
     }
 
     @Override
@@ -174,7 +173,7 @@ public class EventsFragment extends Fragment
             }
         } else if (requestCode == Constants.AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                position = Geo.getPosition(data);
+                Position position = Geo.getPosition(data);
                 MainActivity.preferredLocationService.savePreferredLocation(position);
 
                 updateCityTextView();

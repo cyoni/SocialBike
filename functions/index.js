@@ -407,8 +407,9 @@ exports.getEvents = functions.https.onCall(async (request, context) => {
                         groupEvents.forEach(current => {
                             // if current is active
                             if (
-                                specificEvents !== null && specificEvents.includes(current.key) || 
-                                specificEvents === null && raw_data.child('publicKey').exists()
+                                (specificEvents !== null && specificEvents.includes(current.key) || 
+                                specificEvents === null && raw_data.child('publicKey').exists()) &&
+                                (distanceFromMe(current.child('lat').val(), current.child('lng').val(), lat, lng) <= range)
                                 ){
                                 group_events.push( makeEventObject(current, raw_data.key, publicKey)  )
                             }
@@ -961,6 +962,7 @@ function getGroupData(snapshot) {
         title: snapshot.child('title'),
         description: snapshot.child('description'),
         memberCount: snapshot.child('members').numChildren(),
+        ownerOfGroup: snapshot.child('publicKey'),
         lat: snapshot.child('lat'),
         lng: snapshot.child('lng')
         })

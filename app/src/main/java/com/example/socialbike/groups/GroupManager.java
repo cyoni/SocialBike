@@ -70,6 +70,7 @@ public class GroupManager {
     }
 
     public List<Group> parseGroups(String response) {
+        System.out.println("response: " + response);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             GroupDTO groupDTO = objectMapper.readValue(response, GroupDTO.class);

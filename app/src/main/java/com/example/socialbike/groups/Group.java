@@ -15,6 +15,7 @@ import java.util.Map;
 public class Group {
 
     protected String groupId;
+    protected String ownerOfGroup;
     protected String title;
     protected String description;
     protected int memberCount;
@@ -23,15 +24,20 @@ public class Group {
 
     public Group(){} // do not remove!
 
-    public Group(String groupId, String title, String description) {
+    public Group(String groupId, String title, String description, String ownerOfGroup) {
         this.groupId = groupId;
         this.title = title;
         this.description = description;
+        this.ownerOfGroup = ownerOfGroup;
     }
 
     public boolean getIsMember(){
         return isMember;
     }
+    public String getOwnerOfGroup(){
+        return ownerOfGroup;
+    }
+
 
     public String getGroupId() {
         return groupId;

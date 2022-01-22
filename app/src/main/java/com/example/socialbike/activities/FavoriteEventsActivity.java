@@ -5,6 +5,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import com.example.socialbike.R;
 import com.example.socialbike.events.Event;
@@ -20,8 +22,8 @@ import java.util.Map;
 
 public class FavoriteEventsActivity extends AppCompatActivity implements Updater.IUpdate {
 
-
     EventsManager eventsManager = new EventsManager(this, this, this);
+    TextView emptyList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +35,8 @@ public class FavoriteEventsActivity extends AppCompatActivity implements Updater
         setSupportActionBar(toolbar);
 
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
-
+        emptyList = findViewById(R.id.empty_favorite_list);
+        hideEmptyListIndicator();
 
         eventsManager.init();
         getEvents();
@@ -53,16 +56,35 @@ public class FavoriteEventsActivity extends AppCompatActivity implements Updater
 
 
     private void getEvents() {
+        if (MainActivity.favoriteEventsService.getEvents().isEmpty()){
+            eventsManager.container.clear();
+            onFinishedUpdating();
+            return;
+        }
         String events = MainActivity.favoriteEventsService.toString();
         Map<String, Object> data = new HashMap<>();
         data.put("specificEvents", events);
         eventsManager.getEvents(data);
     }
 
+    private void showEmptyListIndicator(){
+        emptyList.setVisibility(View.VISIBLE);
+    }
+
+    private void hideEmptyListIndicator(){
+        emptyList.setVisibility(View.GONE);
+    }
+
 
     @Override
     public void onFinishedUpdating() {
         eventsManager.hideProgressbar();
+        if (eventsManager.container.isEmpty()){
+            showEmptyListIndicator();
+        }
+        else{
+            hideEmptyListIndicator();
+        }
         eventsManager.recyclerViewAdapter.notifyDataSetChanged();
     }
 }

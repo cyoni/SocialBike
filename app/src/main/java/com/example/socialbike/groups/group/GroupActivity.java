@@ -28,7 +28,7 @@ import java.util.Map;
 public class GroupActivity extends AppCompatActivity implements Updater.IUpdate {
 
     public MainActivity mainActivity;
-    private String groupId;
+    private String groupId, ownerOfGroup;
     Button events_button, joinButton;
     Updater.IUpdate update = this;
     private EventsManager eventsManager;
@@ -49,7 +49,9 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         Intent intent = getIntent();
         String groupName = intent.getStringExtra("groupName");
         groupId = intent.getStringExtra("groupId");
-        group = new Group(groupId, groupName, "description?");
+        ownerOfGroup = intent.getStringExtra("ownerOfGroup");
+
+        group = new Group(groupId, groupName, "description?", ownerOfGroup);
 
         eventsManager = new EventsManager(this, this, update, false);
         eventsManager.init();
@@ -112,6 +114,7 @@ public class GroupActivity extends AppCompatActivity implements Updater.IUpdate 
         events_button.setOnClickListener(view -> {
             Intent intent1 = new Intent(this, GroupEvents.class);
             intent1.putExtra("groupId", groupId);
+            intent1.putExtra("ownerOfGroup", ownerOfGroup);
             startActivity(intent1);
         });
 

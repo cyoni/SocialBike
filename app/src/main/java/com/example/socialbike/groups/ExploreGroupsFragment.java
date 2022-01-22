@@ -194,7 +194,7 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         else
             holder.joinButton.setText("Join");
 
-        holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle()));
+        holder.layout.setOnClickListener(view -> openGroupActivity(current.getGroupId(), current.getTitle(), current.ownerOfGroup));
         holder.title.setText(current.getTitle());
         holder.description.setText(current.getDescription());
         holder.memberCount.setText(current.getMemberCount() + " members");
@@ -314,10 +314,11 @@ public class ExploreGroupsFragment extends Fragment implements RecyclerViewAdapt
         return -1;
     }
 
-    private void openGroupActivity(String groupId, String groupName) {
+    private void openGroupActivity(String groupId, String groupName, String ownerOfEvent) {
         Intent intent = new Intent(getContext(), GroupActivity.class);
         intent.putExtra("groupId", groupId);
         intent.putExtra("groupName", groupName);
+        intent.putExtra("ownerOfEvent", ownerOfEvent);
         startActivity(intent);
     }
 
