@@ -45,6 +45,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.maps.GeoApiContext;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -234,10 +235,10 @@ public class MainActivity extends AppCompatActivity implements MenuAction{
                     changeFragment(ChatLobbyFragment.getInstance());
                     currentLayout = R.layout.fragment_chat_lobby;
                     break;
-                case R.id.profile:
+/*                case R.id.profile:
                     changeFragment(ProfileFragment.getInstance());
                     currentLayout = R.layout.fragment_profile;
-                    break;
+                    break;*/
             }
             return true;
         });

@@ -39,6 +39,7 @@ public class FavoriteEventsActivity extends AppCompatActivity implements Updater
         hideEmptyListIndicator();
 
         eventsManager.init();
+        eventsManager.showProgressbar();
         getEvents();
         setSwipeLayout();
     }

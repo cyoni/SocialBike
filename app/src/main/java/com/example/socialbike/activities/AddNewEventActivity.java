@@ -16,20 +16,27 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.provider.MediaStore;
+import android.view.ContextMenu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.socialbike.groups.Group;
+import com.example.socialbike.groups.group.GroupDTO;
 import com.example.socialbike.utilities.Constants;
 import com.example.socialbike.utilities.DateAndTimeDialog;
 import com.example.socialbike.utilities.DateUtils;
+import com.example.socialbike.utilities.EMethods;
 import com.example.socialbike.utilities.ImageManager;
 import com.example.socialbike.utilities.Maps;
 import com.example.socialbike.utilities.Position;
 import com.example.socialbike.R;
-import com.example.socialbike.utilities.Utils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
@@ -44,8 +51,10 @@ import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +70,9 @@ public class AddNewEventActivity extends AppCompatActivity {
     ImageManager imageManager;
     Bitmap compressImage;
     ProgressDialog progressDialog;
+    private EditText group;
+    private LinearLayout groupLayout;
+    private List<Group> ownerGroups = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +83,10 @@ public class AddNewEventActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         imageManager = new ImageManager(this);
+
         groupId = getIntent().getStringExtra("groupId");
+        groupLayout = findViewById(R.id.group_layout);
+        groupLayout.setVisibility(View.GONE);
 
         time = findViewById(R.id.time);
         date = findViewById(R.id.date);
@@ -96,6 +111,68 @@ public class AddNewEventActivity extends AppCompatActivity {
         progressDialog.setMessage("Uploading event");
 
         setButtonListeners();
+
+        GetOwnerGroups();
+    }
+
+    private void GetOwnerGroups() {
+        Map<String, Object> data = new HashMap<>();
+
+        MainActivity.utils.PostData(EMethods.GetGroupsToPostNewEvent, data).continueWith(task -> {
+            String response = String.valueOf(task.getResult().getData());
+            System.out.println(response);
+            ownerGroups = parseResponse(response);
+            if (ownerGroups != null && !ownerGroups.isEmpty()){
+                groupLayout.setVisibility(View.VISIBLE);
+                initGroup();
+            }
+
+            return null;
+        });
+    }
+
+    private List<Group> parseResponse(String response) {
+        System.out.println("response: " + response);
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            GroupDTO groupDTO = objectMapper.readValue(response, GroupDTO.class);
+            return groupDTO.getGroups();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void initGroup() {
+        group = findViewById(R.id.group);
+        group.setFocusable(View.NOT_FOCUSABLE);
+        group.setClickable(true);
+
+        registerForContextMenu(group);
+        group.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.showContextMenu();
+            }
+        });
+    }
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        // you can set menu header with title icon etc
+        menu.setHeaderTitle("Choose a group to publish");
+        // add menu items
+        menu.add(0, v.getId(), 0, "Global");
+        addGroups(menu, v);
+    }
+
+    private void addGroups(ContextMenu menu, View v) {
+        for (Group group : ownerGroups){
+            menu.add(0, v.getId(), 0, group.getTitle());
+        }
     }
 
     private void openSheet() {
@@ -122,6 +199,19 @@ public class AddNewEventActivity extends AppCompatActivity {
 
             bottomSheetDialog.show();
         }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if (item.getTitle().toString().equals("Global")){
+            groupId = null;
+        }
+        else {
+            Group tmp = ownerGroups.stream().filter(g -> g.getTitle().equals(item.getTitle())).findFirst().get();
+            groupId = tmp.getGroupId();
+        }
+        group.setText(item.getTitle());
+        return true;
     }
 
     @Override

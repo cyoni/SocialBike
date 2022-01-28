@@ -931,6 +931,30 @@ exports.CreateGroup = functions.https.onCall(async (request, context) => {
 })
 
 
+exports.GetGroupsToPostNewEvent = functions.https.onCall(async (request, context) => {
+
+    const account = await verifyUser(context.auth.uid)
+
+    if (account === null){
+        return "Access Denied.";
+    }
+
+    var data = {}
+    data['groups'] = []
+
+    return admin.database().ref('groups').once('value').then(snapshot => {
+            snapshot.forEach(iter => {
+                if (iter.child('publicKey').val() === account.publicKey)
+                    data['groups'].push({
+                        groupId: iter.key,
+                        title: iter.child('title').val()
+                    })
+            })
+            return JSON.stringify(data)
+        })
+})
+
+
 exports.GetMyGroups = functions.https.onCall(async (request, context) => {
 
     const account = await verifyUser(context.auth.uid)

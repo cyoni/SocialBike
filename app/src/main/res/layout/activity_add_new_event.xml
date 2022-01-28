@@ -56,6 +56,24 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/default_image" />
 
+            <LinearLayout
+                android:id="@+id/group_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Group" />
+
+            <EditText
+                android:id="@+id/group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Global (default)"
+                android:inputType="text" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
